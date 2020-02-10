@@ -9,7 +9,7 @@ namespace Subtexture
 		[MenuItem ("Tools/Subtexture/Open &T")]	
 		static void ShowWindow() 
 		{
-			CreateNewWindow<Window>().Show();	
+			CreateWindow<Window>().Show();	
 		}
 		protected override void OnEnable()
 		{
@@ -45,17 +45,14 @@ namespace Subtexture
 			if( rendererParam != null)
 			{
 				rendererParam.OnDisable();
-				rendererParam = null;
 			}
 			if( cameraParam != null)
 			{
 				cameraParam.OnDisable();
-				cameraParam = null;
 			}
 			if( textureParam != null)
 			{
 				textureParam.OnDisable();
-				textureParam = null;
 			}
 			base.OnDisable();
 		}
@@ -204,8 +201,6 @@ namespace Subtexture
 		}
 		
 		[SerializeField]
-		PreviewRenderUtility renderer;
-		[SerializeField]
 		bool previewForceUpdate = false;
 		[SerializeField]
 		FilterMode previewFilterMode = FilterMode.Point;
@@ -219,6 +214,7 @@ namespace Subtexture
 		[SerializeField]
 		RendererParam rendererParam = default;
 		
+		PreviewRenderUtility renderer;
 		RenderTexture image;
 		bool refresh;
 	}

@@ -29,12 +29,10 @@ namespace Subtexture
 			if( materialParam != null)
 			{
 				materialParam.OnDisable();
-				materialParam = null;
 			}
 			if( meshParam != null)
 			{
 				meshParam.OnDisable();
-				meshParam = null;
 			}
 			base.OnDisable();
 		}
