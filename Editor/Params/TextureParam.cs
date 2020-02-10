@@ -7,24 +7,24 @@ namespace Subtexture
 	[System.Serializable]
 	public sealed class TextureParam : BaseParam
 	{
-		public TextureParam() : base( "Texture")
+		public override void OnGUI()
 		{
-		}
-		protected override void OnParamGUI()
-		{
-			forceSquare = EditorGUILayout.Toggle( "Force square", forceSquare);
-			if( forceSquare == false)
+			OnPUI( "Texture", () =>
 			{
-				width = EditorGUILayout.IntPopup( "Width", width, kResolutionLabels, kResolutions);
-				height = EditorGUILayout.IntPopup( "Height", height, kResolutionLabels, kResolutions);
-			}
-			else
-			{
-				int size = width > height ? width : height;
-				size = EditorGUILayout.IntPopup( "Size", size, kResolutionLabels, kResolutions);
-				width = size;
-				height = size;
-			}
+				forceSquare = EditorGUILayout.Toggle( "Force square", forceSquare);
+				if( forceSquare == false)
+				{
+					width = EditorGUILayout.IntPopup( "Width", width, kResolutionLabels, kResolutions);
+					height = EditorGUILayout.IntPopup( "Height", height, kResolutionLabels, kResolutions);
+				}
+				else
+				{
+					int size = width > height ? width : height;
+					size = EditorGUILayout.IntPopup( "Size", size, kResolutionLabels, kResolutions);
+					width = size;
+					height = size;
+				}
+			});
 		}
 		static readonly int[] kResolutions = new int[]
 		{

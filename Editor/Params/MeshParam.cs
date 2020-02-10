@@ -13,9 +13,6 @@ namespace Subtexture
 	[System.Serializable]
 	public sealed class MeshParam : BaseParam
 	{
-		public MeshParam() : base( "Mesh")
-		{
-		}
 		public override void OnEnable( EditorWindow window, bool opened)
 		{
 			base.OnEnable( window, opened);
@@ -116,119 +113,122 @@ namespace Subtexture
 				dynamicMesh = null;
 			}
 		}
-		protected override void OnParamGUI()
+		public override void OnGUI()
 		{
-			if( meshType == MeshType.kAssets)
+			OnPUI( "Mesh", () =>
 			{
-				assetMesh = EditorGUILayout.ObjectField( "Mesh", assetMesh, typeof( Mesh), false) as Mesh;
-			}
-			else if( meshType == MeshType.kDynamic)
-			{
-				Color color = EditorGUILayout.ColorField( "Vertex Color", vertexColor);
-				if( vertexColor != color)
+				if( meshType == MeshType.kAssets)
 				{
-					dynamicMesh.colors = new Color[]
-			        {
-						color,
-						color,
-						color,
-						color
-					};
-					vertexColor = color;
+					assetMesh = EditorGUILayout.ObjectField( "Mesh", assetMesh, typeof( Mesh), false) as Mesh;
 				}
-				List<Vector4> texcoord;
-				Vector4 uv;
-				
-				Vector2 texcoordZW = new Vector2( texcoords0.z, texcoords0.w);
-				Vector2 uvZW = EditorGUILayout.Vector2Field( "TexCoord0.zw", texcoordZW);
-				if( texcoordZW.Equals( uvZW) == false)
+				else if( meshType == MeshType.kDynamic)
 				{
-					texcoord = new List<Vector4>();
-					texcoord.Add( new Vector4( 0, 0, uvZW.x, uvZW.y));
-					texcoord.Add( new Vector4( 0, 1, uvZW.x, uvZW.y));
-					texcoord.Add( new Vector4( 1, 0, uvZW.x, uvZW.y));
-					texcoord.Add( new Vector4( 1, 1, uvZW.x, uvZW.y));
-					dynamicMesh.SetUVs( 0, texcoord);
-					texcoords0 = new Vector4( 0, 0, uvZW.x, uvZW.y);
+					Color color = EditorGUILayout.ColorField( "Vertex Color", vertexColor);
+					if( vertexColor != color)
+					{
+						dynamicMesh.colors = new Color[]
+				        {
+							color,
+							color,
+							color,
+							color
+						};
+						vertexColor = color;
+					}
+					List<Vector4> texcoord;
+					Vector4 uv;
+					
+					Vector2 texcoordZW = new Vector2( texcoords0.z, texcoords0.w);
+					Vector2 uvZW = EditorGUILayout.Vector2Field( "TexCoord0.zw", texcoordZW);
+					if( texcoordZW.Equals( uvZW) == false)
+					{
+						texcoord = new List<Vector4>();
+						texcoord.Add( new Vector4( 0, 0, uvZW.x, uvZW.y));
+						texcoord.Add( new Vector4( 0, 1, uvZW.x, uvZW.y));
+						texcoord.Add( new Vector4( 1, 0, uvZW.x, uvZW.y));
+						texcoord.Add( new Vector4( 1, 1, uvZW.x, uvZW.y));
+						dynamicMesh.SetUVs( 0, texcoord);
+						texcoords0 = new Vector4( 0, 0, uvZW.x, uvZW.y);
+					}
+					uv = EditorGUILayout.Vector4Field( "TexCoord1", texcoords1);
+					if( texcoords1.Equals( uv) == false)
+					{
+						texcoord = new List<Vector4>();
+						texcoord.Add( uv);
+						texcoord.Add( uv);
+						texcoord.Add( uv);
+						texcoord.Add( uv);
+						dynamicMesh.SetUVs( 1, texcoord);
+						texcoords1 = uv;
+					}
+					uv = EditorGUILayout.Vector4Field( "TexCoord2", texcoords2);
+					if( texcoords2.Equals( uv) == false)
+					{
+						texcoord = new List<Vector4>();
+						texcoord.Add( uv);
+						texcoord.Add( uv);
+						texcoord.Add( uv);
+						texcoord.Add( uv);
+						dynamicMesh.SetUVs( 2, texcoord);
+						texcoords2 = uv;
+					}
+					uv = EditorGUILayout.Vector4Field( "TexCoord3", texcoords3);
+					if( texcoords3.Equals( uv) == false)
+					{
+						texcoord = new List<Vector4>();
+						texcoord.Add( uv);
+						texcoord.Add( uv);
+						texcoord.Add( uv);
+						texcoord.Add( uv);
+						dynamicMesh.SetUVs( 3, texcoord);
+						texcoords3 = uv;
+					}
+					uv = EditorGUILayout.Vector4Field( "TexCoord4", texcoords4);
+					if( texcoords4.Equals( uv) == false)
+					{
+						texcoord = new List<Vector4>();
+						texcoord.Add( uv);
+						texcoord.Add( uv);
+						texcoord.Add( uv);
+						texcoord.Add( uv);
+						dynamicMesh.SetUVs( 4, texcoord);
+						texcoords4 = uv;
+					}
+					uv = EditorGUILayout.Vector4Field( "TexCoord5", texcoords5);
+					if( texcoords5.Equals( uv) == false)
+					{
+						texcoord = new List<Vector4>();
+						texcoord.Add( uv);
+						texcoord.Add( uv);
+						texcoord.Add( uv);
+						texcoord.Add( uv);
+						dynamicMesh.SetUVs( 5, texcoord);
+						texcoords5 = uv;
+					}
+					uv = EditorGUILayout.Vector4Field( "TexCoord6", texcoords6);
+					if( texcoords6.Equals( uv) == false)
+					{
+						texcoord = new List<Vector4>();
+						texcoord.Add( uv);
+						texcoord.Add( uv);
+						texcoord.Add( uv);
+						texcoord.Add( uv);
+						dynamicMesh.SetUVs( 6, texcoord);
+						texcoords6 = uv;
+					}
+					uv = EditorGUILayout.Vector4Field( "TexCoord7", texcoords7);
+					if( texcoords7.Equals( uv) == false)
+					{
+						texcoord = new List<Vector4>();
+						texcoord.Add( uv);
+						texcoord.Add( uv);
+						texcoord.Add( uv);
+						texcoord.Add( uv);
+						dynamicMesh.SetUVs( 7, texcoord);
+						texcoords7 = uv;
+					}
 				}
-				uv = EditorGUILayout.Vector4Field( "TexCoord1", texcoords1);
-				if( texcoords1.Equals( uv) == false)
-				{
-					texcoord = new List<Vector4>();
-					texcoord.Add( uv);
-					texcoord.Add( uv);
-					texcoord.Add( uv);
-					texcoord.Add( uv);
-					dynamicMesh.SetUVs( 1, texcoord);
-					texcoords1 = uv;
-				}
-				uv = EditorGUILayout.Vector4Field( "TexCoord2", texcoords2);
-				if( texcoords2.Equals( uv) == false)
-				{
-					texcoord = new List<Vector4>();
-					texcoord.Add( uv);
-					texcoord.Add( uv);
-					texcoord.Add( uv);
-					texcoord.Add( uv);
-					dynamicMesh.SetUVs( 2, texcoord);
-					texcoords2 = uv;
-				}
-				uv = EditorGUILayout.Vector4Field( "TexCoord3", texcoords3);
-				if( texcoords3.Equals( uv) == false)
-				{
-					texcoord = new List<Vector4>();
-					texcoord.Add( uv);
-					texcoord.Add( uv);
-					texcoord.Add( uv);
-					texcoord.Add( uv);
-					dynamicMesh.SetUVs( 3, texcoord);
-					texcoords3 = uv;
-				}
-				uv = EditorGUILayout.Vector4Field( "TexCoord4", texcoords4);
-				if( texcoords4.Equals( uv) == false)
-				{
-					texcoord = new List<Vector4>();
-					texcoord.Add( uv);
-					texcoord.Add( uv);
-					texcoord.Add( uv);
-					texcoord.Add( uv);
-					dynamicMesh.SetUVs( 4, texcoord);
-					texcoords4 = uv;
-				}
-				uv = EditorGUILayout.Vector4Field( "TexCoord5", texcoords5);
-				if( texcoords5.Equals( uv) == false)
-				{
-					texcoord = new List<Vector4>();
-					texcoord.Add( uv);
-					texcoord.Add( uv);
-					texcoord.Add( uv);
-					texcoord.Add( uv);
-					dynamicMesh.SetUVs( 5, texcoord);
-					texcoords5 = uv;
-				}
-				uv = EditorGUILayout.Vector4Field( "TexCoord6", texcoords6);
-				if( texcoords6.Equals( uv) == false)
-				{
-					texcoord = new List<Vector4>();
-					texcoord.Add( uv);
-					texcoord.Add( uv);
-					texcoord.Add( uv);
-					texcoord.Add( uv);
-					dynamicMesh.SetUVs( 6, texcoord);
-					texcoords6 = uv;
-				}
-				uv = EditorGUILayout.Vector4Field( "TexCoord7", texcoords7);
-				if( texcoords7.Equals( uv) == false)
-				{
-					texcoord = new List<Vector4>();
-					texcoord.Add( uv);
-					texcoord.Add( uv);
-					texcoord.Add( uv);
-					texcoord.Add( uv);
-					dynamicMesh.SetUVs( 7, texcoord);
-					texcoords7 = uv;
-				}
-			}
+			});
 		}
 		public Mesh RenderMesh
 		{

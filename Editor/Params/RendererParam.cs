@@ -8,9 +8,6 @@ namespace Subtexture
 	[System.Serializable]
 	public sealed class RendererParam : BaseParam
 	{
-		public RendererParam() : base( "Renderer")
-		{
-		}
 		public override void OnEnable( EditorWindow window, bool opened)
 		{
 			base.OnEnable( window, opened);
@@ -41,17 +38,17 @@ namespace Subtexture
 			}
 			base.OnDisable();
 		}
-		protected override void OnParamGUI()
+		public override void OnGUI()
 		{
-			localPosition = EditorGUILayout.Vector3Field( "Position", localPosition);
-			localRotation = EditorGUILayout.Vector3Field( "Rotation", localRotation);
-			localScale = EditorGUILayout.Vector3Field( "Scale", localScale);
-			
-			meshParam.meshType = (MeshType)EditorGUILayout.EnumPopup( "Mesh Type", meshParam.meshType);
-			materialParam.materialType = (MaterialType)EditorGUILayout.EnumPopup( "Material Type", materialParam.materialType);
-		}
-		protected override void OnAfterGUI()
-		{
+			OnPUI( "Renderer", () =>
+			{
+				localPosition = EditorGUILayout.Vector3Field( "Position", localPosition);
+				localRotation = EditorGUILayout.Vector3Field( "Rotation", localRotation);
+				localScale = EditorGUILayout.Vector3Field( "Scale", localScale);
+				
+				meshParam.meshType = (MeshType)EditorGUILayout.EnumPopup( "Mesh Type", meshParam.meshType);
+				materialParam.materialType = (MaterialType)EditorGUILayout.EnumPopup( "Material Type", materialParam.materialType);
+			});
 			meshParam.OnGUI();
 			materialParam.OnGUI();
 		}

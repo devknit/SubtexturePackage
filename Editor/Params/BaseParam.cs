@@ -8,10 +8,6 @@ namespace Subtexture
 	[System.Serializable]
 	public class BaseParam
 	{
-		public BaseParam( string captionName)
-		{
-			caption = captionName;
-		}
 		public virtual void OnEnable( EditorWindow window, bool opened)
 		{
 			if( enabled == null)
@@ -23,7 +19,10 @@ namespace Subtexture
 		public virtual void OnDisable()
 		{
 		}
-		public void OnGUI()
+		public virtual void OnGUI()
+		{
+		}
+		protected void OnPUI( string caption, System.Action callback)
 		{
 			EditorGUILayout.BeginVertical( GUI.skin.box);
 			{
@@ -32,24 +31,14 @@ namespace Subtexture
 				if( EditorGUILayout.BeginFadeGroup( enabled.faded) != false)
 				{
 					++EditorGUI.indentLevel;
-					OnParamGUI();
+					callback?.Invoke();
 					--EditorGUI.indentLevel;
 				}
 				EditorGUILayout.EndFadeGroup();
 			}
 			EditorGUILayout.EndVertical();
-			
-			OnAfterGUI();
-		}
-		protected virtual void OnParamGUI()
-		{
-		}
-		protected virtual void OnAfterGUI()
-		{
 		}
 		
-		[SerializeField]
-		string caption;
 		[SerializeField]
 		AnimBool enabled;
 	}

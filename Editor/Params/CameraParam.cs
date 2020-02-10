@@ -7,9 +7,6 @@ namespace Subtexture
 	[System.Serializable]
 	public sealed class CameraParam : BaseParam
 	{
-		public CameraParam() : base( "Camera")
-		{
-		}
 		public void Apply( Camera camera)
 		{
 			camera.transform.position = localPosition;
@@ -30,44 +27,47 @@ namespace Subtexture
 			camera.farClipPlane = farClipPlane;
 			camera.rect = rect;
 		}
-		protected override void OnParamGUI()
+		public override void OnGUI()
 		{
-			localPosition = EditorGUILayout.Vector3Field( "Position", localPosition);
-			
-			localRotation = EditorGUILayout.Vector3Field( "Rotation", localRotation);
-			
-			backgroundColor = EditorGUILayout.ColorField( "Background", backgroundColor);
-			
-			int projection = orthographic ? 1 : 0;
-			projection = EditorGUILayout.Popup( "Projection", projection, kProjections);
-			orthographic = (projection == 0) ? false : true;
-			
-			if( orthographic == false)
+			OnPUI( "Camera", () =>
 			{
-				fieldOfView = EditorGUILayout.Slider( " Field of View", fieldOfView, 1e-5f, 179.0f);
-			}
-			else
-			{
-				orthographicSize = EditorGUILayout.FloatField( "Size", orthographicSize);
-			}
-			
-			nearClipPlane = EditorGUILayout.FloatField( "Near Clipping Planes", nearClipPlane);
-			if( nearClipPlane < 0.01)
-			{
-				nearClipPlane = 0.01f;
-			}
-			if( nearClipPlane >= 3.402823e+37f)
-			{
-				nearClipPlane = 3.402823e+37f;
-			}
-			
-			farClipPlane = EditorGUILayout.FloatField( "Far Clipping Planes", farClipPlane);
-			if( farClipPlane < nearClipPlane)
-			{
-				farClipPlane = nearClipPlane + 0.01f;
-			}
-			
-			rect = EditorGUILayout.RectField( "Viewport Rect", rect);
+				localPosition = EditorGUILayout.Vector3Field( "Position", localPosition);
+				
+				localRotation = EditorGUILayout.Vector3Field( "Rotation", localRotation);
+				
+				backgroundColor = EditorGUILayout.ColorField( "Background", backgroundColor);
+				
+				int projection = orthographic ? 1 : 0;
+				projection = EditorGUILayout.Popup( "Projection", projection, kProjections);
+				orthographic = (projection == 0) ? false : true;
+				
+				if( orthographic == false)
+				{
+					fieldOfView = EditorGUILayout.Slider( " Field of View", fieldOfView, 1e-5f, 179.0f);
+				}
+				else
+				{
+					orthographicSize = EditorGUILayout.FloatField( "Size", orthographicSize);
+				}
+				
+				nearClipPlane = EditorGUILayout.FloatField( "Near Clipping Planes", nearClipPlane);
+				if( nearClipPlane < 0.01)
+				{
+					nearClipPlane = 0.01f;
+				}
+				if( nearClipPlane >= 3.402823e+37f)
+				{
+					nearClipPlane = 3.402823e+37f;
+				}
+				
+				farClipPlane = EditorGUILayout.FloatField( "Far Clipping Planes", farClipPlane);
+				if( farClipPlane < nearClipPlane)
+				{
+					farClipPlane = nearClipPlane + 0.01f;
+				}
+				
+				rect = EditorGUILayout.RectField( "Viewport Rect", rect);
+			});
 		}
 		
 		static readonly string[] kProjections = new string[]

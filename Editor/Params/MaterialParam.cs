@@ -14,29 +14,29 @@ namespace Subtexture
 	[System.Serializable]
 	public sealed class MaterialParam : BaseParam
 	{
-		public MaterialParam() : base( "Material")
+		public override void OnGUI()
 		{
-		}
-		protected override void OnParamGUI()
-		{
-			switch( materialType)
+			OnPUI( "Material", () =>
 			{
-				case MaterialType.kAssets:
+				switch( materialType)
 				{
-					assetMaterial = EditorGUILayout.ObjectField( "Material", assetMaterial, typeof( Material), false) as Material;
-					break;
+					case MaterialType.kAssets:
+					{
+						assetMaterial = EditorGUILayout.ObjectField( "Material", assetMaterial, typeof( Material), false) as Material;
+						break;
+					}
+				#if false
+					case MaterialType.kProceduralCircle:
+					{
+						break;
+					}
+					case MaterialType.kProceduralRing:
+					{
+						break;
+					}
+				#endif
 				}
-			#if false
-				case MaterialType.kProceduralCircle:
-				{
-					break;
-				}
-				case MaterialType.kProceduralRing:
-				{
-					break;
-				}
-			#endif
-			}
+			});
 		}
 		public Material RenderMaterial
 		{
