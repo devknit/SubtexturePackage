@@ -6,7 +6,7 @@ using UnityEditor.AnimatedValues;
 namespace Subtexture
 {
 	[System.Serializable]
-	public class RendererParam : BaseParam
+	public sealed class RendererParam : BaseParam
 	{
 		public RendererParam() : base( "Renderer")
 		{

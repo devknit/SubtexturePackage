@@ -1,19 +1,20 @@
 ﻿
 using UnityEngine;
 using UnityEditor;
-using UnityEditor.AnimatedValues;
 
 namespace Subtexture
 {
 	public class Window : MDIEditorWindow
 	{
-		[MenuItem ("Tools/Subtexture/Open")]	
+		[MenuItem ("Tools/Subtexture/Open &T")]	
 		static void ShowWindow() 
 		{
 			CreateNewWindow<Window>().Show();	
 		}
 		protected override void OnEnable()
 		{
+			base.OnEnable();
+			
 			if( textureParam == null)
 			{
 				textureParam = new TextureParam();
@@ -56,6 +57,7 @@ namespace Subtexture
 				textureParam.OnDisable();
 				textureParam = null;
 			}
+			base.OnDisable();
 		}
 		void Update()
 		{
@@ -209,13 +211,13 @@ namespace Subtexture
 		FilterMode previewFilterMode = FilterMode.Point;
 		
 		[SerializeField]
-		Vector2 scrollPosition;
+		Vector2 scrollPosition = Vector2.zero;
 		[SerializeField]
-		TextureParam textureParam;
+		TextureParam textureParam = default;
 		[SerializeField]
-		CameraParam cameraParam;
+		CameraParam cameraParam = default;
 		[SerializeField]
-		RendererParam rendererParam;
+		RendererParam rendererParam = default;
 		
 		RenderTexture image;
 		bool refresh;

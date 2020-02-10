@@ -1,0 +1,17 @@
+{
+    "name": "Subtexture.Editor",
+    "references": [
+        "GUID:4b1bfff92d08bba47b9655aca56351c9"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

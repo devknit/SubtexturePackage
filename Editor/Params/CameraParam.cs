@@ -5,7 +5,7 @@ using UnityEditor;
 namespace Subtexture
 {
 	[System.Serializable]
-	public class CameraParam : BaseParam
+	public sealed class CameraParam : BaseParam
 	{
 		public CameraParam() : base( "Camera")
 		{

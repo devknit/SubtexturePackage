@@ -11,7 +11,7 @@ namespace Subtexture
 		kDynamic
 	}
 	[System.Serializable]
-	public class MeshParam : BaseParam
+	public sealed class MeshParam : BaseParam
 	{
 		public MeshParam() : base( "Mesh")
 		{

@@ -5,7 +5,7 @@ using UnityEditor;
 namespace Subtexture
 {
 	[System.Serializable]
-	public class TextureParam : BaseParam
+	public sealed class TextureParam : BaseParam
 	{
 		public TextureParam() : base( "Texture")
 		{

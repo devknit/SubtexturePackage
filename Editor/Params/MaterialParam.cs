@@ -12,7 +12,7 @@ namespace Subtexture
 	//	kProceduralRing,
 	}
 	[System.Serializable]
-	public class MaterialParam : BaseParam
+	public sealed class MaterialParam : BaseParam
 	{
 		public MaterialParam() : base( "Material")
 		{
