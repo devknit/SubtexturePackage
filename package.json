@@ -1,0 +1,13 @@
+{
+    "name": "com.devknit.subtexture",
+    "displayName": "Subtexture",
+    "version": "1.0.0",
+    "unity": "2018.4",
+    "description": "",
+    "keywords": [
+		"texture"
+	],
+    "category": "Editor",
+    "dependencies": {
+    }
+}
