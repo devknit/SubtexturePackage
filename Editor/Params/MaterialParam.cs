@@ -18,6 +18,7 @@ namespace Subtexture
 		{
 			OnPUI( "Material", () =>
 			{
+				materialType = (MaterialType)EditorGUILayout.EnumPopup( "Type", materialType);
 				switch( materialType)
 				{
 					case MaterialType.kAssets:

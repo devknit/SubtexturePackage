@@ -33,6 +33,18 @@ namespace Subtexture
 			}
 			rendererParam.OnEnable( this, true);
 			
+			if( meshParam == null)
+			{
+				meshParam = new MeshParam();
+			}
+			meshParam.OnEnable( this, false);
+			
+			if( materialParam == null)
+			{
+				materialParam = new MaterialParam();
+			}
+			materialParam.OnEnable( this, true);
+			
 			refresh = true;
 		}
 		protected override void OnDisable()
@@ -41,6 +53,14 @@ namespace Subtexture
 			{
 				renderer.Cleanup();
 				renderer = null;
+			}
+			if( materialParam != null)
+			{
+				materialParam.OnDisable();
+			}
+			if( meshParam != null)
+			{
+				meshParam.OnDisable();
 			}
 			if( rendererParam != null)
 			{
@@ -140,6 +160,8 @@ namespace Subtexture
 							textureParam.OnGUI();
 							cameraParam.OnGUI();
 							rendererParam.OnGUI();
+							meshParam.OnGUI();
+							materialParam.OnGUI();
 					
 							EditorGUI.BeginDisabledGroup( image == null);
 							{
@@ -154,7 +176,7 @@ namespace Subtexture
 							{
 								refresh = true;
 							}
-							if( refresh != false && rendererParam.RenderMesh != null && rendererParam.RenderMaterial != null)
+							if( refresh != false && meshParam.RenderMesh != null && materialParam.RenderMaterial != null)
 							{
 								Refresh();
 							}
@@ -162,8 +184,6 @@ namespace Subtexture
 						EditorGUILayout.EndScrollView();
 					}
 					EditorGUILayout.EndVertical();
-					
-					
 				}
 				EditorGUILayout.EndHorizontal();
 			}
@@ -194,7 +214,7 @@ namespace Subtexture
 			}
 			renderer.BeginPreview( textureParam.RenderRect, GUIStyle.none);
 			cameraParam.Apply( renderer.camera);
-			renderer.DrawMesh( rendererParam.RenderMesh, rendererParam.LocalMatrix, rendererParam.RenderMaterial, 0);
+			renderer.DrawMesh( meshParam.RenderMesh, rendererParam.LocalMatrix, materialParam.RenderMaterial, 0);
 			renderer.camera.Render();
 			image = renderer.EndPreview() as RenderTexture;
 			refresh = false;
@@ -213,6 +233,10 @@ namespace Subtexture
 		CameraParam cameraParam = default;
 		[SerializeField]
 		RendererParam rendererParam = default;
+		[SerializeField]
+		MeshParam meshParam = default;
+		[SerializeField]
+		MaterialParam materialParam = default;
 		
 		PreviewRenderUtility renderer;
 		RenderTexture image;

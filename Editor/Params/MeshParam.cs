@@ -117,6 +117,7 @@ namespace Subtexture
 		{
 			OnPUI( "Mesh", () =>
 			{
+				meshType = (MeshType)EditorGUILayout.EnumPopup( "Type", meshType);
 				if( meshType == MeshType.kAssets)
 				{
 					assetMesh = EditorGUILayout.ObjectField( "Mesh", assetMesh, typeof( Mesh), false) as Mesh;
