@@ -27,11 +27,11 @@ namespace Subtexture
 			}
 			cameraParam.OnEnable( this, false);
 			
-			if( rendererParam == null)
+			if( transformParam == null)
 			{
-				rendererParam = new RendererParam();
+				transformParam = new TransformParam();
 			}
-			rendererParam.OnEnable( this, true);
+			transformParam.OnEnable( this, true);
 			
 			if( meshParam == null)
 			{
@@ -62,9 +62,9 @@ namespace Subtexture
 			{
 				meshParam.OnDisable();
 			}
-			if( rendererParam != null)
+			if( transformParam != null)
 			{
-				rendererParam.OnDisable();
+				transformParam.OnDisable();
 			}
 			if( cameraParam != null)
 			{
@@ -159,7 +159,7 @@ namespace Subtexture
 							
 							textureParam.OnGUI();
 							cameraParam.OnGUI();
-							rendererParam.OnGUI();
+							transformParam.OnGUI();
 							meshParam.OnGUI();
 							materialParam.OnGUI();
 					
@@ -214,7 +214,7 @@ namespace Subtexture
 			}
 			renderer.BeginPreview( textureParam.RenderRect, GUIStyle.none);
 			cameraParam.Apply( renderer.camera);
-			renderer.DrawMesh( meshParam.RenderMesh, rendererParam.LocalMatrix, materialParam.RenderMaterial, 0);
+			renderer.DrawMesh( meshParam.RenderMesh, transformParam.LocalMatrix, materialParam.RenderMaterial, 0);
 			renderer.camera.Render();
 			image = renderer.EndPreview() as RenderTexture;
 			refresh = false;
@@ -232,7 +232,7 @@ namespace Subtexture
 		[SerializeField]
 		CameraParam cameraParam = default;
 		[SerializeField]
-		RendererParam rendererParam = default;
+		TransformParam transformParam = default;
 		[SerializeField]
 		MeshParam meshParam = default;
 		[SerializeField]

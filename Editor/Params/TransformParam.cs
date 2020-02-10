@@ -6,7 +6,7 @@ using UnityEditor.AnimatedValues;
 namespace Subtexture
 {
 	[System.Serializable]
-	public sealed class RendererParam : BaseParam
+	public sealed class TransformParam : BaseParam
 	{
 		public override void OnEnable( EditorWindow window, bool opened)
 		{
@@ -18,7 +18,7 @@ namespace Subtexture
 		}
 		public override void OnGUI()
 		{
-			OnPUI( "Renderer", () =>
+			OnPUI( "Transform", () =>
 			{
 				localPosition = EditorGUILayout.Vector3Field( "Position", localPosition);
 				localRotation = EditorGUILayout.Vector3Field( "Rotation", localRotation);
