@@ -55,7 +55,8 @@
 				float2 uvScale = UNITY_ACCESS_INSTANCED_PROP( Props, _UVScale);
 				float2 uvOffset = UNITY_ACCESS_INSTANCED_PROP( Props, _UVOffset);
 				float t = UNITY_ACCESS_INSTANCED_PROP( Props, _TimePosition);
-				float3 c = voronoiNoise( i.uv0 * uvScale + uvOffset, t);
+				float3 c = voronoiNoise2( i.uv0 * uvScale + uvOffset, t);
+				c = clamp( float3( c.x, 1.0, c.y) * smoothstep( 0.05,0.07, c.z), 0.0, 1.0);
 				return fixed4( c, 1);
 			}
             ENDCG

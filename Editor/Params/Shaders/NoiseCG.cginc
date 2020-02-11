@@ -78,7 +78,6 @@ float fBm( float2 v, int octave, float amplitude[8], float lacunarity[8], float 
 	
 	for( int i0 = 0; i0 < octave; ++i0)
 	{
-		
 		c = cos( rotation[ i0]);
 		s = sin( rotation[ i0]);
 		m = float2x2( c, s, -s, c);
@@ -123,24 +122,19 @@ float3 voronoiNoise( float2 v, float t)
 {
 	float2 ist = floor( v);
 	float2 fst = frac( v);
-	float minDistance = 1.0;
 	float2 minPoint;
+	float minDistance = 10.0;
+	float distance;
 	
 	for( int y = -1; y <= 1; ++y)
 	{
 		for( int x = -1; x <= 1; ++x)
 		{
-			/* マスの基点 */
 			float2 neighbor = float2( x, y);
-			
-			/* マスの起点を基準にした点の座標 */
 			float2 pt = random2( ist + neighbor);
-			pt = 0.5 + 0.5 * sin( t + 6.2831 * pt);
+			pt = 0.5 + 0.5 * sin( pt * 6.2831853 + t);
+			distance = length( neighbor + pt - fst);
 			
-			/* 基点と点の距離 */
-			float distance = length( neighbor + pt - fst);
-			
-			/* 近い距離を保つ */
 			if( minDistance > distance)
 			{
 				minDistance = distance;
@@ -148,7 +142,57 @@ float3 voronoiNoise( float2 v, float t)
 			}
 		}
 	}
-	return float3( minDistance, minPoint);
+	return float3( minPoint, minDistance);
+}
+float3 voronoiNoise2( float2 v, float t)
+{
+	float2 ist = floor( v);
+	float2 fst = frac( v);
+	float2 minDifference;
+	float2 minNeighbor;
+	float2 minPoint;
+	float minDistance = 10.0;
+	float distance;
+	
+	for( int y = -1; y <= 1; ++y)
+	{
+		for( int x = -1; x <= 1; ++x)
+		{
+			float2 neighbor = float2( x, y);
+			float2 pt = random2( ist + neighbor);
+			pt = 0.5 + 0.5 * sin( pt * 6.2831853 + t);
+			float2 difference = neighbor + pt - fst;
+			distance = length( difference);
+			
+			if( minDistance > distance)
+			{
+				minDifference = difference;
+				minDistance = distance;
+				minNeighbor = neighbor;
+				minPoint = pt;
+			}
+		}
+	}
+	minDistance = 10.0;
+	
+	for( int y = -2; y <= 2; ++y)
+	{
+		for( int x = -2; x <= 2; ++x)
+		{
+			if( x == 0 && y == 0)
+			{
+				continue;
+			}
+			float2 neighbor = minNeighbor + float2( x, y);
+			float2 pt = random2( ist + neighbor);
+			pt = 0.5 + 0.5 * sin( pt * 6.2831853 + t);
+			float2 difference = neighbor + pt - fst;
+			distance = dot( 0.5 * (minDifference + difference), normalize( difference - minDifference));
+			minPoint = pt;
+			minDistance = min( minDistance, distance);
+		}
+	}
+	return float3( minPoint, minDistance);
 }
 
 
