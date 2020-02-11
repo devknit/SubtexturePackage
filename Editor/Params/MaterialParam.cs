@@ -15,7 +15,7 @@ namespace Subtexture
 		kFractalNoise,
 		kCellularNoise,
 		kVoronoiNoise,
-	//	kProceduralCircle,
+		kCirclePattern,
 	//	kProceduralRing,
 	}
 	[System.Serializable]
@@ -67,6 +67,12 @@ namespace Subtexture
 			}
 			materialVoronoiNoise.OnEnable( window);
 			
+			if( materialCirclePattern == null)
+			{
+				materialCirclePattern = new MaterialCirclePattern();
+			}
+			materialCirclePattern.OnEnable( window);
+			
 			ChangeDynamicMaterial( materialType);
 		}
 		public override void OnDisable()
@@ -98,6 +104,10 @@ namespace Subtexture
 			if( materialVoronoiNoise != null)
 			{
 				materialVoronoiNoise.OnDisable();
+			}
+			if( materialCirclePattern != null)
+			{
+				materialCirclePattern.OnDisable();
 			}
 			if( materialProperties != null)
 			{
@@ -194,6 +204,11 @@ namespace Subtexture
 					materialProperties = materialVoronoiNoise;
 					break;
 				}
+				case MaterialType.kCirclePattern:
+				{
+					materialProperties = materialCirclePattern;
+					break;
+				}
 			}
 			if( materialProperties != null)
 			{
@@ -222,6 +237,8 @@ namespace Subtexture
 		MaterialCellularNoise materialCellularNoise;
 		[SerializeField]
 		MaterialVoronoiNoise materialVoronoiNoise;
+		[SerializeField]
+		MaterialCirclePattern materialCirclePattern;
 		[SerializeField]
 		Material assetMaterial;
 		
