@@ -153,10 +153,11 @@ float3 voronoiNoise2( float2 v, float t)
 	float2 minPoint;
 	float minDistance = 10.0;
 	float distance;
+	int x, y;
 	
-	for( int y = -1; y <= 1; ++y)
+	for( y = -1; y <= 1; ++y)
 	{
-		for( int x = -1; x <= 1; ++x)
+		for( x = -1; x <= 1; ++x)
 		{
 			float2 neighbor = float2( x, y);
 			float2 pt = random2( ist + neighbor);
@@ -175,9 +176,9 @@ float3 voronoiNoise2( float2 v, float t)
 	}
 	minDistance = 10.0;
 	
-	for( int y = -2; y <= 2; ++y)
+	for( y = -2; y <= 2; ++y)
 	{
-		for( int x = -2; x <= 2; ++x)
+		for( x = -2; x <= 2; ++x)
 		{
 			if( x == 0 && y == 0)
 			{
