@@ -13,7 +13,7 @@ namespace Subtexture
 	[System.Serializable]
 	public sealed class MeshParam : BaseParam
 	{
-		public override void OnEnable( EditorWindow window, bool opened)
+		public override void OnEnable( Window window, bool opened)
 		{
 			base.OnEnable( window, opened);
 			

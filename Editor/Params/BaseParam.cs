@@ -8,8 +8,9 @@ namespace Subtexture
 	[System.Serializable]
 	public class BaseParam
 	{
-		public virtual void OnEnable( EditorWindow window, bool opened)
+		public virtual void OnEnable( Window window, bool opened)
 		{
+			handle = window;
 			if( enabled == null)
 			{
 				enabled = new AnimBool( opened);
@@ -18,6 +19,10 @@ namespace Subtexture
 		}
 		public virtual void OnDisable()
 		{
+		}
+		public void Record( string label)
+		{
+			handle.Record( label);
 		}
 		public virtual void OnGUI()
 		{
@@ -41,5 +46,7 @@ namespace Subtexture
 		
 		[SerializeField]
 		AnimBool enabled;
+		[System.NonSerialized]
+		Window handle;
 	}
 }

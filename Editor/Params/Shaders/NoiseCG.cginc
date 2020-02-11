@@ -1,4 +1,6 @@
 // https://thebookofshaders.com/
+// Upgrade NOTE: excluded shader from DX11, OpenGL ES 2.0 because it uses unsized arrays
+#pragma exclude_renderers d3d11 gles
 
 #ifndef __SUBTEXTURE_NOISE_CGINC__
 #define __SUBTEXTURE_NOISE_CGINC__
@@ -69,31 +71,30 @@ float perlinNoise( float2 v)
 }
 /* Fractal Brownian Motion */
 //https://thebookofshaders.com/13/?lan=jp
-float fBm( float2 v, int octave, float amplitude, float lacunarity, float gain, float angle, float2 shift)
+float fBm( float2 v, int octave, float amplitude[8], float lacunarity[8], float rotation[8], float2 shift[8])
 {
-	float n;
-	float f = 0.0;
-	float c = cos( angle);
-	float s = sin( angle);
-	float2x2 mat = float2x2( c, s, -s, c);
+	float n, c, s, f = 0.0;
+	float2x2 m;
 	
 	for( int i0 = 0; i0 < octave; ++i0)
 	{
+		
+		c = cos( rotation[ i0]);
+		s = sin( rotation[ i0]);
+		m = float2x2( c, s, -s, c);
+		v = mul( m, v) * lacunarity[ i0] + shift[ i0];
 		n = perlinNoise( v);
 	//	n = abs( n);
 	//	n = n * -1;
 	//	n = n * n;
-		f += amplitude * n;
-		v = mul( mat, v) * lacunarity + shift;
-		amplitude *= gain;
+		f += amplitude[i0] * n;
+		
 	}
 	return f;
 }
 //https://thebookofshaders.com/12/?lan=jp
-float cellularNoise( float2 v, float scale, float white, float t)
+float cellularNoise( float2 v, float t)
 {
-	v *= scale;
-	
 	float2 ist = floor( v);
 	float2 fst = frac( v);
 	float minDistance = 1.0;
@@ -116,12 +117,10 @@ float cellularNoise( float2 v, float scale, float white, float t)
 			minDistance = min( minDistance, distance);
 		}
 	}
-	return minDistance + (1.0 - step( white, minDistance));
+	return minDistance;
 }
-float3 voronoiNoise( float2 v, float scale, float white, float t)
+float3 voronoiNoise( float2 v, float t)
 {
-	v *= scale;
-	
 	float2 ist = floor( v);
 	float2 fst = frac( v);
 	float minDistance = 1.0;

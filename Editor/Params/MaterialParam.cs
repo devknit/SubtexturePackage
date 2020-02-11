@@ -21,13 +21,89 @@ namespace Subtexture
 	[System.Serializable]
 	public sealed class MaterialParam : BaseParam
 	{
-		public override void OnEnable( EditorWindow window, bool opened)
+		public override void OnEnable( Window window, bool opened)
 		{
 			base.OnEnable( window, opened);
+			
+			if( materialRandomNoise == null)
+			{
+				materialRandomNoise = new MaterialRandomNoise();
+			}
+			materialRandomNoise.OnEnable( window);
+			
+			if( materialBlockNoise == null)
+			{
+				materialBlockNoise = new MaterialBlockNoise();
+			}
+			materialBlockNoise.OnEnable( window);
+			
+			if( materialValueNoise == null)
+			{
+				materialValueNoise = new MaterialValueNoise();
+			}
+			materialValueNoise.OnEnable( window);
+			
+			if( materialPerlinNoise == null)
+			{
+				materialPerlinNoise = new MaterialPerlinNoise();
+			}
+			materialPerlinNoise.OnEnable( window);
+			
+			if( materialFractalNoise == null)
+			{
+				materialFractalNoise = new MaterialFractalNoise();
+			}
+			materialFractalNoise.OnEnable( window);
+			
+			if( materialCellularNoise == null)
+			{
+				materialCellularNoise = new MaterialCellularNoise();
+			}
+			materialCellularNoise.OnEnable( window);
+			
+			if( materialVoronoiNoise == null)
+			{
+				materialVoronoiNoise = new MaterialVoronoiNoise();
+			}
+			materialVoronoiNoise.OnEnable( window);
+			
 			ChangeDynamicMaterial( materialType);
 		}
 		public override void OnDisable()
 		{
+			if( materialRandomNoise != null)
+			{
+				materialRandomNoise.OnDisable();
+			}
+			if( materialBlockNoise != null)
+			{
+				materialBlockNoise.OnDisable();
+			}
+			if( materialValueNoise != null)
+			{
+				materialValueNoise.OnDisable();
+			}
+			if( materialPerlinNoise != null)
+			{
+				materialPerlinNoise.OnDisable();
+			}
+			if( materialFractalNoise != null)
+			{
+				materialFractalNoise.OnDisable();
+			}
+			if( materialCellularNoise != null)
+			{
+				materialCellularNoise.OnDisable();
+			}
+			if( materialVoronoiNoise != null)
+			{
+				materialVoronoiNoise.OnDisable();
+			}
+			if( materialProperties != null)
+			{
+				materialProperties.Dispose();
+				materialProperties = null;
+			}
 			if( dynamicMaterial != null)
 			{
 				Material.DestroyImmediate( dynamicMaterial);
@@ -42,6 +118,7 @@ namespace Subtexture
 				var type = (MaterialType)EditorGUILayout.EnumPopup( "Type", materialType);
 				if( materialType != type)
 				{
+					Record( "Change Material Type");
 					ChangeDynamicMaterial( type);
 					materialType = type;
 				}
@@ -49,80 +126,79 @@ namespace Subtexture
 				{
 					case MaterialType.kAssets:
 					{
-						assetMaterial = EditorGUILayout.ObjectField( "Material", assetMaterial, typeof( Material), false) as Material;
+						var material = EditorGUILayout.ObjectField( "Material", assetMaterial, typeof( Material), false) as Material;
+						if( assetMaterial != material)
+						{
+							Record( "Change Asset Material");
+							assetMaterial = material;
+						}
 						break;
 					}
-				#if false
-					case MaterialType.kProceduralCircle:
+					default:
 					{
+						if( materialProperties != null)
+						{
+							materialProperties.OnGUI();
+						}
 						break;
 					}
-					case MaterialType.kProceduralRing:
-					{
-						break;
-					}
-				#endif
 				}
 			});
 		}
 		void ChangeDynamicMaterial( MaterialType type)
 		{
-			string newShaderGuid = string.Empty;
-			string newShaderPath = string.Empty;
-			
 			if( dynamicMaterial != null)
 			{
 				Material.DestroyImmediate( dynamicMaterial);
 				dynamicMaterial = null;
 			}
+			if( materialProperties != null)
+			{
+				materialProperties.Dispose();
+				materialProperties = null;
+			}
 			switch( type)
 			{
 				case MaterialType.kRandomNoise:
 				{
-					newShaderGuid = "a0bc3d9f3b361864d851388e6a7071ec";
+					materialProperties = materialRandomNoise;
 					break;
 				}
 				case MaterialType.kBlockNoise:
 				{
-					newShaderGuid = "4dde2b0e60992e84082aaa19cc0edef4";
+					materialProperties = materialBlockNoise;
 					break;
 				}
 				case MaterialType.kValueNoise:
 				{
-					newShaderGuid = "c213afc6e8574a540b30cd6ef7c038ef";
+					materialProperties = materialValueNoise;
 					break;
 				}
 				case MaterialType.kPerlinNoise:
 				{
-					newShaderGuid = "b2423f437ef759643be61fd6902a848e";
+					materialProperties = materialPerlinNoise;
 					break;
 				}
 				case MaterialType.kFractalNoise:
 				{
-					newShaderGuid = "b649d9c025e729849bf5138c0dad8d6b";
+					materialProperties = materialFractalNoise;
 					break;
 				}
 				case MaterialType.kCellularNoise:
 				{
-					newShaderGuid = "b68038a3be357504db49ab1958ec5ffe";
+					materialProperties = materialCellularNoise;
 					break;
 				}
 				case MaterialType.kVoronoiNoise:
 				{
-					newShaderGuid = "25a82b0086028984c9b934ab9644b05d";
+					materialProperties = materialVoronoiNoise;
 					break;
 				}
 			}
-			if( string.IsNullOrEmpty( newShaderGuid) == false)
+			if( materialProperties != null)
 			{
-				newShaderPath = AssetDatabase.GUIDToAssetPath( newShaderGuid);
-			}
-			if( string.IsNullOrEmpty( newShaderPath) == false)
-			{
-				if( AssetDatabase.LoadAssetAtPath<Shader>( newShaderPath) is Shader shader)
-				{
-					dynamicMaterial = new Material( shader);
-				}
+				dynamicMaterial = materialProperties.Create();
+				materialProperties.OnUpdateMaterial();
 			}
 		}
 		public Material RenderMaterial
@@ -133,8 +209,23 @@ namespace Subtexture
 		[SerializeField]
 		public MaterialType materialType = MaterialType.kAssets;
 		[SerializeField]
+		MaterialRandomNoise materialRandomNoise;
+		[SerializeField]
+		MaterialBlockNoise materialBlockNoise;
+		[SerializeField]
+		MaterialValueNoise materialValueNoise;
+		[SerializeField]
+		MaterialPerlinNoise materialPerlinNoise;
+		[SerializeField]
+		MaterialFractalNoise materialFractalNoise;
+		[SerializeField]
+		MaterialCellularNoise materialCellularNoise;
+		[SerializeField]
+		MaterialVoronoiNoise materialVoronoiNoise;
+		[SerializeField]
 		Material assetMaterial;
 		
+		MaterialBase materialProperties;
 		Material dynamicMaterial;
 	}
 }
