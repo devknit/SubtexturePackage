@@ -126,7 +126,7 @@ namespace Subtexture
 				if( meshType == MeshType.kAssets)
 				{
 					var assetMeshValue = EditorGUILayout.ObjectField( "Mesh", assetMesh, typeof( Mesh), false) as Mesh;
-					if( assetMesh.Equals( assetMeshValue) == false)
+					if( assetMesh != assetMeshValue)
 					{
 						Record( "Change Mesh Assets");
 						assetMeshValue = assetMesh;

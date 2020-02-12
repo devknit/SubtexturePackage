@@ -48,7 +48,7 @@ namespace Subtexture
 		{
 			if( materialList != null)
 			{
-				for( i0 = 0; i0 < materialList.Count; ++i0)
+				for( int i0 = 0; i0 < materialList.Count; ++i0)
 				{
 					materialList[ i0].OnDisable();
 				}
