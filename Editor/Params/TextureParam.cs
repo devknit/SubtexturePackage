@@ -15,6 +15,11 @@ namespace Subtexture
 				if( forceSquare.Equals( forceSquareValue) == false)
 				{
 					Record( "Change Force square");
+					if( forceSquareValue != false)
+					{
+						width = size;
+						height = size;
+					}
 					forceSquare = forceSquareValue;
 				}
 				if( forceSquare == false)
@@ -40,9 +45,9 @@ namespace Subtexture
 					if( size.Equals( sizeValue) == false)
 					{
 						Record( "Change Size");
-						width = sizeValue;
-						height = sizeValue;
 						size = sizeValue;
+						width = size;
+						height = size;
 					}
 				}
 			});

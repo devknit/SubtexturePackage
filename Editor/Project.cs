@@ -79,6 +79,17 @@ namespace Subtexture
 				handle.Repaint();
 			}
 		}
+		public void OnToolbarGUI()
+		{
+			EditorGUI.BeginDisabledGroup( image == null);
+			{
+				if( GUILayout.Button( "Export", EditorStyles.toolbarButton, GUILayout.Width( 70)) != false)
+				{
+					Export();
+				}
+			}
+			EditorGUI.EndDisabledGroup();
+		}
 		public void OnPreviewGUI( Rect rect)
 		{
 			GUILayout.BeginArea( rect);
@@ -133,6 +144,14 @@ namespace Subtexture
 						previewRect.yMax -= offset;
 					}
 					image.filterMode = previewFilterMode;
+					
+					var checker = EditorGUIUtility.Load( 
+						EditorGUIUtility.isProSkin ? "textureCheckerDark" : "textureChecker");
+					if( checker is Texture textureChecker)
+					{	
+						var texCoords = new Rect( 0, 0, previewRect.width * 0.02f, previewRect.height * 0.02f);
+						GUI.DrawTextureWithTexCoords( previewRect, textureChecker, texCoords, false);
+					}
 					GUI.DrawTexture( previewRect, image);
 				}
 			}
@@ -156,15 +175,6 @@ namespace Subtexture
 							meshParam.OnGUI();
 							materialParam.OnGUI();
 					
-							EditorGUI.BeginDisabledGroup( image == null);
-							{
-								if( GUILayout.Button( "Export") != false)
-								{
-									Export();
-								}
-							}
-							EditorGUI.EndDisabledGroup();
-						
 							if( EditorGUI.EndChangeCheck() != false)
 							{
 								refresh = true;

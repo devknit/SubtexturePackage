@@ -42,6 +42,10 @@ namespace Subtexture
 		{
 			project.Update();
 		}
+		protected override void OnDrawToolBar()
+		{
+			project.OnToolbarGUI();
+		}
 		[EWSubWindow( "Preview", EWSubWindowIcon.Scene, true, SubWindowStyle.Preview)]
 		void OnPreviewGUI( Rect rect)
 		{
