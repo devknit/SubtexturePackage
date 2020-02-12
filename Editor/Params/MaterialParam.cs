@@ -2,12 +2,13 @@
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.AnimatedValues;
+using System.Collections.Generic;
 
 namespace Subtexture
 {
 	public enum MaterialType
 	{
-		kAssets,
+		kAssets = -1,
 		kRandomNoise,
 		kBlockNoise,
 		kValueNoise,
@@ -17,6 +18,7 @@ namespace Subtexture
 		kVoronoiNoise,
 		kCirclePattern,
 	//	kProceduralRing,
+		kMax,
 	}
 	[System.Serializable]
 	public sealed class MaterialParam : BaseParam
@@ -25,90 +27,52 @@ namespace Subtexture
 		{
 			base.OnEnable( window, opened);
 			
-			if( materialRandomNoise == null)
+			materialList = new List<MaterialBase>();
+			int i;		
+			for(i = 0; i < (int)MaterialType.kMax; i ++)
 			{
-				materialRandomNoise = new MaterialRandomNoise();
+				switch((MaterialType)i)
+				{
+					case MaterialType.kRandomNoise:
+					materialList.Add(new MaterialRandomNoise());
+					break;
+					case MaterialType.kBlockNoise:
+					materialList.Add(new MaterialBlockNoise());
+					break;
+					case MaterialType.kValueNoise:
+					materialList.Add(new MaterialValueNoise());
+					break;
+					case MaterialType.kPerlinNoise:
+					materialList.Add(new MaterialPerlinNoise());
+					break;
+					case MaterialType.kFractalNoise:
+					materialList.Add(new MaterialFractalNoise());
+					break;
+					case MaterialType.kCellularNoise:
+					materialList.Add(new MaterialCellularNoise());
+					break;
+					case MaterialType.kVoronoiNoise:
+					materialList.Add(new MaterialVoronoiNoise());
+					break;
+					case MaterialType.kCirclePattern:
+					materialList.Add(new MaterialCirclePattern());
+					break;
+				}
+				materialList[i].OnEnable( window);
 			}
-			materialRandomNoise.OnEnable( window);
-			
-			if( materialBlockNoise == null)
-			{
-				materialBlockNoise = new MaterialBlockNoise();
-			}
-			materialBlockNoise.OnEnable( window);
-			
-			if( materialValueNoise == null)
-			{
-				materialValueNoise = new MaterialValueNoise();
-			}
-			materialValueNoise.OnEnable( window);
-			
-			if( materialPerlinNoise == null)
-			{
-				materialPerlinNoise = new MaterialPerlinNoise();
-			}
-			materialPerlinNoise.OnEnable( window);
-			
-			if( materialFractalNoise == null)
-			{
-				materialFractalNoise = new MaterialFractalNoise();
-			}
-			materialFractalNoise.OnEnable( window);
-			
-			if( materialCellularNoise == null)
-			{
-				materialCellularNoise = new MaterialCellularNoise();
-			}
-			materialCellularNoise.OnEnable( window);
-			
-			if( materialVoronoiNoise == null)
-			{
-				materialVoronoiNoise = new MaterialVoronoiNoise();
-			}
-			materialVoronoiNoise.OnEnable( window);
-			
-			if( materialCirclePattern == null)
-			{
-				materialCirclePattern = new MaterialCirclePattern();
-			}
-			materialCirclePattern.OnEnable( window);
 			
 			ChangeDynamicMaterial( materialType);
 		}
 		public override void OnDisable()
 		{
-			if( materialRandomNoise != null)
+			int i;
+			for(i = 0; i < materialList.Count; i ++)
 			{
-				materialRandomNoise.OnDisable();
+				materialList[i].OnDisable();
 			}
-			if( materialBlockNoise != null)
-			{
-				materialBlockNoise.OnDisable();
-			}
-			if( materialValueNoise != null)
-			{
-				materialValueNoise.OnDisable();
-			}
-			if( materialPerlinNoise != null)
-			{
-				materialPerlinNoise.OnDisable();
-			}
-			if( materialFractalNoise != null)
-			{
-				materialFractalNoise.OnDisable();
-			}
-			if( materialCellularNoise != null)
-			{
-				materialCellularNoise.OnDisable();
-			}
-			if( materialVoronoiNoise != null)
-			{
-				materialVoronoiNoise.OnDisable();
-			}
-			if( materialCirclePattern != null)
-			{
-				materialCirclePattern.OnDisable();
-			}
+			materialList.Clear();
+			materialList = null;
+
 			if( materialProperties != null)
 			{
 				materialProperties.Dispose();
@@ -167,49 +131,12 @@ namespace Subtexture
 				materialProperties.Dispose();
 				materialProperties = null;
 			}
-			switch( type)
+			
+			if(type != MaterialType.kAssets)
 			{
-				case MaterialType.kRandomNoise:
-				{
-					materialProperties = materialRandomNoise;
-					break;
-				}
-				case MaterialType.kBlockNoise:
-				{
-					materialProperties = materialBlockNoise;
-					break;
-				}
-				case MaterialType.kValueNoise:
-				{
-					materialProperties = materialValueNoise;
-					break;
-				}
-				case MaterialType.kPerlinNoise:
-				{
-					materialProperties = materialPerlinNoise;
-					break;
-				}
-				case MaterialType.kFractalNoise:
-				{
-					materialProperties = materialFractalNoise;
-					break;
-				}
-				case MaterialType.kCellularNoise:
-				{
-					materialProperties = materialCellularNoise;
-					break;
-				}
-				case MaterialType.kVoronoiNoise:
-				{
-					materialProperties = materialVoronoiNoise;
-					break;
-				}
-				case MaterialType.kCirclePattern:
-				{
-					materialProperties = materialCirclePattern;
-					break;
-				}
+				materialProperties = materialList[(int)type];
 			}
+
 			if( materialProperties != null)
 			{
 				dynamicMaterial = materialProperties.Create();
@@ -224,21 +151,7 @@ namespace Subtexture
 		[SerializeField]
 		public MaterialType materialType = MaterialType.kAssets;
 		[SerializeField]
-		MaterialRandomNoise materialRandomNoise;
-		[SerializeField]
-		MaterialBlockNoise materialBlockNoise;
-		[SerializeField]
-		MaterialValueNoise materialValueNoise;
-		[SerializeField]
-		MaterialPerlinNoise materialPerlinNoise;
-		[SerializeField]
-		MaterialFractalNoise materialFractalNoise;
-		[SerializeField]
-		MaterialCellularNoise materialCellularNoise;
-		[SerializeField]
-		MaterialVoronoiNoise materialVoronoiNoise;
-		[SerializeField]
-		MaterialCirclePattern materialCirclePattern;
+		List<MaterialBase> materialList;
 		[SerializeField]
 		Material assetMaterial;
 		
