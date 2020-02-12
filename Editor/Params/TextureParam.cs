@@ -24,23 +24,25 @@ namespace Subtexture
 					{
 						Record( "Change Width");
 						width = widthValue;
+						size = widthValue;
 					}
 					int heightValue = EditorGUILayout.IntPopup( "Height", height, kResolutionLabels, kResolutions);
 					if( height.Equals( heightValue) == false)
 					{
 						Record( "Change Height");
 						height = heightValue;
+						size = heightValue;
 					}
 				}
 				else
 				{
-					int size = width > height ? width : height;
 					int sizeValue = EditorGUILayout.IntPopup( "Size", size, kResolutionLabels, kResolutions);
 					if( size.Equals( sizeValue) == false)
 					{
 						Record( "Change Size");
-						width = size;
-						height = size;
+						width = sizeValue;
+						height = sizeValue;
+						size = sizeValue;
 					}
 				}
 			});
@@ -82,5 +84,7 @@ namespace Subtexture
 		public int width = 256;
 		[SerializeField]
 		public int height = 256;
+		[SerializeField]
+		public int size = 256;
 	}
 }
