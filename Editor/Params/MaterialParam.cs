@@ -26,39 +26,33 @@ namespace Subtexture
 		{
 			base.OnEnable( window, opened);
 			
-			int i;
-
-			if(materialList == null)
+			if( materialList == null)
 			{
 				materialList = new List<MaterialBase>();
-				materialList.Add(new MaterialRandomNoise());
-				materialList.Add(new MaterialBlockNoise());
-				materialList.Add(new MaterialValueNoise());
-				materialList.Add(new MaterialPerlinNoise());
-				materialList.Add(new MaterialFractalNoise());
-				materialList.Add(new MaterialCellularNoise());
-				materialList.Add(new MaterialVoronoiNoise());
-				materialList.Add(new MaterialCirclePattern());
+				materialList.Add( new MaterialRandomNoise());
+				materialList.Add( new MaterialBlockNoise());
+				materialList.Add( new MaterialValueNoise());
+				materialList.Add( new MaterialPerlinNoise());
+				materialList.Add( new MaterialFractalNoise());
+				materialList.Add( new MaterialCellularNoise());
+				materialList.Add( new MaterialVoronoiNoise());
+				materialList.Add( new MaterialCirclePattern());
 			}
-
-			for(i = 0; i < materialList.Count; i ++)
+			for( int i0 = 0; i0 < materialList.Count; ++i0)
 			{
-				materialList[i].OnEnable( window);
+				materialList[ i0].OnEnable( window);
 			}
-			
 			ChangeDynamicMaterial( materialType);
 		}
 		public override void OnDisable()
 		{
-			if(materialList != null)
+			if( materialList != null)
 			{
-				int i;
-				for(i = 0; i < materialList.Count; i ++)
+				for( i0 = 0; i0 < materialList.Count; ++i0)
 				{
-					materialList[i].OnDisable();
+					materialList[ i0].OnDisable();
 				}
 			}
-
 			if( materialProperties != null)
 			{
 				materialProperties.Dispose();
@@ -117,12 +111,10 @@ namespace Subtexture
 				materialProperties.Dispose();
 				materialProperties = null;
 			}
-			
-			if(type != MaterialType.kAssets)
+			if( type != MaterialType.kAssets)
 			{
-				materialProperties = materialList[(int)type];
+				materialProperties = materialList[ (int)type];
 			}
-
 			if( materialProperties != null)
 			{
 				dynamicMaterial = materialProperties.Create();
@@ -137,7 +129,7 @@ namespace Subtexture
 		[SerializeField]
 		public MaterialType materialType = MaterialType.kAssets;
 		[SerializeReference]
-		List<MaterialBase> materialList = null;
+		List<MaterialBase> materialList;
 		[SerializeField]
 		Material assetMaterial;
 		
