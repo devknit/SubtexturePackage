@@ -126,7 +126,7 @@ namespace Subtexture
 			OnPUI( "Material", () =>
 			{
 				var type = (MaterialType)EditorGUILayout.EnumPopup( "Type", materialType);
-				if( materialType != type)
+				if( materialType.Equals( type) == false)
 				{
 					Record( "Change Material Type");
 					ChangeDynamicMaterial( type);
@@ -136,11 +136,11 @@ namespace Subtexture
 				{
 					case MaterialType.kAssets:
 					{
-						var material = EditorGUILayout.ObjectField( "Material", assetMaterial, typeof( Material), false) as Material;
-						if( assetMaterial != material)
+						var assetMaterialValue = EditorGUILayout.ObjectField( "Material", assetMaterial, typeof( Material), false) as Material;
+						if( assetMaterial != assetMaterialValue)
 						{
 							Record( "Change Asset Material");
-							assetMaterial = material;
+							assetMaterial = assetMaterialValue;
 						}
 						break;
 					}

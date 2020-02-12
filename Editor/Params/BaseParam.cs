@@ -31,8 +31,12 @@ namespace Subtexture
 		{
 			EditorGUILayout.BeginVertical( GUI.skin.box);
 			{
-				enabled.target = EditorGUILayout.Foldout( enabled.target, caption);
-				
+				bool target = EditorGUILayout.Foldout( enabled.target, caption);
+				if( enabled.target.Equals( target) == false)
+				{
+					Record( "Change Foldout");
+					enabled.target = target;
+				}
 				if( EditorGUILayout.BeginFadeGroup( enabled.faded) != false)
 				{
 					++EditorGUI.indentLevel;

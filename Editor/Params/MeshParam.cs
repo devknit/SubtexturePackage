@@ -117,24 +117,35 @@ namespace Subtexture
 		{
 			OnPUI( "Mesh", () =>
 			{
-				meshType = (MeshType)EditorGUILayout.EnumPopup( "Type", meshType);
+				var meshTypeValue = (MeshType)EditorGUILayout.EnumPopup( "Type", meshType);
+				if( meshType.Equals( meshTypeValue) == false)
+				{
+					Record( "Change Mesh Type");
+					meshType = meshTypeValue;
+				}
 				if( meshType == MeshType.kAssets)
 				{
-					assetMesh = EditorGUILayout.ObjectField( "Mesh", assetMesh, typeof( Mesh), false) as Mesh;
+					var assetMeshValue = EditorGUILayout.ObjectField( "Mesh", assetMesh, typeof( Mesh), false) as Mesh;
+					if( assetMesh.Equals( assetMeshValue) == false)
+					{
+						Record( "Change Mesh Assets");
+						assetMeshValue = assetMesh;
+					}
 				}
 				else if( meshType == MeshType.kDynamic)
 				{
-					Color color = EditorGUILayout.ColorField( "Vertex Color", vertexColor);
-					if( vertexColor != color)
+					Color vertexColorValue = EditorGUILayout.ColorField( "Vertex Color", vertexColor);
+					if( vertexColor.Equals( vertexColorValue) == false)
 					{
+						Record( "Change Vertex Color");
 						dynamicMesh.colors = new Color[]
 				        {
-							color,
-							color,
-							color,
-							color
+							vertexColorValue,
+							vertexColorValue,
+							vertexColorValue,
+							vertexColorValue
 						};
-						vertexColor = color;
+						vertexColor = vertexColorValue;
 					}
 					List<Vector4> texcoord;
 					Vector4 uv;
@@ -143,6 +154,7 @@ namespace Subtexture
 					Vector2 uvZW = EditorGUILayout.Vector2Field( "TexCoord0.zw", texcoordZW);
 					if( texcoordZW.Equals( uvZW) == false)
 					{
+						Record( "Change TexCoord0");
 						texcoord = new List<Vector4>();
 						texcoord.Add( new Vector4( 0, 0, uvZW.x, uvZW.y));
 						texcoord.Add( new Vector4( 0, 1, uvZW.x, uvZW.y));
@@ -154,6 +166,7 @@ namespace Subtexture
 					uv = EditorGUILayout.Vector4Field( "TexCoord1", texcoords1);
 					if( texcoords1.Equals( uv) == false)
 					{
+						Record( "Change TexCoord1");
 						texcoord = new List<Vector4>();
 						texcoord.Add( uv);
 						texcoord.Add( uv);
@@ -165,6 +178,7 @@ namespace Subtexture
 					uv = EditorGUILayout.Vector4Field( "TexCoord2", texcoords2);
 					if( texcoords2.Equals( uv) == false)
 					{
+						Record( "Change TexCoord2");
 						texcoord = new List<Vector4>();
 						texcoord.Add( uv);
 						texcoord.Add( uv);
@@ -176,6 +190,7 @@ namespace Subtexture
 					uv = EditorGUILayout.Vector4Field( "TexCoord3", texcoords3);
 					if( texcoords3.Equals( uv) == false)
 					{
+						Record( "Change TexCoord3");
 						texcoord = new List<Vector4>();
 						texcoord.Add( uv);
 						texcoord.Add( uv);
@@ -187,6 +202,7 @@ namespace Subtexture
 					uv = EditorGUILayout.Vector4Field( "TexCoord4", texcoords4);
 					if( texcoords4.Equals( uv) == false)
 					{
+						Record( "Change TexCoord4");
 						texcoord = new List<Vector4>();
 						texcoord.Add( uv);
 						texcoord.Add( uv);
@@ -198,6 +214,7 @@ namespace Subtexture
 					uv = EditorGUILayout.Vector4Field( "TexCoord5", texcoords5);
 					if( texcoords5.Equals( uv) == false)
 					{
+						Record( "Change TexCoord5");
 						texcoord = new List<Vector4>();
 						texcoord.Add( uv);
 						texcoord.Add( uv);
@@ -209,6 +226,7 @@ namespace Subtexture
 					uv = EditorGUILayout.Vector4Field( "TexCoord6", texcoords6);
 					if( texcoords6.Equals( uv) == false)
 					{
+						Record( "Change TexCoord6");
 						texcoord = new List<Vector4>();
 						texcoord.Add( uv);
 						texcoord.Add( uv);
@@ -220,6 +238,7 @@ namespace Subtexture
 					uv = EditorGUILayout.Vector4Field( "TexCoord7", texcoords7);
 					if( texcoords7.Equals( uv) == false)
 					{
+						Record( "Change TexCoord7");
 						texcoord = new List<Vector4>();
 						texcoord.Add( uv);
 						texcoord.Add( uv);

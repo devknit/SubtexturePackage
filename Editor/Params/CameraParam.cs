@@ -31,42 +31,86 @@ namespace Subtexture
 		{
 			OnPUI( "Camera", () =>
 			{
-				localPosition = EditorGUILayout.Vector3Field( "Position", localPosition);
+				Vector3 localPositionValue = EditorGUILayout.Vector3Field( "Position", localPosition);
+				if( localPosition.Equals( localPositionValue) == false)
+				{
+					Record( "Change Position");
+					localPosition = localPositionValue;
+				}
+				Vector3 localRotationValue = EditorGUILayout.Vector3Field( "Rotation", localRotation);
+				if( localRotation.Equals( localRotationValue) == false)
+				{
+					Record( "Change Rotation");
+					localRotation = localRotationValue;
+				}
 				
-				localRotation = EditorGUILayout.Vector3Field( "Rotation", localRotation);
-				
-				backgroundColor = EditorGUILayout.ColorField( "Background", backgroundColor);
+				Color backgroundColorValue = EditorGUILayout.ColorField( "Background", backgroundColor);
+				if( backgroundColor.Equals( backgroundColorValue) == false)
+				{
+					Record( "Change Background");
+					backgroundColor = backgroundColorValue;
+				}
 				
 				int projection = orthographic ? 1 : 0;
 				projection = EditorGUILayout.Popup( "Projection", projection, kProjections);
-				orthographic = (projection == 0) ? false : true;
+				bool orthographicValue = (projection == 0) ? false : true;
+				if( orthographic.Equals( orthographicValue) == false)
+				{
+					Record( "Change Projection");
+					orthographic = orthographicValue;
+				}
 				
 				if( orthographic == false)
 				{
-					fieldOfView = EditorGUILayout.Slider( " Field of View", fieldOfView, 1e-5f, 179.0f);
+					float fieldOfViewValue = EditorGUILayout.Slider( " Field of View", fieldOfView, 1e-5f, 179.0f);
+					if( fieldOfView.Equals( fieldOfViewValue) == false)
+					{
+						Record( "Change Field of View");
+						fieldOfView = fieldOfViewValue;
+					}
 				}
 				else
 				{
-					orthographicSize = EditorGUILayout.FloatField( "Size", orthographicSize);
+					float orthographicSizeValue = EditorGUILayout.FloatField( "Size", orthographicSize);
+					if( orthographicSize.Equals( orthographicSizeValue) == false)
+					{
+						Record( "Change Size");
+						orthographicSize = orthographicSizeValue;
+					}
 				}
 				
-				nearClipPlane = EditorGUILayout.FloatField( "Near Clipping Planes", nearClipPlane);
-				if( nearClipPlane < 0.01)
+				float nearClipPlaneValue = EditorGUILayout.FloatField( "Near Clipping Planes", nearClipPlane);
+				if( nearClipPlaneValue < 0.01)
 				{
-					nearClipPlane = 0.01f;
+					nearClipPlaneValue = 0.01f;
 				}
-				if( nearClipPlane >= 3.402823e+37f)
+				if( nearClipPlaneValue >= 3.402823e+37f)
 				{
-					nearClipPlane = 3.402823e+37f;
+					nearClipPlaneValue = 3.402823e+37f;
+				}
+				if( nearClipPlane.Equals( nearClipPlaneValue) == false)
+				{
+					Record( "Change Near Clipping Planes");
+					nearClipPlane = nearClipPlaneValue;
 				}
 				
-				farClipPlane = EditorGUILayout.FloatField( "Far Clipping Planes", farClipPlane);
-				if( farClipPlane < nearClipPlane)
+				float farClipPlaneValue = EditorGUILayout.FloatField( "Far Clipping Planes", farClipPlane);
+				if( farClipPlaneValue < nearClipPlane)
 				{
-					farClipPlane = nearClipPlane + 0.01f;
+					farClipPlaneValue = nearClipPlane + 0.01f;
+				}
+				if( farClipPlane.Equals( farClipPlaneValue) == false)
+				{
+					Record( "Change Far Clipping Planes");
+					farClipPlane = farClipPlaneValue;
 				}
 				
-				rect = EditorGUILayout.RectField( "Viewport Rect", rect);
+				Rect rectValue = EditorGUILayout.RectField( "Viewport Rect", rect);
+				if( rect.Equals( rectValue) == false)
+				{
+					Record( "Change Far Clipping Planes");
+					rect = rectValue;
+				}
 			});
 		}
 		

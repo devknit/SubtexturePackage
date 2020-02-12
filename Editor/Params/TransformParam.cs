@@ -20,9 +20,24 @@ namespace Subtexture
 		{
 			OnPUI( "Transform", () =>
 			{
-				localPosition = EditorGUILayout.Vector3Field( "Position", localPosition);
-				localRotation = EditorGUILayout.Vector3Field( "Rotation", localRotation);
-				localScale = EditorGUILayout.Vector3Field( "Scale", localScale);
+				Vector3 localPositionValue = EditorGUILayout.Vector3Field( "Position", localPosition);
+				if( localPosition.Equals( localPositionValue) == false)
+				{
+					Record( "Change Position");
+					localPosition = localPositionValue;
+				}
+				Vector3 localRotationValue = EditorGUILayout.Vector3Field( "Rotation", localRotation);
+				if( localRotation.Equals( localRotationValue) == false)
+				{
+					Record( "Change Rotation");
+					localRotation = localRotationValue;
+				}
+				Vector3 localScaleValue = EditorGUILayout.Vector3Field( "Scale", localScale);
+				if( localScale.Equals( localScaleValue) == false)
+				{
+					Record( "Change Scale");
+					localScale = localScaleValue;
+				}
 			});
 		}
 		public Matrix4x4 LocalMatrix

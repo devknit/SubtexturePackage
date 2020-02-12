@@ -11,18 +11,37 @@ namespace Subtexture
 		{
 			OnPUI( "Texture", () =>
 			{
-				forceSquare = EditorGUILayout.Toggle( "Force square", forceSquare);
+				bool forceSquareValue = EditorGUILayout.Toggle( "Force square", forceSquare);
+				if( forceSquare.Equals( forceSquareValue) == false)
+				{
+					Record( "Change Force square");
+					forceSquare = forceSquareValue;
+				}
 				if( forceSquare == false)
 				{
-					width = EditorGUILayout.IntPopup( "Width", width, kResolutionLabels, kResolutions);
-					height = EditorGUILayout.IntPopup( "Height", height, kResolutionLabels, kResolutions);
+					int widthValue = EditorGUILayout.IntPopup( "Width", width, kResolutionLabels, kResolutions);
+					if( width.Equals( widthValue) == false)
+					{
+						Record( "Change Width");
+						width = widthValue;
+					}
+					int heightValue = EditorGUILayout.IntPopup( "Height", height, kResolutionLabels, kResolutions);
+					if( height.Equals( heightValue) == false)
+					{
+						Record( "Change Height");
+						height = heightValue;
+					}
 				}
 				else
 				{
 					int size = width > height ? width : height;
-					size = EditorGUILayout.IntPopup( "Size", size, kResolutionLabels, kResolutions);
-					width = size;
-					height = size;
+					int sizeValue = EditorGUILayout.IntPopup( "Size", size, kResolutionLabels, kResolutions);
+					if( size.Equals( sizeValue) == false)
+					{
+						Record( "Change Size");
+						width = size;
+						height = size;
+					}
 				}
 			});
 		}
