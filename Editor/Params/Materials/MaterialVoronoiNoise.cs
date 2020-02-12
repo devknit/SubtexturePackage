@@ -5,63 +5,45 @@ using UnityEditor;
 namespace Subtexture
 {
 	[System.Serializable]
-	public class MaterialVoronoiNoise : MaterialBase
+	public class MaterialVoronoiNoise : MaterialBaseUvProperties
 	{
-		public override void OnGUI()
+		public override bool OnGUI()
 		{
-			bool update = false;
+			bool ret = base.OnGUI();
 			
-			Vector2 uvScaleValue = EditorGUILayout.Vector2Field( "UV Scale", uvScale);
-			if( uvScale.Equals( uvScaleValue) == false)
-			{
-				Record( "Change UV Scale");
-				uvScale = uvScaleValue;
-				update = true;
-			}
-			Vector2 uvOffsetValue = EditorGUILayout.Vector2Field( "UV Offset", uvOffset);
-			if( uvOffset.Equals( uvOffsetValue) == false)
-			{
-				Record( "Change UV Offset");
-				uvOffset = uvOffsetValue;
-				update = true;
-			}
 			float timeValue = EditorGUILayout.FloatField( "Time", time);
 			if( time.Equals( timeValue) == false)
 			{
 				Record( "Change Time");
 				time = timeValue;
-				update = true;
+				ret = true;
 			}
 			int swizzleValue = EditorGUILayout.Popup( "Swizzle", swizzle, kSwizzleLabels);
 			if( swizzle.Equals( swizzleValue) == false)
 			{
 				Record( "Change Swizzle");
 				swizzle = swizzleValue;
-				update = true;
+				ret = true;
 			}
 			Vector3 colorScaleValue = EditorGUILayout.Vector3Field( "Color Scale", colorScale);
 			if( colorScale.Equals( colorScaleValue) == false)
 			{
 				Record( "Change Color Scale");
 				colorScale = colorScaleValue;
-				update = true;
+				ret = true;
 			}
 			Vector2 smoothEdgesValue = EditorGUILayout.Vector2Field( "Smooth Edges", smoothEdges);
 			if( smoothEdges.Equals( smoothEdgesValue) == false)
 			{
 				Record( "Change Smooth Edges");
 				smoothEdges = smoothEdgesValue;
-				update = true;
+				ret = true;
 			}
-			if( update != false)
-			{
-				OnUpdateMaterial();
-			}
+			return ret;
 		}
 		public override void OnUpdateMaterial()
 		{
-			materialCache.SetVector( "_UVScale", new Vector4( uvScale.x, uvScale.y, 1, 1));
-			materialCache.SetVector( "_UVOffset", new Vector4( uvOffset.x, uvOffset.y, 0, 0));
+			base.OnUpdateMaterial();
 			materialCache.SetFloat( "_TimePosition", time);
 			materialCache.SetInt( "_Swizzle", swizzle);
 			materialCache.SetVector( "_ColorScale", new Vector4( colorScale.x, colorScale.y, colorScale.z, 1));
@@ -86,10 +68,6 @@ namespace Subtexture
 			"Blue 2"
 		};
 		
-		[SerializeField]
-		Vector2 uvScale = new Vector2( 8, 8);
-		[SerializeField]
-		Vector2 uvOffset = Vector2.zero;
 		[SerializeField]
 		float time = 0.0f;
 		[SerializeField]

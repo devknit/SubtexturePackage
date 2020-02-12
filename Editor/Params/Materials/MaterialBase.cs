@@ -44,8 +44,9 @@ namespace Subtexture
 				materialCache = null;
 			}
 		}
-		public virtual void OnGUI()
+		public virtual bool OnGUI()
 		{
+			return false;
 		}
 		public virtual void OnUpdateMaterial()
 		{
@@ -53,6 +54,39 @@ namespace Subtexture
 		protected virtual string GetShaderGuid()
 		{
 			return string.Empty;
+		}
+		protected bool AxisSyncVector2Field( string caption, ref Vector2 source, ref bool axisSync)
+		{
+			bool ret = false;
+			
+			bool axisSyncValue = EditorGUILayout.ToggleLeft( "UV Scale", axisSync);
+			if( axisSync.Equals( axisSyncValue) == false)
+			{
+				Record( string.Format( $"Change {caption} Axis Sync"));
+				axisSync = axisSyncValue;
+				ret = true;
+			}
+			++EditorGUI.indentLevel;
+			Vector2 sourceValue = EditorGUILayout.Vector2Field( string.Empty, source);
+			--EditorGUI.indentLevel;
+			if( source.Equals( sourceValue) == false)
+			{
+				if( axisSync != false)
+				{
+					if( source.x != sourceValue.x)
+					{
+						sourceValue.y = sourceValue.x;
+					}
+					else
+					{
+						sourceValue.x = sourceValue.y;
+					}
+				}
+				Record( string.Format( $"Change {caption}"));
+				source = sourceValue;
+				ret = true;
+			}
+			return ret;
 		}
 		
 		[System.NonSerialized]

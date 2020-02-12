@@ -5,39 +5,25 @@ using UnityEditor;
 namespace Subtexture
 {
 	[System.Serializable]
-	public class MaterialFractalNoise : MaterialBase
+	public class MaterialFractalNoise : MaterialBaseUvProperties
 	{
-		public override void OnGUI()
+		public override bool OnGUI()
 		{
-			bool update = false;
+			bool ret = base.OnGUI();
 			
-			Vector2 uvScaleValue = EditorGUILayout.Vector2Field( "UV Scale", uvScale);
-			if( uvScale.Equals( uvScaleValue) == false)
-			{
-				Record( "Change UV Scale");
-				uvScale = uvScaleValue;
-				update = true;
-			}
-			Vector2 uvOffsetValue = EditorGUILayout.Vector2Field( "UV Offset", uvOffset);
-			if( uvOffset.Equals( uvOffsetValue) == false)
-			{
-				Record( "Change UV Offset");
-				uvOffset = uvOffsetValue;
-				update = true;
-			}
 			float brightnessValue = EditorGUILayout.Slider( "Brightness", brightness, 0.0f, 1.0f);
 			if( brightness.Equals( brightnessValue) == false)
 			{
 				Record( "Change Brightness");
 				brightness = brightnessValue;
-				update = true;
+				ret = true;
 			}
 			int octaveValue = EditorGUILayout.IntSlider( "Octave", octave, 1, 8);
 			if( octave.Equals( octaveValue) == false)
 			{
 				Record( "Change Octave");
 				octave = octaveValue;
-				update = true;
+				ret = true;
 			}
 			EditorGUILayout.BeginVertical( GUI.skin.box);
 			{
@@ -45,21 +31,17 @@ namespace Subtexture
 				{
 					if( noiseParams[ i0].OnGUI( "Element" + i0, Record) != false)
 					{
-						update = true;
+						ret = true;
 					}
 				}
 			}
 			EditorGUILayout.EndVertical();
 			
-			if( update != false)
-			{
-				OnUpdateMaterial();
-			}
+			return ret;
 		}
 		public override void OnUpdateMaterial()
 		{
-			materialCache.SetVector( "_UVScale", new Vector4( uvScale.x, uvScale.y, 1, 1));
-			materialCache.SetVector( "_UVOffset", new Vector4( uvOffset.x, uvOffset.y, 1, 1));
+			base.OnUpdateMaterial();
 			materialCache.SetFloat( "_Brightness", brightness);
 			materialCache.SetInt( "_Octave", octave);
 			
@@ -134,10 +116,6 @@ namespace Subtexture
 		}
 		
 		[SerializeField]
-		Vector2 uvScale = new Vector2( 8, 8);
-		[SerializeField]
-		Vector2 uvOffset = Vector2.zero;
-		[SerializeField]
 		float brightness = 0.5f;
 		[SerializeField]
 		int octave = 4;
@@ -165,7 +143,7 @@ namespace Subtexture
 			}
 			public bool OnGUI( string caption, System.Action<string> record)
 			{
-				bool update = false;
+				bool ret = false;
 				
 				enabled = EditorGUILayout.Foldout( enabled, caption);
 				if( enabled != false)
@@ -177,32 +155,32 @@ namespace Subtexture
 					{
 						record?.Invoke( "Change Amplitude");
 						amplitude = amplitudeValue;
-						update = true;
+						ret = true;
 					}
 					float lacunarityValue = EditorGUILayout.FloatField( "Lacunarity", lacunarity);
 					if( lacunarity.Equals( lacunarityValue) == false)
 					{
 						record?.Invoke( "Change Lacunarity");
 						lacunarity = lacunarityValue;
-						update = true;
+						ret = true;
 					}
 					float rotationValue = EditorGUILayout.FloatField( "Rotation", rotation);
 					if( rotation.Equals( rotationValue) == false)
 					{
 						record?.Invoke( "Change Rotation");
 						rotation = rotationValue;
-						update = true;
+						ret = true;
 					}
 					Vector2 shiftValue = EditorGUILayout.Vector2Field( "Shift", shift);
 					if( shift.Equals( shiftValue) == false)
 					{
 						record?.Invoke( "Change Shift");
 						shift = shiftValue;
-						update = true;
+						ret = true;
 					}
 					--EditorGUI.indentLevel;
 				}
-				return update;
+				return ret;
 			}
 			[SerializeField]
 			bool enabled = true;

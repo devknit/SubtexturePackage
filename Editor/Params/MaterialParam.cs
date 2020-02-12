@@ -1,7 +1,6 @@
 ﻿
 using UnityEngine;
 using UnityEditor;
-using UnityEditor.AnimatedValues;
 using System.Collections.Generic;
 
 namespace Subtexture
@@ -92,7 +91,10 @@ namespace Subtexture
 					{
 						if( materialProperties != null)
 						{
-							materialProperties.OnGUI();
+							if( materialProperties.OnGUI() != false)
+							{
+								materialProperties.OnUpdateMaterial();
+							}
 						}
 						break;
 					}
