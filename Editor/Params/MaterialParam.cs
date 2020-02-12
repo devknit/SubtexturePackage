@@ -18,7 +18,6 @@ namespace Subtexture
 		kVoronoiNoise,
 		kCirclePattern,
 	//	kProceduralRing,
-		kMax,
 	}
 	[System.Serializable]
 	public sealed class MaterialParam : BaseParam
@@ -27,37 +26,23 @@ namespace Subtexture
 		{
 			base.OnEnable( window, opened);
 			
-			materialList = new List<MaterialBase>();
-			int i;		
-			for(i = 0; i < (int)MaterialType.kMax; i ++)
+			int i;
+
+			if(materialList == null)
 			{
-				switch((MaterialType)i)
-				{
-					case MaterialType.kRandomNoise:
-					materialList.Add(new MaterialRandomNoise());
-					break;
-					case MaterialType.kBlockNoise:
-					materialList.Add(new MaterialBlockNoise());
-					break;
-					case MaterialType.kValueNoise:
-					materialList.Add(new MaterialValueNoise());
-					break;
-					case MaterialType.kPerlinNoise:
-					materialList.Add(new MaterialPerlinNoise());
-					break;
-					case MaterialType.kFractalNoise:
-					materialList.Add(new MaterialFractalNoise());
-					break;
-					case MaterialType.kCellularNoise:
-					materialList.Add(new MaterialCellularNoise());
-					break;
-					case MaterialType.kVoronoiNoise:
-					materialList.Add(new MaterialVoronoiNoise());
-					break;
-					case MaterialType.kCirclePattern:
-					materialList.Add(new MaterialCirclePattern());
-					break;
-				}
+				materialList = new List<MaterialBase>();
+				materialList.Add(new MaterialRandomNoise());
+				materialList.Add(new MaterialBlockNoise());
+				materialList.Add(new MaterialValueNoise());
+				materialList.Add(new MaterialPerlinNoise());
+				materialList.Add(new MaterialFractalNoise());
+				materialList.Add(new MaterialCellularNoise());
+				materialList.Add(new MaterialVoronoiNoise());
+				materialList.Add(new MaterialCirclePattern());
+			}
+
+			for(i = 0; i < materialList.Count; i ++)
+			{
 				materialList[i].OnEnable( window);
 			}
 			
@@ -65,13 +50,14 @@ namespace Subtexture
 		}
 		public override void OnDisable()
 		{
-			int i;
-			for(i = 0; i < materialList.Count; i ++)
+			if(materialList != null)
 			{
-				materialList[i].OnDisable();
+				int i;
+				for(i = 0; i < materialList.Count; i ++)
+				{
+					materialList[i].OnDisable();
+				}
 			}
-			materialList.Clear();
-			materialList = null;
 
 			if( materialProperties != null)
 			{
@@ -150,8 +136,8 @@ namespace Subtexture
 		
 		[SerializeField]
 		public MaterialType materialType = MaterialType.kAssets;
-		[SerializeField]
-		List<MaterialBase> materialList;
+		[SerializeReference]
+		List<MaterialBase> materialList = null;
 		[SerializeField]
 		Material assetMaterial;
 		
