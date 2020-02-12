@@ -24,7 +24,7 @@ namespace Subtexture
 		public override void OnUpdateMaterial()
 		{
 			materialCache.SetVector( "_UVScale", new Vector4( uvScale.x, uvScale.y, 1, 1));
-			materialCache.SetVector( "_UVOffset", new Vector4( uvOffset.x, uvOffset.y, 1, 1));
+			materialCache.SetVector( "_UVOffset", new Vector4( uvOffset.x, uvOffset.y, 0, 0));
 		}
 		
 		[SerializeField]

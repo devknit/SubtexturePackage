@@ -1,6 +1,7 @@
 ﻿
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.Experimental.Rendering;
 
 namespace Subtexture
 {
@@ -49,6 +50,16 @@ namespace Subtexture
 			{
 				renderer.Cleanup();
 				renderer = null;
+			}
+			if( image != null)
+			{
+				RenderTexture.DestroyImmediate( image);
+				image = null;
+			}
+			if( material != null)
+			{
+				Material.DestroyImmediate( material);
+				material = null;
 			}
 			if( materialParam != null)
 			{
@@ -219,7 +230,40 @@ namespace Subtexture
 			cameraParam.Apply( renderer.camera);
 			renderer.DrawMesh( meshParam.RenderMesh, transformParam.LocalMatrix, materialParam.RenderMaterial, 0);
 			renderer.camera.Render();
-			image = renderer.EndPreview() as RenderTexture;
+			if( renderer.EndPreview() is RenderTexture renderTexture)
+			{
+				RenderTexture currentTexture = RenderTexture.active;
+				
+				/* postprocess param */
+				if( image != null)
+				{
+					if( image.width != renderTexture.width || image.height != renderTexture.height)
+					{
+						RenderTexture.DestroyImmediate( image);
+						image = null;
+					}
+				}
+				if( image == null)
+				{
+					GraphicsFormat format = renderer.camera.allowHDR ? GraphicsFormat.R16G16B16A16_SFloat : GraphicsFormat.R8G8B8A8_UNorm;
+					image = new RenderTexture( renderTexture.width, renderTexture.height, 16, format);
+					image.hideFlags = HideFlags.HideAndDontSave;
+				}
+				if( material == null)
+				{
+					string newShaderPath = AssetDatabase.GUIDToAssetPath( "2b154a50c25ca3a4c9c4512a996093b1");
+					
+					if( string.IsNullOrEmpty( newShaderPath) == false)
+					{
+						if( AssetDatabase.LoadAssetAtPath<Shader>( newShaderPath) is Shader shader)
+						{
+							material = new Material( shader);
+						}
+					}
+				}
+				Graphics.Blit( renderTexture, image, material);
+				RenderTexture.active = currentTexture;
+			}
 			refresh = false;
 		}
 		public void Record( string label)
@@ -248,10 +292,13 @@ namespace Subtexture
 		[System.NonSerialized]
 		PreviewRenderUtility renderer;
 		[System.NonSerialized]
-		RenderTexture image;
-		[System.NonSerialized]
 		bool refresh;
 		[System.NonSerialized]
 		Window handle;
+		
+		[System.NonSerialized]
+		RenderTexture image;
+		[System.NonSerialized]
+		Material material;
 	}
 }
