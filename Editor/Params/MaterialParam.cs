@@ -16,7 +16,7 @@ namespace Subtexture
 		kCellularNoise,
 		kVoronoiNoise,
 		kCirclePattern,
-	//	kProceduralRing,
+		kPolygonPattern,
 	}
 	[System.Serializable]
 	public sealed class MaterialParam : BaseParam
@@ -36,6 +36,7 @@ namespace Subtexture
 				materialList.Add( new MaterialCellularNoise());
 				materialList.Add( new MaterialVoronoiNoise());
 				materialList.Add( new MaterialCirclePattern());
+				materialList.Add( new MaterialPolygonPattern());
 			}
 			for( int i0 = 0; i0 < materialList.Count; ++i0)
 			{
