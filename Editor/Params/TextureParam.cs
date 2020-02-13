@@ -7,9 +7,12 @@ namespace Subtexture
 	[System.Serializable]
 	public sealed class TextureParam : BaseParam
 	{
+		public TextureParam() : base( true)
+		{
+		}
 		public override void OnGUI()
 		{
-			OnPUI( "Texture", () =>
+			OnPUI( "Texture", false, () =>
 			{
 				bool forceSquareValue = EditorGUILayout.Toggle( "Force square", forceSquare);
 				if( forceSquare.Equals( forceSquareValue) == false)

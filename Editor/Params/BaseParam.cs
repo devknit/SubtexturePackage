@@ -8,12 +8,16 @@ namespace Subtexture
 	[System.Serializable]
 	public class BaseParam
 	{
-		public virtual void OnEnable( Window window, bool opened)
+		public BaseParam( bool opened)
+		{
+			defaultOpened = opened;
+		}
+		public virtual void OnEnable( Window window)
 		{
 			handle = window;
 			if( enabled == null)
 			{
-				enabled = new AnimBool( opened);
+				enabled = new AnimBool( defaultOpened);
 				enabled.valueChanged.AddListener( window.Repaint);
 			}
 		}
@@ -27,16 +31,34 @@ namespace Subtexture
 		public virtual void OnGUI()
 		{
 		}
-		protected void OnPUI( string caption, System.Action callback)
+		public bool IsClose()
+		{
+			return closed;
+		}
+		protected void OnPUI( string caption, bool close, System.Action callback)
 		{
 			EditorGUILayout.BeginVertical( GUI.skin.box);
 			{
-				bool target = EditorGUILayout.Foldout( enabled.target, caption);
-				if( enabled.target.Equals( target) == false)
+				EditorGUILayout.BeginHorizontal();
 				{
-					Record( "Change Foldout");
-					enabled.target = target;
+					bool target = EditorGUILayout.Foldout( enabled.target, caption);
+					if( enabled.target.Equals( target) == false)
+					{
+						Record( "Change Foldout");
+						enabled.target = target;
+					}
+					if( close != false)
+					{
+						GUILayout.FlexibleSpace();
+						
+						if( GUILayout.Button( "×"))
+						{
+							closed = true;
+						}
+					}
 				}
+				EditorGUILayout.EndHorizontal();
+				
 				if( EditorGUILayout.BeginFadeGroup( enabled.faded) != false)
 				{
 					++EditorGUI.indentLevel;
@@ -49,7 +71,11 @@ namespace Subtexture
 		}
 		
 		[SerializeField]
+		bool defaultOpened;
+		[SerializeField]
 		AnimBool enabled;
+		[SerializeField]
+		bool closed;
 		[System.NonSerialized]
 		Window handle;
 	}

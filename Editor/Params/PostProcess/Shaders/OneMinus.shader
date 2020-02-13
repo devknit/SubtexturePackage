@@ -1,4 +1,4 @@
-﻿Shader "Hidden/Subtexture/PostProcess"
+﻿Shader "Hidden/Subtexture/PostProcess/OneMinus"
 {
 	Properties
 	{
@@ -55,7 +55,7 @@
 				float2 uvScale = UNITY_ACCESS_INSTANCED_PROP( Props, _UVScale);
 				float2 uvOffset = UNITY_ACCESS_INSTANCED_PROP( Props, _UVOffset);
 				float4 c = tex2D( _MainTex, i.uv0 * uvScale + uvOffset);
-				return fixed4( c.xyz, c.w);
+				return fixed4( 1.0 - c.xyz, c.w);
 			}
             ENDCG
         }

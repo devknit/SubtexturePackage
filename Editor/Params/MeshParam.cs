@@ -13,9 +13,12 @@ namespace Subtexture
 	[System.Serializable]
 	public sealed class MeshParam : BaseParam
 	{
-		public override void OnEnable( Window window, bool opened)
+		public MeshParam() : base( false)
 		{
-			base.OnEnable( window, opened);
+		}
+		public override void OnEnable( Window window)
+		{
+			base.OnEnable( window);
 			
 			if( dynamicMesh == null)
 			{
@@ -115,7 +118,7 @@ namespace Subtexture
 		}
 		public override void OnGUI()
 		{
-			OnPUI( "Mesh", () =>
+			OnPUI( "Mesh", false, () =>
 			{
 				var meshTypeValue = (MeshType)EditorGUILayout.EnumPopup( "Type", meshType);
 				if( meshType.Equals( meshTypeValue) == false)

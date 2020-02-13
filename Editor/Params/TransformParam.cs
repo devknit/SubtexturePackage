@@ -8,9 +8,12 @@ namespace Subtexture
 	[System.Serializable]
 	public sealed class TransformParam : BaseParam
 	{
-		public override void OnEnable( Window window, bool opened)
+		public TransformParam() : base( false)
 		{
-			base.OnEnable( window, opened);
+		}
+		public override void OnEnable( Window window)
+		{
+			base.OnEnable( window);
 		}
 		public override void OnDisable()
 		{
@@ -18,7 +21,7 @@ namespace Subtexture
 		}
 		public override void OnGUI()
 		{
-			OnPUI( "Transform", () =>
+			OnPUI( "Transform", false, () =>
 			{
 				Vector3 localPositionValue = EditorGUILayout.Vector3Field( "Position", localPosition);
 				if( localPosition.Equals( localPositionValue) == false)

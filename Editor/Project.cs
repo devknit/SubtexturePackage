@@ -1,10 +1,19 @@
 ﻿
 using UnityEngine;
 using UnityEditor;
+using System.Collections.Generic;
 using UnityEngine.Experimental.Rendering;
 
 namespace Subtexture
 {
+	public enum PreParamType
+	{
+		kTexture,
+		kCamera,
+		kTransform,
+		kMesh,
+		kMaterial
+	}
 	[System.Serializable]
 	public class Project
 	{
@@ -12,35 +21,29 @@ namespace Subtexture
 		{
 			handle = window;
 			
-			if( textureParam == null)
+			if( preParams == null)
 			{
-				textureParam = new TextureParam();
+				preParams = new BaseParam[]
+				{
+					new TextureParam(),
+					new CameraParam(),
+					new TransformParam(),
+					new MeshParam(),
+					new MaterialParam()
+				};
 			}
-			textureParam.OnEnable( window, true);
-			
-			if( cameraParam == null)
+			for( int i0 = 0; i0 < preParams.Length; ++i0)
 			{
-				cameraParam = new CameraParam();
+				preParams[ i0].OnEnable( window);
 			}
-			cameraParam.OnEnable( window, false);
-			
-			if( transformParam == null)
+			if( postProcessParams == null)
 			{
-				transformParam = new TransformParam();
+				postProcessParams = new List<PostProcessParam>();
 			}
-			transformParam.OnEnable( window, true);
-			
-			if( meshParam == null)
+			foreach( PostProcessParam param in postProcessParams)
 			{
-				meshParam = new MeshParam();
+				param.OnEnable( window);
 			}
-			meshParam.OnEnable( window, false);
-			
-			if( materialParam == null)
-			{
-				materialParam = new MaterialParam();
-			}
-			materialParam.OnEnable( window, true);
 			
 			refresh = true;
 		}
@@ -51,35 +54,19 @@ namespace Subtexture
 				renderer.Cleanup();
 				renderer = null;
 			}
-			if( image != null)
+			if( postProcessParams != null)
 			{
-				RenderTexture.DestroyImmediate( image);
-				image = null;
+				foreach( PostProcessParam param in postProcessParams)
+				{
+					param.OnDisable();
+				}
 			}
-			if( material != null)
+			if( preParams != null)
 			{
-				Material.DestroyImmediate( material);
-				material = null;
-			}
-			if( materialParam != null)
-			{
-				materialParam.OnDisable();
-			}
-			if( meshParam != null)
-			{
-				meshParam.OnDisable();
-			}
-			if( transformParam != null)
-			{
-				transformParam.OnDisable();
-			}
-			if( cameraParam != null)
-			{
-				cameraParam.OnDisable();
-			}
-			if( textureParam != null)
-			{
-				textureParam.OnDisable();
+				for( int i0 = 0; i0 < preParams.Length; ++i0)
+				{
+					preParams[ i0].OnDisable();
+				}
 			}
 		}
 		public void Update()
@@ -92,7 +79,7 @@ namespace Subtexture
 		}
 		public void OnToolbarGUI()
 		{
-			EditorGUI.BeginDisabledGroup( image == null);
+			EditorGUI.BeginDisabledGroup( previewTexture == null);
 			{
 				if( GUILayout.Button( "Export", EditorStyles.toolbarButton, GUILayout.Width( 70)) != false)
 				{
@@ -117,11 +104,11 @@ namespace Subtexture
 				}
 				EditorGUILayout.EndHorizontal();
 			
-				if( image != null && image.IsCreated() != false)
+				if( previewTexture != null && previewTexture.IsCreated() != false)
 				{
 					Rect previewRect = EditorGUILayout.GetControlRect( GUILayout.ExpandWidth( true), GUILayout.ExpandHeight( true));
 					float previewAspect = previewRect.width / previewRect.height;
-					float imageAspect = (float)image.width / (float)image.height;
+					float textureAspect = (float)previewTexture.width / (float)previewTexture.height;
 					float offset, scale;
 					
 					if( previewAspect < 1.0f)
@@ -136,25 +123,25 @@ namespace Subtexture
 						previewRect.xMin += offset;
 						previewRect.xMax -= offset;
 					}
-					if( image.width < image.height)
+					if( previewTexture.width < previewTexture.height)
 					{
 						scale = Mathf.Min( 
-							Mathf.Abs( previewRect.width / image.width),
-							Mathf.Abs( previewRect.height / image.height));
-						offset = ((float)image.height - (float)image.width) * scale * 0.5f;
+							Mathf.Abs( previewRect.width / previewTexture.width),
+							Mathf.Abs( previewRect.height / previewTexture.height));
+						offset = ((float)previewTexture.height - (float)previewTexture.width) * scale * 0.5f;
 						previewRect.xMin += offset;
 						previewRect.xMax -= offset;
 					}
-					else if( imageAspect > 1.0f)
+					else if( textureAspect > 1.0f)
 					{
 						scale = Mathf.Min( 
-							Mathf.Abs( previewRect.width / image.width),
-							Mathf.Abs( previewRect.height / image.height));
-						offset = ((float)image.width - (float)image.height) * scale * 0.5f;
+							Mathf.Abs( previewRect.width / previewTexture.width),
+							Mathf.Abs( previewRect.height / previewTexture.height));
+						offset = ((float)previewTexture.width - (float)previewTexture.height) * scale * 0.5f;
 						previewRect.yMin += offset;
 						previewRect.yMax -= offset;
 					}
-					image.filterMode = previewFilterMode;
+					previewTexture.filterMode = previewFilterMode;
 					
 					var checker = EditorGUIUtility.Load( 
 						EditorGUIUtility.isProSkin ? "textureCheckerDark" : "textureChecker");
@@ -163,7 +150,7 @@ namespace Subtexture
 						var texCoords = new Rect( 0, 0, previewRect.width * 0.02f, previewRect.height * 0.02f);
 						GUI.DrawTextureWithTexCoords( previewRect, textureChecker, texCoords, false);
 					}
-					GUI.DrawTexture( previewRect, image);
+					GUI.DrawTexture( previewRect, previewTexture);
 				}
 			}
 			GUILayout.EndArea();
@@ -180,17 +167,53 @@ namespace Subtexture
 						{
 							EditorGUI.BeginChangeCheck();
 							
-							textureParam.OnGUI();
-							cameraParam.OnGUI();
-							transformParam.OnGUI();
-							meshParam.OnGUI();
-							materialParam.OnGUI();
-					
+							for( int i0 = 0; i0 < preParams.Length; ++i0)
+							{
+								preParams[ i0].OnGUI();
+							}
+							List<PostProcessParam> removeParams = null;
+							
+							foreach( PostProcessParam param in postProcessParams)
+							{
+								param.OnGUI();
+								
+								if( param.IsClose() != false)
+								{
+									if( removeParams == null)
+									{
+										removeParams = new List<PostProcessParam>();
+									}
+									removeParams.Add( param);
+								}
+							}
+							if( removeParams != null)
+							{
+								foreach( PostProcessParam param in removeParams)
+								{
+									postProcessParams.Remove( param);
+								}
+							}
+							EditorGUILayout.BeginHorizontal();
+							{
+								GUILayout.FlexibleSpace();
+								{
+									if( GUILayout.Button( "Add Post Processing"))
+									{
+										var postProcessParam = new PostProcessParam();
+										postProcessParam.OnEnable( handle);
+										postProcessParams.Add( postProcessParam);
+										handle.Repaint();
+									}
+								}
+								GUILayout.FlexibleSpace();
+							}
+							EditorGUILayout.EndHorizontal();
+							
 							if( EditorGUI.EndChangeCheck() != false)
 							{
 								refresh = true;
 							}
-							if( refresh != false && meshParam.RenderMesh != null && materialParam.RenderMaterial != null)
+							if( refresh != false)
 							{
 								Refresh();
 							}
@@ -208,10 +231,10 @@ namespace Subtexture
 			string path = EditorUtility.SaveFilePanel( "Subtexture", Application.dataPath, "", "png");
 			if( string.IsNullOrEmpty( path) == false)
 			{
-				var texture = new Texture2D( image.width, image.height, TextureFormat.RGBA32, false, false);
+				var texture = new Texture2D( previewTexture.width, previewTexture.height, TextureFormat.RGBA32, false, false);
 				var current = RenderTexture.active;
-				RenderTexture.active = image;
-				texture.ReadPixels( new Rect( 0, 0, image.width, image.height), 0, 0);
+				RenderTexture.active = previewTexture;
+				texture.ReadPixels( new Rect( 0, 0, previewTexture.width, previewTexture.height), 0, 0);
 				texture.Apply();
 				RenderTexture.active = current;
 				byte[] bytes = texture.EncodeToPNG();
@@ -222,47 +245,49 @@ namespace Subtexture
 		}
 		void Refresh()
 		{
-			if( renderer == null)
+			if( preParams[ (int)PreParamType.kMesh] is MeshParam meshParam)
 			{
-				renderer = new PreviewRenderUtility();
-			}
-			renderer.BeginPreview( textureParam.RenderRect, GUIStyle.none);
-			cameraParam.Apply( renderer.camera);
-			renderer.DrawMesh( meshParam.RenderMesh, transformParam.LocalMatrix, materialParam.RenderMaterial, 0);
-			renderer.camera.Render();
-			if( renderer.EndPreview() is RenderTexture renderTexture)
-			{
-				RenderTexture currentTexture = RenderTexture.active;
-				
-				/* postprocess param */
-				if( image != null)
+				if( preParams[ (int)PreParamType.kMaterial] is MaterialParam materialParam)
 				{
-					if( image.width != renderTexture.width || image.height != renderTexture.height)
-					{
-						RenderTexture.DestroyImmediate( image);
-						image = null;
-					}
-				}
-				if( image == null)
-				{
-					GraphicsFormat format = renderer.camera.allowHDR ? GraphicsFormat.R16G16B16A16_SFloat : GraphicsFormat.R8G8B8A8_UNorm;
-					image = new RenderTexture( renderTexture.width, renderTexture.height, 16, format);
-					image.hideFlags = HideFlags.HideAndDontSave;
-				}
-				if( material == null)
-				{
-					string newShaderPath = AssetDatabase.GUIDToAssetPath( "2b154a50c25ca3a4c9c4512a996093b1");
+					Material renderMaterial = materialParam.RenderMaterial;
+					Mesh renderMesh = meshParam.RenderMesh;
 					
-					if( string.IsNullOrEmpty( newShaderPath) == false)
+					if( renderMaterial != null && renderMesh != null)
 					{
-						if( AssetDatabase.LoadAssetAtPath<Shader>( newShaderPath) is Shader shader)
+						if( preParams[ (int)PreParamType.kTexture] is TextureParam textureParam)
 						{
-							material = new Material( shader);
+							if( preParams[ (int)PreParamType.kCamera] is CameraParam cameraParam)
+							{
+								if( preParams[ (int)PreParamType.kTransform] is TransformParam transformParam)
+								{
+									Rect renderRect = textureParam.RenderRect;
+									Matrix4x4 localMatrix = transformParam.LocalMatrix;
+									
+									if( renderer == null)
+									{
+										renderer = new PreviewRenderUtility();
+									}
+									renderer.BeginPreview( renderRect, GUIStyle.none);
+									cameraParam.Apply( renderer.camera);
+									renderer.DrawMesh( renderMesh, localMatrix, renderMaterial, 0);
+									renderer.camera.Render();
+									if( renderer.EndPreview() is RenderTexture renderTexture)
+									{
+										RenderTexture currentTexture = RenderTexture.active;
+										
+										previewTexture = renderTexture;
+										
+										foreach( PostProcessParam param in postProcessParams)
+										{
+											previewTexture = param.Blit( previewTexture);
+										}
+										RenderTexture.active = currentTexture;
+									}
+								}
+							}
 						}
 					}
 				}
-				Graphics.Blit( renderTexture, image, material);
-				RenderTexture.active = currentTexture;
 			}
 			refresh = false;
 		}
@@ -278,16 +303,11 @@ namespace Subtexture
 		
 		[SerializeField]
 		Vector2 scrollPosition = Vector2.zero;
+		
 		[SerializeField]
-		TextureParam textureParam = default;
+		BaseParam[] preParams = default;
 		[SerializeField]
-		CameraParam cameraParam = default;
-		[SerializeField]
-		TransformParam transformParam = default;
-		[SerializeField]
-		MeshParam meshParam = default;
-		[SerializeField]
-		MaterialParam materialParam = default;
+		List<PostProcessParam> postProcessParams = default;
 		
 		[System.NonSerialized]
 		PreviewRenderUtility renderer;
@@ -297,8 +317,6 @@ namespace Subtexture
 		Window handle;
 		
 		[System.NonSerialized]
-		RenderTexture image;
-		[System.NonSerialized]
-		Material material;
+		RenderTexture previewTexture;
 	}
 }

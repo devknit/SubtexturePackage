@@ -21,9 +21,12 @@ namespace Subtexture
 	[System.Serializable]
 	public sealed class MaterialParam : BaseParam
 	{
-		public override void OnEnable( Window window, bool opened)
+		public MaterialParam() : base( true)
 		{
-			base.OnEnable( window, opened);
+		}
+		public override void OnEnable( Window window)
+		{
+			base.OnEnable( window);
 			
 			if( materialList == null)
 			{
@@ -67,7 +70,7 @@ namespace Subtexture
 		}
 		public override void OnGUI()
 		{
-			OnPUI( "Material", () =>
+			OnPUI( "Material", false, () =>
 			{
 				var type = (MaterialType)EditorGUILayout.EnumPopup( "Type", materialType);
 				if( materialType.Equals( type) == false)
@@ -130,7 +133,7 @@ namespace Subtexture
 		}
 		
 		[SerializeField]
-		public MaterialType materialType = MaterialType.kAssets;
+		MaterialType materialType = MaterialType.kAssets;
 		[SerializeReference]
 		List<MaterialBase> materialList;
 		[SerializeField]

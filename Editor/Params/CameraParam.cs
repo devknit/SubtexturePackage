@@ -7,29 +7,12 @@ namespace Subtexture
 	[System.Serializable]
 	public sealed class CameraParam : BaseParam
 	{
-		public void Apply( Camera camera)
+		public CameraParam() : base( false)
 		{
-			camera.transform.position = localPosition;
-			camera.transform.rotation = Quaternion.Euler( localRotation);
-			
-			camera.clearFlags = CameraClearFlags.SolidColor;
-			camera.backgroundColor = backgroundColor;
-			camera.orthographic = orthographic;
-			if( orthographic == false)
-			{
-				camera.fieldOfView = fieldOfView;
-			}
-			else
-			{
-				camera.orthographicSize = orthographicSize;
-			}
-			camera.nearClipPlane = nearClipPlane;
-			camera.farClipPlane = farClipPlane;
-			camera.rect = rect;
 		}
 		public override void OnGUI()
 		{
-			OnPUI( "Camera", () =>
+			OnPUI( "Camera", false, () =>
 			{
 				Vector3 localPositionValue = EditorGUILayout.Vector3Field( "Position", localPosition);
 				if( localPosition.Equals( localPositionValue) == false)
@@ -112,6 +95,26 @@ namespace Subtexture
 					rect = rectValue;
 				}
 			});
+		}
+		public void Apply( Camera camera)
+		{
+			camera.transform.position = localPosition;
+			camera.transform.rotation = Quaternion.Euler( localRotation);
+			
+			camera.clearFlags = CameraClearFlags.SolidColor;
+			camera.backgroundColor = backgroundColor;
+			camera.orthographic = orthographic;
+			if( orthographic == false)
+			{
+				camera.fieldOfView = fieldOfView;
+			}
+			else
+			{
+				camera.orthographicSize = orthographicSize;
+			}
+			camera.nearClipPlane = nearClipPlane;
+			camera.farClipPlane = farClipPlane;
+			camera.rect = rect;
 		}
 		
 		static readonly string[] kProjections = new string[]
