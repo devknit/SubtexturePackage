@@ -1,8 +1,9 @@
 ﻿
 using UnityEngine;
 using UnityEditor;
-using System.Collections.Generic;
+using UnityEditorInternal;
 using UnityEngine.Experimental.Rendering;
+using System.Collections.Generic;
 
 namespace Subtexture
 {
@@ -44,7 +45,21 @@ namespace Subtexture
 			{
 				param.OnEnable( window);
 			}
-			
+			if( postProcessList == null)
+			{
+				postProcessList = new ReorderableList(
+					postProcessParams,
+					typeof( PostProcessParam),
+					true, true, true, true);
+				postProcessList.onAddCallback += OnPostProcessAdd;
+				postProcessList.onRemoveCallback += OnPostProcessRemove;
+				postProcessList.drawElementCallback += OnPostProcessGUI;
+				postProcessList.elementHeightCallback += OnPostProcessHeight;
+				postProcessList.drawHeaderCallback = (rect) =>
+		        {
+		            EditorGUI.LabelField( rect, "Post Processing");
+		        };
+			}
 			refresh = true;
 		}
 		public void OnDisable()
@@ -53,6 +68,10 @@ namespace Subtexture
 			{
 				renderer.Cleanup();
 				renderer = null;
+			}
+			if( postProcessList != null)
+			{
+				postProcessList = null;
 			}
 			if( postProcessParams != null)
 			{
@@ -171,43 +190,7 @@ namespace Subtexture
 							{
 								preParams[ i0].OnGUI();
 							}
-							List<PostProcessParam> removeParams = null;
-							
-							foreach( PostProcessParam param in postProcessParams)
-							{
-								param.OnGUI();
-								
-								if( param.IsClose() != false)
-								{
-									if( removeParams == null)
-									{
-										removeParams = new List<PostProcessParam>();
-									}
-									removeParams.Add( param);
-								}
-							}
-							if( removeParams != null)
-							{
-								foreach( PostProcessParam param in removeParams)
-								{
-									postProcessParams.Remove( param);
-								}
-							}
-							EditorGUILayout.BeginHorizontal();
-							{
-								GUILayout.FlexibleSpace();
-								{
-									if( GUILayout.Button( "Add Post Processing"))
-									{
-										var postProcessParam = new PostProcessParam();
-										postProcessParam.OnEnable( handle);
-										postProcessParams.Add( postProcessParam);
-										handle.Repaint();
-									}
-								}
-								GUILayout.FlexibleSpace();
-							}
-							EditorGUILayout.EndHorizontal();
+							postProcessList.DoLayoutList();
 							
 							if( EditorGUI.EndChangeCheck() != false)
 							{
@@ -225,6 +208,26 @@ namespace Subtexture
 				EditorGUILayout.EndHorizontal();
 			}
 			GUILayout.EndArea();
+		}
+		void OnPostProcessGUI( Rect rect, int index, bool isActive, bool isFocused)
+		{
+			postProcessParams[ index].OnElementGUI( rect);
+		}
+		float OnPostProcessHeight( int index)
+		{
+			return postProcessParams[ index].GetElementHeight();
+		}
+		void OnPostProcessAdd( ReorderableList list)
+		{
+			var postProcessParam = new PostProcessParam();
+			postProcessParam.OnEnable( handle);
+			postProcessParams.Add( postProcessParam);
+		}
+		void OnPostProcessRemove( ReorderableList list)
+		{
+			var postProcessParam = postProcessParams[ list.index];
+			postProcessParam.OnDisable();
+			postProcessParams.Remove( postProcessParam);
 		}
 		void Export()
 		{
@@ -303,20 +306,20 @@ namespace Subtexture
 		
 		[SerializeField]
 		Vector2 scrollPosition = Vector2.zero;
-		
-		[SerializeField]
+		[SerializeReference]
 		BaseParam[] preParams = default;
 		[SerializeField]
 		List<PostProcessParam> postProcessParams = default;
 		
 		[System.NonSerialized]
-		PreviewRenderUtility renderer;
+		Window handle;
 		[System.NonSerialized]
 		bool refresh;
 		[System.NonSerialized]
-		Window handle;
-		
+		PreviewRenderUtility renderer;
 		[System.NonSerialized]
 		RenderTexture previewTexture;
+		[System.NonSerialized]
+		ReorderableList postProcessList;
 	}
 }

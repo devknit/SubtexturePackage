@@ -35,18 +35,20 @@ namespace Subtexture
 			}
 			base.OnDisable();
 		}
-		public override void OnGUI()
+		public void OnElementGUI( Rect rect)
 		{
-			OnPUI( "PostProcess", true, () =>
+			Rect typeRect = new Rect( rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight);
+			var postProcessTypeValue = (PostProcessType)EditorGUI.EnumPopup( typeRect, "Type", postProcessType);
+			if( postProcessType.Equals( postProcessTypeValue) == false)
 			{
-				var postProcessTypeValue = (PostProcessType)EditorGUILayout.EnumPopup( "Type", postProcessType);
-				if( postProcessType.Equals( postProcessTypeValue) == false)
-				{
-					Record( "Change PostProcess Type");
-					postProcessType = postProcessTypeValue;
-					ChangeBlitMaterial( postProcessType);
-				}
-			});
+				Record( "Change PostProcess Type");
+				postProcessType = postProcessTypeValue;
+				ChangeBlitMaterial( postProcessType);
+			}
+		}
+		public float GetElementHeight()
+		{
+			return EditorGUIUtility.singleLineHeight;
 		}
 		public RenderTexture Blit( RenderTexture source)
 		{
