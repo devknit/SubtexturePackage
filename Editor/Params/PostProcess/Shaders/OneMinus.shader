@@ -24,7 +24,6 @@
             UNITY_INSTANCING_BUFFER_START( Props)
 				UNITY_DEFINE_INSTANCED_PROP( float2, _UVScale)
 				UNITY_DEFINE_INSTANCED_PROP( float2, _UVOffset)
-				UNITY_DEFINE_INSTANCED_PROP( float, _TimePosition)
             UNITY_INSTANCING_BUFFER_END( Props)
 
             struct VertexInput

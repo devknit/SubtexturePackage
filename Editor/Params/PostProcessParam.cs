@@ -19,6 +19,20 @@ namespace Subtexture
 		public override void OnEnable( Window window)
 		{
 			base.OnEnable( window);
+			
+			if( processes == null)
+			{
+				processes = new PostProcessBase[]
+				{
+					new NoneProcess(),
+					new OneMinusProcess(),
+					new SwizzleProcess()
+				};
+			}
+			for( int i0 = 0; i0 < processes.Length; ++i0)
+			{
+				processes[ i0]?.OnEnable( window);
+			}
 			ChangeBlitMaterial( postProcessType);
 		}
 		public override void OnDisable()
@@ -28,94 +42,91 @@ namespace Subtexture
 				RenderTexture.DestroyImmediate( renderTexture);
 				renderTexture = null;
 			}
-			if( blitMaterial != null)
+			if( processProperties != null)
 			{
-				Material.DestroyImmediate( blitMaterial);
-				blitMaterial = null;
+				processProperties.Dispose();
+				processProperties = null;
 			}
 			base.OnDisable();
 		}
 		public void OnElementGUI( Rect rect)
 		{
 			Rect typeRect = new Rect( rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight);
-			var postProcessTypeValue = (PostProcessType)EditorGUI.EnumPopup( typeRect, "Type", postProcessType);
+			var postProcessTypeValue = (PostProcessType)EditorGUI.EnumPopup( typeRect, postProcessType);
 			if( postProcessType.Equals( postProcessTypeValue) == false)
 			{
 				Record( "Change PostProcess Type");
+				ChangeBlitMaterial( postProcessTypeValue);
 				postProcessType = postProcessTypeValue;
-				ChangeBlitMaterial( postProcessType);
+			}
+			if( processProperties != null)
+			{
+				if( processProperties.OnGUI( new Rect( 
+					rect.x, rect.y + typeRect.height, 
+					rect.width, rect.height - typeRect.height)) != false)
+				{
+					processProperties.OnUpdateMaterial();
+				}
 			}
 		}
 		public float GetElementHeight()
 		{
-			return EditorGUIUtility.singleLineHeight;
+			return EditorGUIUtility.singleLineHeight + (processProperties?.GetHeight() ?? 0);
 		}
 		public RenderTexture Blit( RenderTexture source)
 		{
-			if( renderTexture != null)
+			if( blitMaterial != null)
 			{
-				if( renderTexture.width != source.width || renderTexture.height != source.height)
+				if( renderTexture != null)
 				{
-					RenderTexture.DestroyImmediate( renderTexture);
-					renderTexture = null;
+					if( renderTexture.width != source.width || renderTexture.height != source.height)
+					{
+						RenderTexture.DestroyImmediate( renderTexture);
+						renderTexture = null;
+					}
 				}
+				if( renderTexture == null)
+				{
+					renderTexture = new RenderTexture( source.width, source.height, source.depth, source.format);
+					renderTexture.hideFlags = HideFlags.HideAndDontSave;
+				}
+				Graphics.Blit( source, renderTexture, blitMaterial);
+				
+				return renderTexture;
 			}
-			if( renderTexture == null)
-			{
-				renderTexture = new RenderTexture( source.width, source.height, source.depth, source.format);
-				renderTexture.hideFlags = HideFlags.HideAndDontSave;
-			}
-			Graphics.Blit( source, renderTexture, blitMaterial);
-			
-			return renderTexture;
+			return source;
 		}
 		void ChangeBlitMaterial( PostProcessType type)
 		{
 			if( blitMaterial != null)
 			{
-				Material.DestroyImmediate( blitMaterial);
 				blitMaterial = null;
 			}
-			string newShaderGuid = string.Empty;
-			
-			switch( type)
+			if( processProperties != null)
 			{
-				case PostProcessType.kNone:
-				{
-					newShaderGuid = "2b154a50c25ca3a4c9c4512a996093b1";
-					break;
-				}
-				case PostProcessType.kOneMinus:
-				{
-					newShaderGuid = "442e234fb65d8cf498e37fa4a7d4947c";
-					break;
-				}
-				case PostProcessType.kSwizzle:
-				{
-					newShaderGuid = "cfcb423e393b75a469ad749f8b662ba5";
-					break;
-				}
+				processProperties.Dispose();
+				processProperties = null;
 			}
-			if( string.IsNullOrEmpty( newShaderGuid) == false)
+			processProperties = processes[ (int)type];
+			
+			if( processProperties != null)
 			{
-				string newShaderPath = AssetDatabase.GUIDToAssetPath( newShaderGuid);
-				
-				if( string.IsNullOrEmpty( newShaderPath) == false)
-				{
-					if( AssetDatabase.LoadAssetAtPath<Shader>( newShaderPath) is Shader shader)
-					{
-						blitMaterial = new Material( shader);
-					}
-				}
+				blitMaterial = processProperties.Create();
+				processProperties.OnUpdateMaterial();
 			}
 		}
 		
 		[SerializeField]
 		PostProcessType postProcessType = PostProcessType.kNone;
+		[SerializeReference]
+		PostProcessBase[] processes;
 		
 		[System.NonSerialized]
 		RenderTexture renderTexture;
 		[System.NonSerialized]
+		PostProcessBase processProperties;
+		[System.NonSerialized]
 		Material blitMaterial;
+		
 	}
 }

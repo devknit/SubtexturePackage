@@ -7,7 +7,7 @@ namespace Subtexture
 {
 	public enum MaterialType
 	{
-		kAssets = -1,
+		kAssets,
 		kRandomNoise,
 		kBlockNoise,
 		kValueNoise,
@@ -28,43 +28,45 @@ namespace Subtexture
 		{
 			base.OnEnable( window);
 			
-			if( materialList == null)
+			if( materials == null)
 			{
-				materialList = new List<MaterialBase>();
-				materialList.Add( new MaterialRandomNoise());
-				materialList.Add( new MaterialBlockNoise());
-				materialList.Add( new MaterialValueNoise());
-				materialList.Add( new MaterialPerlinNoise());
-				materialList.Add( new MaterialFractalNoise());
-				materialList.Add( new MaterialCellularNoise());
-				materialList.Add( new MaterialVoronoiNoise());
-				materialList.Add( new MaterialCirclePattern());
-				materialList.Add( new MaterialPolygonPattern());
+				materials = new MaterialBase[]
+				{
+					null,
+					new MaterialRandomNoise(),
+					new MaterialBlockNoise(),
+					new MaterialValueNoise(),
+					new MaterialPerlinNoise(),
+					new MaterialFractalNoise(),
+					new MaterialCellularNoise(),
+					new MaterialVoronoiNoise(),
+					new MaterialCirclePattern(),
+					new MaterialPolygonPattern()
+				};
 			}
-			for( int i0 = 0; i0 < materialList.Count; ++i0)
+			for( int i0 = 0; i0 < materials.Length; ++i0)
 			{
-				materialList[ i0].OnEnable( window);
+				materials[ i0]?.OnEnable( window);
 			}
 			ChangeDynamicMaterial( materialType);
 		}
 		public override void OnDisable()
 		{
-			if( materialList != null)
+			if( dynamicMaterial != null)
 			{
-				for( int i0 = 0; i0 < materialList.Count; ++i0)
-				{
-					materialList[ i0].OnDisable();
-				}
+				dynamicMaterial = null;
 			}
 			if( materialProperties != null)
 			{
 				materialProperties.Dispose();
 				materialProperties = null;
 			}
-			if( dynamicMaterial != null)
+			if( materials != null)
 			{
-				Material.DestroyImmediate( dynamicMaterial);
-				dynamicMaterial = null;
+				for( int i0 = 0; i0 < materials.Length; ++i0)
+				{
+					materials[ i0]?.OnDisable();
+				}
 			}
 			base.OnDisable();
 		}
@@ -109,7 +111,6 @@ namespace Subtexture
 		{
 			if( dynamicMaterial != null)
 			{
-				Material.DestroyImmediate( dynamicMaterial);
 				dynamicMaterial = null;
 			}
 			if( materialProperties != null)
@@ -117,10 +118,8 @@ namespace Subtexture
 				materialProperties.Dispose();
 				materialProperties = null;
 			}
-			if( type != MaterialType.kAssets)
-			{
-				materialProperties = materialList[ (int)type];
-			}
+			materialProperties = materials[ (int)type];
+			
 			if( materialProperties != null)
 			{
 				dynamicMaterial = materialProperties.Create();
@@ -135,7 +134,7 @@ namespace Subtexture
 		[SerializeField]
 		MaterialType materialType = MaterialType.kAssets;
 		[SerializeReference]
-		List<MaterialBase> materialList;
+		MaterialBase[] materials;
 		[SerializeField]
 		Material assetMaterial;
 		
