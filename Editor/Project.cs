@@ -61,6 +61,7 @@ namespace Subtexture
 		        };
 			}
 			refresh = true;
+			enabled = true;
 		}
 		public void OnDisable()
 		{
@@ -87,9 +88,14 @@ namespace Subtexture
 					preParams[ i0].OnDisable();
 				}
 			}
+			enabled = false;
 		}
 		public void Update()
 		{
+			if( enabled == false)
+			{
+				return;
+			}
 			if( previewForceUpdate != false)
 			{
 				refresh = true;
@@ -98,6 +104,10 @@ namespace Subtexture
 		}
 		public void OnToolbarGUI()
 		{
+			if( enabled == false)
+			{
+				return;
+			}
 			EditorGUI.BeginDisabledGroup( previewTexture == null);
 			{
 				if( GUILayout.Button( "Export", EditorStyles.toolbarButton, GUILayout.Width( 70)) != false)
@@ -109,6 +119,10 @@ namespace Subtexture
 		}
 		public void OnPreviewGUI( Rect rect)
 		{
+			if( enabled == false)
+			{
+				return;
+			}
 			GUILayout.BeginArea( rect);
 			{
 				EditorGUILayout.BeginHorizontal( EditorStyles.toolbar, GUILayout.ExpandWidth( true));
@@ -122,10 +136,12 @@ namespace Subtexture
 						previewFilterMode, EditorStyles.toolbarPopup, GUILayout.Width( 70));
 				}
 				EditorGUILayout.EndHorizontal();
-			
+				
 				if( previewTexture != null && previewTexture.IsCreated() != false)
 				{
-					Rect previewRect = EditorGUILayout.GetControlRect( GUILayout.ExpandWidth( true), GUILayout.ExpandHeight( true));
+					Rect previewRect = new Rect( 
+						0, EditorStyles.toolbar.fixedHeight, rect.width, 
+						rect.height - EditorStyles.toolbar.fixedHeight);
 					float previewAspect = previewRect.width / previewRect.height;
 					float textureAspect = (float)previewTexture.width / (float)previewTexture.height;
 					float offset, scale;
@@ -176,6 +192,10 @@ namespace Subtexture
 		}
 		public void OnInspectorGUI( Rect rect)
 		{
+			if( enabled == false)
+			{
+				return;
+			}
 			GUILayout.BeginArea( rect);
 			{
 				EditorGUILayout.BeginHorizontal();
@@ -311,6 +331,8 @@ namespace Subtexture
 		[SerializeField]
 		List<PostProcessParam> postProcessParams = default;
 		
+		[System.NonSerialized]
+		bool enabled;
 		[System.NonSerialized]
 		Window handle;
 		[System.NonSerialized]

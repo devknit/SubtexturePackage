@@ -21,10 +21,12 @@ namespace Subtexture
 			}
 			project.OnEnable( this);
 			
+			EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
 			Undo.undoRedoPerformed += OnUndoRedo;
 		}
 		protected override void OnDisable()
 		{
+			EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
 			Undo.undoRedoPerformed -= OnUndoRedo;
 			
 			if( project != null)
@@ -32,6 +34,24 @@ namespace Subtexture
 				project.OnDisable();
 			}
 			base.OnDisable();
+		}
+		void OnPlayModeStateChanged( PlayModeStateChange state)
+		{
+			switch( state)
+			{
+				case PlayModeStateChange.EnteredEditMode:
+				case PlayModeStateChange.EnteredPlayMode:
+				{
+					project.OnEnable( this);
+					break;
+				}
+				case PlayModeStateChange.ExitingEditMode:
+				case PlayModeStateChange.ExitingPlayMode:
+				{
+					project.OnDisable();
+					break;
+				}
+			}
 		}
 		void OnUndoRedo()
 		{

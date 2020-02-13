@@ -7,7 +7,8 @@ namespace Subtexture
 {
 	public enum MaterialType
 	{
-		kAssets,
+		kMaterialAssets,
+		kTextureAsset,
 		kRandomNoise,
 		kBlockNoise,
 		kValueNoise,
@@ -33,6 +34,7 @@ namespace Subtexture
 				materials = new MaterialBase[]
 				{
 					null,
+					new MaterialTexture(),
 					new MaterialRandomNoise(),
 					new MaterialBlockNoise(),
 					new MaterialValueNoise(),
@@ -83,7 +85,7 @@ namespace Subtexture
 				}
 				switch( materialType)
 				{
-					case MaterialType.kAssets:
+					case MaterialType.kMaterialAssets:
 					{
 						var assetMaterialValue = EditorGUILayout.ObjectField( "Material", assetMaterial, typeof( Material), false) as Material;
 						if( assetMaterial != assetMaterialValue)
@@ -128,11 +130,11 @@ namespace Subtexture
 		}
 		public Material RenderMaterial
 		{
-			get{ return (materialType == MaterialType.kAssets)? assetMaterial : dynamicMaterial; }
+			get{ return (materialType == MaterialType.kMaterialAssets)? assetMaterial : dynamicMaterial; }
 		}
 		
 		[SerializeField]
-		MaterialType materialType = MaterialType.kAssets;
+		MaterialType materialType = MaterialType.kMaterialAssets;
 		[SerializeReference]
 		MaterialBase[] materials;
 		[SerializeField]

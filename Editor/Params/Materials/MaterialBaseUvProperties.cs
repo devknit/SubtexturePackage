@@ -28,12 +28,12 @@ namespace Subtexture
 		}
 		
 		[SerializeField]
-		bool uvScaleAxisSync = true;
+		protected bool uvScaleAxisSync = true;
 		[SerializeField]
-		Vector2 uvScale = new Vector2( 8, 8);
+		protected Vector2 uvScale = new Vector2( 8, 8);
 		[SerializeField]
-		bool uvOffsetAxisSync = false;
+		protected bool uvOffsetAxisSync = false;
 		[SerializeField]
-		Vector2 uvOffset = Vector2.zero;
+		protected Vector2 uvOffset = Vector2.zero;
 	}
 }
