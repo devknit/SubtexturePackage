@@ -15,6 +15,16 @@ namespace Subtexture
 		kMesh,
 		kMaterial
 	}
+	public enum ExportFormat
+	{
+		kPng,
+		kExr16,
+		kExr16ZIP,
+		kExr16RLE,
+		kExr32,
+		kExr32ZIP,
+		kExr32RLE,
+	}
 	[System.Serializable]
 	public class Project
 	{
@@ -112,7 +122,37 @@ namespace Subtexture
 			{
 				if( GUILayout.Button( "Export", EditorStyles.toolbarButton, GUILayout.Width( 70)) != false)
 				{
-					Export();
+					var contextMenu = new GenericMenu();
+					
+					contextMenu.AddItem( new GUIContent( "PNG"), false, () =>
+					{
+						Export( ExportFormat.kPng);
+					});
+					contextMenu.AddItem( new GUIContent( "EXR/16bit"), false, () =>
+					{
+						Export( ExportFormat.kExr16);
+					});
+					contextMenu.AddItem( new GUIContent( "EXR/16bit ZIP"), false, () =>
+					{
+						Export( ExportFormat.kExr16ZIP);
+					});
+					contextMenu.AddItem( new GUIContent( "EXR/16bit RLE"), false, () =>
+					{
+						Export( ExportFormat.kExr16RLE);
+					});
+					contextMenu.AddItem( new GUIContent( "EXR/32bit"), false, () =>
+					{
+						Export( ExportFormat.kExr32);
+					});
+					contextMenu.AddItem( new GUIContent( "EXR/32bit ZIP"), false, () =>
+					{
+						Export( ExportFormat.kExr32ZIP);
+					});
+					contextMenu.AddItem( new GUIContent( "EXR/32bit RLE"), false, () =>
+					{
+						Export( ExportFormat.kExr32RLE);
+					});
+					contextMenu.ShowAsContext();
 				}
 			}
 			EditorGUI.EndDisabledGroup();
@@ -249,21 +289,112 @@ namespace Subtexture
 			postProcessParam.OnDisable();
 			postProcessParams.Remove( postProcessParam);
 		}
-		void Export()
+		void Export( ExportFormat exportFormat)
 		{
-			string path = EditorUtility.SaveFilePanel( "Subtexture", Application.dataPath, "", "png");
+			string extension = string.Empty;
+			
+			switch( exportFormat)
+			{
+				case ExportFormat.kExr16:
+				case ExportFormat.kExr16ZIP:
+				case ExportFormat.kExr16RLE:
+				case ExportFormat.kExr32:
+				case ExportFormat.kExr32ZIP:
+				case ExportFormat.kExr32RLE:
+				{
+					extension = "exr";
+					break;
+				}
+				default: /* case ExportFormat.kPng: */
+				{
+					extension = "png";
+					break;
+				}
+			}
+			
+			string path = EditorUtility.SaveFilePanel( "Subtexture", Application.dataPath, "", extension);
 			if( string.IsNullOrEmpty( path) == false)
 			{
-				var texture = new Texture2D( previewTexture.width, previewTexture.height, TextureFormat.RGBA32, false, false);
-				var current = RenderTexture.active;
-				RenderTexture.active = previewTexture;
-				texture.ReadPixels( new Rect( 0, 0, previewTexture.width, previewTexture.height), 0, 0);
-				texture.Apply();
-				RenderTexture.active = current;
-				byte[] bytes = texture.EncodeToPNG();
-				Texture.DestroyImmediate( texture);
-				Debug.Log(path);
-				System.IO.File.WriteAllBytes( path, bytes);
+				Texture2D texture = null;
+				
+				switch( exportFormat)
+				{
+					case ExportFormat.kExr16:
+					case ExportFormat.kExr16ZIP:
+					case ExportFormat.kExr16RLE:
+					{
+						texture = new Texture2D( previewTexture.width, previewTexture.height, TextureFormat.RGBAHalf, false, false);
+						break;
+					}
+					case ExportFormat.kExr32:
+					case ExportFormat.kExr32ZIP:
+					case ExportFormat.kExr32RLE:
+					{
+						texture = new Texture2D( previewTexture.width, previewTexture.height, TextureFormat.RGBAFloat, false, false);
+						break;
+					}
+					default: /* case ExportFormat.kPng: */
+					{
+						texture = new Texture2D( previewTexture.width, previewTexture.height, TextureFormat.RGBA32, false, false);
+						break;
+					}
+				}
+				if( texture != null)
+				{
+					var current = RenderTexture.active;
+					RenderTexture.active = previewTexture;
+					texture.ReadPixels( new Rect( 0, 0, previewTexture.width, previewTexture.height), 0, 0);
+					texture.Apply();
+					RenderTexture.active = current;
+					byte[] bytes = null;
+					
+					if( exportFormat == ExportFormat.kPng)
+					{
+						bytes = texture.EncodeToPNG();
+					}
+					else
+					{
+						Texture2D.EXRFlags exrFlags = Texture2D.EXRFlags.None;
+						
+						switch( exportFormat)
+						{
+							case ExportFormat.kExr16ZIP:
+							{
+								exrFlags |= Texture2D.EXRFlags.CompressZIP;
+								break;
+							}
+							case ExportFormat.kExr16RLE:
+							{
+								exrFlags |= Texture2D.EXRFlags.CompressRLE;
+								break;
+							}
+							case ExportFormat.kExr32:
+							{
+								exrFlags |= Texture2D.EXRFlags.OutputAsFloat;
+								break;
+							}
+							case ExportFormat.kExr32ZIP:
+							{
+								exrFlags |= Texture2D.EXRFlags.OutputAsFloat;
+								exrFlags |= Texture2D.EXRFlags.CompressZIP;
+								break;
+							}
+							case ExportFormat.kExr32RLE:
+							{
+								exrFlags |= Texture2D.EXRFlags.OutputAsFloat;
+								exrFlags |= Texture2D.EXRFlags.CompressRLE;
+								break;
+							}
+						}
+						bytes = ImageConversion.EncodeToEXR( texture, exrFlags);
+					}
+					Texture.DestroyImmediate( texture);
+					
+					if( bytes != null)
+					{
+						System.IO.File.WriteAllBytes( path, bytes);
+					}
+				}
 			}
 		}
 		void Refresh()

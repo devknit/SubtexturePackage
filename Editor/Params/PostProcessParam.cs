@@ -87,7 +87,7 @@ namespace Subtexture
 				}
 				if( renderTexture == null)
 				{
-					renderTexture = new RenderTexture( source.width, source.height, source.depth, source.format);
+					renderTexture = new RenderTexture( source.width, source.height, 32, RenderTextureFormat.ARGBFloat);
 					renderTexture.hideFlags = HideFlags.HideAndDontSave;
 				}
 				Graphics.Blit( source, renderTexture, blitMaterial);
