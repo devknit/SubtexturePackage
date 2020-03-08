@@ -9,6 +9,7 @@ namespace Subtexture
 		kNone,
 		kOneMinus,
 		kSwizzle,
+		kBlendMap,
 	}
 	[System.Serializable]
 	public sealed class PostProcessParam : BaseParam
@@ -26,7 +27,8 @@ namespace Subtexture
 				{
 					new NoneProcess(),
 					new OneMinusProcess(),
-					new SwizzleProcess()
+					new SwizzleProcess(),
+					new BlendMapProcess()
 				};
 			}
 			for( int i0 = 0; i0 < processes.Length; ++i0)
@@ -51,6 +53,7 @@ namespace Subtexture
 		}
 		public void OnElementGUI( Rect rect)
 		{
+			rect.yMin += 2.0f;
 			Rect typeRect = new Rect( rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight);
 			var postProcessTypeValue = (PostProcessType)EditorGUI.EnumPopup( typeRect, postProcessType);
 			if( postProcessType.Equals( postProcessTypeValue) == false)
@@ -62,16 +65,16 @@ namespace Subtexture
 			if( processProperties != null)
 			{
 				if( processProperties.OnGUI( new Rect( 
-					rect.x, rect.y + typeRect.height, 
+					rect.x, rect.y + typeRect.height + 2.0f, 
 					rect.width, rect.height - typeRect.height)) != false)
 				{
-					processProperties.OnUpdateMaterial();
+					blitMaterial = processProperties.OnUpdateMaterial();
 				}
 			}
 		}
 		public float GetElementHeight()
 		{
-			return EditorGUIUtility.singleLineHeight + (processProperties?.GetHeight() ?? 0);
+			return EditorGUIUtility.singleLineHeight + (processProperties?.GetHeight() ?? 0) + 6.0f;
 		}
 		public RenderTexture Blit( RenderTexture source)
 		{
@@ -111,8 +114,8 @@ namespace Subtexture
 			
 			if( processProperties != null)
 			{
-				blitMaterial = processProperties.Create();
-				processProperties.OnUpdateMaterial();
+				processProperties.Create();
+				blitMaterial = processProperties.OnUpdateMaterial();
 			}
 		}
 		

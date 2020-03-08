@@ -25,7 +25,7 @@ namespace Subtexture
 			{
 				if( i0 > 0)
 				{
-					elementRect.y += elementRect.height;
+					elementRect.y += elementRect.height + kIntervalHeight;
 				}
 				var component = (ColorComponent)EditorGUI.EnumPopup( 
 					elementRect, kComponentNames[ i0], components[ i0]);
@@ -37,7 +37,7 @@ namespace Subtexture
 				}
 				if( components[ i0] == ColorComponent.kValue)
 				{
-					elementRect.y += elementRect.height;
+					elementRect.y += elementRect.height + kIntervalHeight;
 					float value = EditorGUI.Slider( elementRect, 
 						string.Format( $"{kComponentNames[ i0]} Value"), 
 						componentValues[ i0], 0.0f, 1.0f);
@@ -53,18 +53,18 @@ namespace Subtexture
 		}
 		public override float GetHeight()
 		{
-			float height = EditorGUIUtility.singleLineHeight * 4;
+			float height = (EditorGUIUtility.singleLineHeight + kIntervalHeight) * 4;
 			
 			for( int i0 = 0; i0 < 4; ++i0)
 			{
 				if( components[ i0] == ColorComponent.kValue)
 				{
-					height += EditorGUIUtility.singleLineHeight;
+					height += EditorGUIUtility.singleLineHeight + kIntervalHeight;
 				}
 			}
 			return height;
 		}
-		public override void OnUpdateMaterial()
+		public override Material OnUpdateMaterial()
 		{
 			materialCache.SetVector( 
 				"_SwizzleType", new Vector4( 
@@ -78,6 +78,7 @@ namespace Subtexture
 					componentValues[ 1],
 					componentValues[ 2],
 					componentValues[ 3]));
+			return base.OnUpdateMaterial();
 		}
 		protected override string GetShaderGuid()
 		{

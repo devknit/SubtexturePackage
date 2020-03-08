@@ -53,10 +53,13 @@ namespace Subtexture
 		{
 			return 0.0f;
 		}
-		public virtual void OnUpdateMaterial()
+		public virtual Material OnUpdateMaterial()
 		{
+			return materialCache;
 		}
 		protected abstract string GetShaderGuid();
+		
+		protected const float kIntervalHeight = 2.0f;
 		
 		[System.NonSerialized]
 		Window handle;
