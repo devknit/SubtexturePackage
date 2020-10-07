@@ -72,7 +72,7 @@ namespace Subtexture
 			}
 			base.OnDisable();
 		}
-		public override void OnGUI()
+		public override void OnGUI( BaseParam[] param)
 		{
 			OnPUI( "Material", false, () =>
 			{

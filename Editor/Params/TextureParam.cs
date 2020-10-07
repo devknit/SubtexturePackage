@@ -10,7 +10,7 @@ namespace Subtexture
 		public TextureParam() : base( true)
 		{
 		}
-		public override void OnGUI()
+		public override void OnGUI( BaseParam[] param)
 		{
 			OnPUI( "Texture", false, () =>
 			{
@@ -57,11 +57,11 @@ namespace Subtexture
 		}
 		static readonly int[] kResolutions = new int[]
 		{
-			1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096
+			1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192
 		};
 		static readonly string[] kResolutionLabels = new string[]
 		{
-			"1", "2", "4", "8", "16", "32", "64", "128", "256", "512", "1024", "2048", "4096"
+			"1", "2", "4", "8", "16", "32", "64", "128", "256", "512", "1024", "2048", "4096", "8192"
 		};
 		float GetScaleFactor()
 	    {

@@ -19,7 +19,7 @@ namespace Subtexture
 		{
 			base.OnDisable();
 		}
-		public override void OnGUI()
+		public override void OnGUI( BaseParam[] param)
 		{
 			OnPUI( "Transform", false, () =>
 			{
@@ -52,10 +52,10 @@ namespace Subtexture
 		}
 		
 		[SerializeField]
-		Vector3 localPosition = Vector3.zero;
+		public Vector3 localPosition = Vector3.zero;
 		[SerializeField]
-		Vector3 localRotation = Vector3.zero;
+		public Vector3 localRotation = Vector3.zero;
 		[SerializeField]
-		Vector3 localScale = Vector3.one;
+		public Vector3 localScale = Vector3.one;
 	}
 }

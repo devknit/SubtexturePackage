@@ -8,7 +8,8 @@ namespace Subtexture
 	public enum MeshType
 	{
 		kAssets,
-		kDynamic
+		kDynamic,
+		kPrefab
 	}
 	[System.Serializable]
 	public sealed class MeshParam : BaseParam
@@ -20,6 +21,48 @@ namespace Subtexture
 		{
 			base.OnEnable( window);
 			
+			string newShaderPath = AssetDatabase.GUIDToAssetPath( "2848d84731c5f6c4683867a9fafecacc");
+			
+			if( string.IsNullOrEmpty( newShaderPath) == false)
+			{
+				if( AssetDatabase.LoadAssetAtPath<Shader>( newShaderPath) is Shader shader)
+				{
+					boundsMaterial = new Material( shader);
+				}
+			}
+			if( boundsMesh == null)
+			{
+				boundsMesh = new Mesh();
+				
+				boundsMesh.SetVertices( new Vector3[]
+				{
+		            new Vector3( -0.5f, -0.5f, -0.5f),
+					new Vector3(  0.5f, -0.5f, -0.5f),
+					new Vector3( -0.5f,  0.5f, -0.5f),
+					new Vector3(  0.5f,  0.5f, -0.5f),
+					new Vector3( -0.5f, -0.5f,  0.5f),
+					new Vector3(  0.5f, -0.5f,  0.5f),
+					new Vector3( -0.5f,  0.5f,  0.5f),
+					new Vector3(  0.5f,  0.5f,  0.5f),
+		        });
+		        boundsMesh.SetColors( new Color[]
+		        {
+					Color.green,
+					Color.green,
+					Color.green,
+					Color.green,
+					Color.green,
+					Color.green,
+					Color.green,
+					Color.green,
+				});
+				boundsMesh.SetIndices( new int[]
+				{
+					0, 1, 2, 3, 4, 5, 6, 7,
+					0, 2, 1, 3, 4, 6, 5, 7,
+					0, 4, 1, 5, 2, 6, 3, 7,
+				}, MeshTopology.Lines, 0);
+			}
 			if( dynamicMesh == null)
 			{
 				dynamicMesh = new Mesh();
@@ -110,13 +153,23 @@ namespace Subtexture
 		{
 			base.OnDisable();
 			
+			if( boundsMaterial != null)
+			{
+				Material.DestroyImmediate( boundsMaterial);
+				boundsMaterial = null;
+			}
+			if( boundsMesh != null)
+			{
+				Mesh.DestroyImmediate( boundsMesh);
+				boundsMesh = null;
+			}
 			if( dynamicMesh != null)
 			{
 				Mesh.DestroyImmediate( dynamicMesh);
 				dynamicMesh = null;
 			}
 		}
-		public override void OnGUI()
+		public override void OnGUI( BaseParam[] param)
 		{
 			OnPUI( "Mesh", false, () =>
 			{
@@ -132,7 +185,7 @@ namespace Subtexture
 					if( assetMesh != assetMeshValue)
 					{
 						Record( "Change Mesh Assets");
-						assetMeshValue = assetMesh;
+						assetMesh = assetMeshValue;
 					}
 				}
 				else if( meshType == MeshType.kDynamic)
@@ -251,11 +304,126 @@ namespace Subtexture
 						texcoords7 = uv;
 					}
 				}
+				else if( meshType == MeshType.kPrefab)
+				{
+					var prefabValue = EditorGUILayout.ObjectField( "Prefab", prefab, typeof( GameObject), false) as GameObject;
+					if( prefab != prefabValue)
+					{
+						Record( "Change Prefab");
+						prefab = prefabValue;
+					}
+					showBounds = EditorGUILayout.Toggle( "Show BoundingBox", showBounds);
+				}
 			});
+		}
+		public bool TryGetBoundingBox( out Bounds bounds)
+		{
+			switch( meshType)
+			{
+				case MeshType.kPrefab:
+				{
+					if( prefab != null)
+					{
+						bounds = new Bounds();
+						
+						Renderer[] renderers = prefab.GetComponentsInChildren<Renderer>();
+						
+						for( int i0 = 0; i0 < renderers.Length; ++i0)
+						{
+							switch( renderers[ i0])
+							{
+								case MeshRenderer meshRenderer:
+								case SkinnedMeshRenderer skinnedMeshRenderer:
+								{
+									bounds.Encapsulate( renderers[ i0].bounds);
+									break;
+								}
+							}
+						}
+						return true;
+					}
+					break;
+				}
+			}
+			bounds = new Bounds( Vector3.zero, Vector3.zero);
+			return false;
+		}
+		public bool TryGetBoundingSphere( out BoundingSphere sphere)
+		{
+			Bounds bounds;
+			
+			if( TryGetBoundingBox( out bounds) != false)
+			{
+				sphere = new BoundingSphere( bounds.center, ((bounds.max - bounds.min) / 2.0f).magnitude);
+				return true;
+			}
+			sphere = new BoundingSphere( Vector3.zero, 0.0f);
+			return false;
+		}
+		public void PrefabRender( PreviewRenderUtility context, Matrix4x4 localMatrix)
+		{
+			if( prefab != null)
+			{
+				Renderer[] renderers = prefab.GetComponentsInChildren<Renderer>();
+				
+				for( int i0 = 0; i0 < renderers.Length; ++i0)
+				{
+					switch( renderers[ i0])
+					{
+						case MeshRenderer meshRenderer:
+						{
+							MeshFilter meshFilter = meshRenderer.gameObject.GetComponent<MeshFilter>();
+							if( meshFilter != null)
+							{
+								for( int i1 = 0; i1 < meshFilter.sharedMesh.subMeshCount; ++i1)
+								{
+									context.DrawMesh(
+										meshFilter.sharedMesh,
+										localMatrix * meshRenderer.transform.localToWorldMatrix,
+										meshRenderer.sharedMaterials[ i1], i1);
+								}
+							}
+							break;
+						}
+						case SkinnedMeshRenderer skinnedMeshRenderer:
+						{
+							var bakeMesh = new Mesh();
+							skinnedMeshRenderer.BakeMesh( bakeMesh);
+							
+							for( int i1 = 0; i1 < bakeMesh.subMeshCount; ++i1)
+							{
+								context.DrawMesh( bakeMesh,
+									localMatrix * skinnedMeshRenderer.transform.localToWorldMatrix,
+									skinnedMeshRenderer.sharedMaterials[ i1], i1);
+							}
+							break;
+						}
+					}
+				}
+				if( showBounds != false)
+				{
+					Bounds bounds;
+					
+					if( TryGetBoundingBox( out bounds) != false)
+					{
+						localMatrix *= Matrix4x4.Translate( bounds.center);
+						localMatrix *= Matrix4x4.Scale( bounds.size);
+						context.DrawMesh( boundsMesh, localMatrix, boundsMaterial, 0);
+					}
+				}
+			}
 		}
 		public Mesh RenderMesh
 		{
-			get{ return (meshType == MeshType.kAssets) ? assetMesh : dynamicMesh; }
+			get
+			{
+				switch( meshType)
+				{
+					case MeshType.kAssets: return assetMesh;
+					case MeshType.kDynamic: return dynamicMesh;
+				}
+				return null;
+			}
 		}
 		
 		[SerializeField]
@@ -279,8 +447,16 @@ namespace Subtexture
 		[SerializeField]
 		Vector4 texcoords7 = Vector4.zero;
 		[SerializeField]
+		Material boundsMaterial = default;
+		[SerializeField]
+		Mesh boundsMesh = default;
+		[SerializeField]
 		Mesh dynamicMesh = default;
 		[SerializeField]
 		Mesh assetMesh = default;
+		[SerializeField]
+		GameObject prefab = default;
+		[SerializeField]
+		bool showBounds = false;
 	}
 }

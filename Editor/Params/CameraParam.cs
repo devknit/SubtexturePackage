@@ -10,7 +10,7 @@ namespace Subtexture
 		public CameraParam() : base( false)
 		{
 		}
-		public override void OnGUI()
+		public override void OnGUI( BaseParam[] param)
 		{
 			OnPUI( "Camera", false, () =>
 			{
@@ -94,7 +94,40 @@ namespace Subtexture
 					Record( "Change Far Clipping Planes");
 					rect = rectValue;
 				}
+				if( GUILayout.Button( "Front") != false)
+				{
+					if( param[ (int)PreParamType.kTexture] is TextureParam textureParam)
+					if( param[ (int)PreParamType.kTransform] is TransformParam transformParam)
+					if( param[ (int)PreParamType.kMesh] is MeshParam meshParam)
+					{
+						ToFront( textureParam, transformParam, meshParam);
+					}
+				}
 			});
+		}
+		void ToFront( TextureParam textureParam, TransformParam transformParam, MeshParam meshParam)
+		{
+			if( orthographic == false)
+			{
+				BoundingSphere sphere;
+				
+				if( meshParam.TryGetBoundingSphere( out sphere) != false)
+				{
+					float z = sphere.radius / Mathf.Tan( fieldOfView * Mathf.Deg2Rad) + sphere.radius;
+					localPosition = new Vector3( sphere.position.x, sphere.position.y, -z);
+				}
+			}
+			else
+			{
+				Bounds bounds;
+				
+				if( meshParam.TryGetBoundingBox( out bounds) != false)
+				{
+					float aspecct = (float)textureParam.width / (float)textureParam.height;
+					localPosition = new Vector3( bounds.center.x, bounds.center.y, -(nearClipPlane + bounds.extents.z));
+					orthographicSize = Mathf.Max( Camera.HorizontalToVerticalFieldOfView( bounds.extents.x, aspecct), bounds.extents.y) * 1.005f;
+				}
+			}
 		}
 		public void Apply( Camera camera)
 		{
@@ -134,7 +167,7 @@ namespace Subtexture
 		[SerializeField]
 		float orthographicSize = 0.5f;
 		[SerializeField]
-		float fieldOfView = 60.0f;
+		float fieldOfView = Camera.HorizontalToVerticalFieldOfView( 45.0f, 1.0f);
 		[SerializeField]
 		float nearClipPlane = 0.03f;
 		[SerializeField]

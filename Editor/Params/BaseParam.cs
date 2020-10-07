@@ -15,6 +15,7 @@ namespace Subtexture
 		public virtual void OnEnable( Window window)
 		{
 			handle = window;
+			
 			if( enabled == null)
 			{
 				enabled = new AnimBool( defaultOpened);
@@ -28,7 +29,7 @@ namespace Subtexture
 		{
 			handle.Record( label);
 		}
-		public virtual void OnGUI()
+		public virtual void OnGUI( BaseParam[] param)
 		{
 		}
 		public bool IsClose()

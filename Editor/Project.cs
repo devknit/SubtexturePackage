@@ -248,7 +248,7 @@ namespace Subtexture
 							
 							for( int i0 = 0; i0 < preParams.Length; ++i0)
 							{
-								preParams[ i0].OnGUI();
+								preParams[ i0].OnGUI( preParams);
 							}
 							postProcessList.DoLayoutList();
 							
@@ -399,44 +399,32 @@ namespace Subtexture
 		}
 		void Refresh()
 		{
-			if( preParams[ (int)PreParamType.kMesh] is MeshParam meshParam)
+			if( preParams[ (int)PreParamType.kTexture] is TextureParam textureParam)
 			{
-				if( preParams[ (int)PreParamType.kMaterial] is MaterialParam materialParam)
+				if( preParams[ (int)PreParamType.kCamera] is CameraParam cameraParam)
 				{
-					Material renderMaterial = materialParam.RenderMaterial;
-					Mesh renderMesh = meshParam.RenderMesh;
-					
-					if( renderMaterial != null && renderMesh != null)
+					if( preParams[ (int)PreParamType.kTransform] is TransformParam transformParam)
 					{
-						if( preParams[ (int)PreParamType.kTexture] is TextureParam textureParam)
+						if( preParams[ (int)PreParamType.kMesh] is MeshParam meshParam)
 						{
-							if( preParams[ (int)PreParamType.kCamera] is CameraParam cameraParam)
+							if( meshParam.meshType == MeshType.kPrefab)
 							{
-								if( preParams[ (int)PreParamType.kTransform] is TransformParam transformParam)
+								Rendering( textureParam.RenderRect, cameraParam, (renderer) =>
 								{
-									Rect renderRect = textureParam.RenderRect;
-									Matrix4x4 localMatrix = transformParam.LocalMatrix;
-									
-									if( renderer == null)
+									meshParam.PrefabRender( renderer, transformParam.LocalMatrix);
+								});
+							}
+							else if( preParams[ (int)PreParamType.kMaterial] is MaterialParam materialParam)
+							{
+								Material renderMaterial = materialParam.RenderMaterial;
+								Mesh renderMesh = meshParam.RenderMesh;
+								
+								if( renderMaterial != null && renderMesh != null)
+								{
+									Rendering( textureParam.RenderRect, cameraParam, (renderer) =>
 									{
-										renderer = new PreviewRenderUtility();
-									}
-									renderer.BeginPreview( renderRect, GUIStyle.none);
-									cameraParam.Apply( renderer.camera);
-									renderer.DrawMesh( renderMesh, localMatrix, renderMaterial, 0);
-									renderer.camera.Render();
-									if( renderer.EndPreview() is RenderTexture renderTexture)
-									{
-										RenderTexture currentTexture = RenderTexture.active;
-										
-										previewTexture = renderTexture;
-										
-										foreach( PostProcessParam param in postProcessParams)
-										{
-											previewTexture = param.Blit( previewTexture);
-										}
-										RenderTexture.active = currentTexture;
-									}
+										renderer.DrawMesh( renderMesh, transformParam.LocalMatrix, renderMaterial, 0);
+									});
 								}
 							}
 						}
@@ -444,6 +432,29 @@ namespace Subtexture
 				}
 			}
 			refresh = false;
+		}
+		void Rendering( Rect renderRect, CameraParam cameraParam, System.Action<PreviewRenderUtility> callback)
+		{
+			if( renderer == null)
+			{
+				renderer = new PreviewRenderUtility();
+			}
+			renderer.BeginPreview( renderRect, GUIStyle.none);
+			cameraParam.Apply( renderer.camera);
+			callback?.Invoke( renderer);
+			renderer.camera.Render();
+			if( renderer.EndPreview() is RenderTexture renderTexture)
+			{
+				RenderTexture currentTexture = RenderTexture.active;
+				
+				previewTexture = renderTexture;
+				
+				foreach( PostProcessParam param in postProcessParams)
+				{
+					previewTexture = param.Blit( previewTexture);
+				}
+				RenderTexture.active = currentTexture;
+			}
 		}
 		public void Record( string label)
 		{
