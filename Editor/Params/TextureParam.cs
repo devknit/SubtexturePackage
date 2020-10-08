@@ -89,10 +89,10 @@ namespace Subtexture
 		[SerializeField]
 		bool forceSquare = true;
 		[SerializeField]
-		public int width = 256;
+		public int width = 512;
 		[SerializeField]
-		public int height = 256;
+		public int height = 512;
 		[SerializeField]
-		public int size = 256;
+		public int size = 512;
 	}
 }

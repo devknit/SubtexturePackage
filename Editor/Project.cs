@@ -11,6 +11,7 @@ namespace Subtexture
 	{
 		kTexture,
 		kCamera,
+		kLight,
 		kTransform,
 		kMesh,
 		kMaterial
@@ -38,6 +39,7 @@ namespace Subtexture
 				{
 					new TextureParam(),
 					new CameraParam(),
+					new LightParam(),
 					new TransformParam(),
 					new MeshParam(),
 					new MaterialParam()
@@ -400,40 +402,33 @@ namespace Subtexture
 		void Refresh()
 		{
 			if( preParams[ (int)PreParamType.kTexture] is TextureParam textureParam)
+			if( preParams[ (int)PreParamType.kCamera] is CameraParam cameraParam)
+			if( preParams[ (int)PreParamType.kLight] is LightParam lightParam)
+			if( preParams[ (int)PreParamType.kTransform] is TransformParam transformParam)
+			if( preParams[ (int)PreParamType.kMesh] is MeshParam meshParam)
+			if( meshParam.meshType == MeshType.kPrefab)
 			{
-				if( preParams[ (int)PreParamType.kCamera] is CameraParam cameraParam)
+				Rendering( textureParam.RenderRect, cameraParam, lightParam, (renderer) =>
 				{
-					if( preParams[ (int)PreParamType.kTransform] is TransformParam transformParam)
+					meshParam.PrefabRender( renderer, transformParam.LocalMatrix);
+				});
+			}
+			else if( preParams[ (int)PreParamType.kMaterial] is MaterialParam materialParam)
+			{
+				Material renderMaterial = materialParam.RenderMaterial;
+				Mesh renderMesh = meshParam.RenderMesh;
+				
+				if( renderMaterial != null && renderMesh != null)
+				{
+					Rendering( textureParam.RenderRect, cameraParam, lightParam, (renderer) =>
 					{
-						if( preParams[ (int)PreParamType.kMesh] is MeshParam meshParam)
-						{
-							if( meshParam.meshType == MeshType.kPrefab)
-							{
-								Rendering( textureParam.RenderRect, cameraParam, (renderer) =>
-								{
-									meshParam.PrefabRender( renderer, transformParam.LocalMatrix);
-								});
-							}
-							else if( preParams[ (int)PreParamType.kMaterial] is MaterialParam materialParam)
-							{
-								Material renderMaterial = materialParam.RenderMaterial;
-								Mesh renderMesh = meshParam.RenderMesh;
-								
-								if( renderMaterial != null && renderMesh != null)
-								{
-									Rendering( textureParam.RenderRect, cameraParam, (renderer) =>
-									{
-										renderer.DrawMesh( renderMesh, transformParam.LocalMatrix, renderMaterial, 0);
-									});
-								}
-							}
-						}
-					}
+						renderer.DrawMesh( renderMesh, transformParam.LocalMatrix, renderMaterial, 0);
+					});
 				}
 			}
 			refresh = false;
 		}
-		void Rendering( Rect renderRect, CameraParam cameraParam, System.Action<PreviewRenderUtility> callback)
+		void Rendering( Rect renderRect, CameraParam cameraParam, LightParam lightParam, System.Action<PreviewRenderUtility> callback)
 		{
 			if( renderer == null)
 			{
@@ -441,6 +436,7 @@ namespace Subtexture
 			}
 			renderer.BeginPreview( renderRect, GUIStyle.none);
 			cameraParam.Apply( renderer.camera);
+			renderer.ambientColor = lightParam.Apply( renderer.lights[ 0]);
 			callback?.Invoke( renderer);
 			renderer.camera.Render();
 			if( renderer.EndPreview() is RenderTexture renderTexture)
@@ -464,7 +460,7 @@ namespace Subtexture
 		[SerializeField]
 		bool previewForceUpdate = false;
 		[SerializeField]
-		FilterMode previewFilterMode = FilterMode.Point;
+		FilterMode previewFilterMode = FilterMode.Bilinear;
 		
 		[SerializeField]
 		Vector2 scrollPosition = Vector2.zero;

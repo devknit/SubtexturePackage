@@ -311,6 +311,13 @@ namespace Subtexture
 					{
 						Record( "Change Prefab");
 						prefab = prefabValue;
+						
+						if( param[ (int)PreParamType.kCamera] is CameraParam cameraParam)
+						if( param[ (int)PreParamType.kTexture] is TextureParam textureParam)
+						if( param[ (int)PreParamType.kTransform] is TransformParam transformParam)
+						{
+							cameraParam.ToDirection( Direction.kFront, textureParam, transformParam, this);
+						}
 					}
 					showBounds = EditorGUILayout.Toggle( "Show BoundingBox", showBounds);
 				}
@@ -373,7 +380,7 @@ namespace Subtexture
 						case MeshRenderer meshRenderer:
 						{
 							MeshFilter meshFilter = meshRenderer.gameObject.GetComponent<MeshFilter>();
-							if( meshFilter != null)
+							if( meshFilter?.sharedMesh != null)
 							{
 								for( int i1 = 0; i1 < meshFilter.sharedMesh.subMeshCount; ++i1)
 								{
@@ -427,7 +434,7 @@ namespace Subtexture
 		}
 		
 		[SerializeField]
-		public MeshType meshType = MeshType.kDynamic;
+		public MeshType meshType = MeshType.kPrefab;
 		[SerializeField]
 		Color vertexColor = Color.white;
 		[SerializeField]

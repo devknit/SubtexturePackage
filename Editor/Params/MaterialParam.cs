@@ -74,6 +74,13 @@ namespace Subtexture
 		}
 		public override void OnGUI( BaseParam[] param)
 		{
+			if( param[ (int)PreParamType.kMesh] is MeshParam meshParam)
+			{
+				if( meshParam.meshType == MeshType.kPrefab)
+				{
+					return;
+				}
+			}
 			OnPUI( "Material", false, () =>
 			{
 				var type = (MaterialType)EditorGUILayout.EnumPopup( "Type", materialType);
