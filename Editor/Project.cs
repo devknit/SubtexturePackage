@@ -108,8 +108,12 @@ namespace Subtexture
 			{
 				return;
 			}
-			if( previewForceUpdate != false)
+			if( previewForceUpdate != false || refreshCount > 0)
 			{
+				if( --refreshCount < 0)
+				{
+					refreshCount = 0;
+				}
 				refresh = true;
 				handle.Repaint();
 			}
@@ -238,6 +242,10 @@ namespace Subtexture
 			{
 				return;
 			}
+			if( renderer == null)
+			{
+				renderer = new PreviewRenderUtility();
+			}
 			GUILayout.BeginArea( rect);
 			{
 				EditorGUILayout.BeginHorizontal();
@@ -250,7 +258,7 @@ namespace Subtexture
 							
 							for( int i0 = 0; i0 < preParams.Length; ++i0)
 							{
-								preParams[ i0].OnGUI( preParams);
+								refreshCount = Mathf.Max( refreshCount, preParams[ i0].OnGUI( renderer, preParams));
 							}
 							postProcessList.DoLayoutList();
 							
@@ -410,7 +418,7 @@ namespace Subtexture
 			{
 				Rendering( textureParam.RenderRect, cameraParam, lightParam, (renderer) =>
 				{
-					meshParam.PrefabRender( renderer, transformParam.LocalMatrix);
+					meshParam.PrefabRender( renderer, transformParam);
 				});
 			}
 			else if( preParams[ (int)PreParamType.kMaterial] is MaterialParam materialParam)
@@ -430,10 +438,6 @@ namespace Subtexture
 		}
 		void Rendering( Rect renderRect, CameraParam cameraParam, LightParam lightParam, System.Action<PreviewRenderUtility> callback)
 		{
-			if( renderer == null)
-			{
-				renderer = new PreviewRenderUtility();
-			}
 			renderer.BeginPreview( renderRect, GUIStyle.none);
 			cameraParam.Apply( renderer.camera);
 			renderer.ambientColor = lightParam.Apply( renderer.lights[ 0]);
@@ -475,6 +479,8 @@ namespace Subtexture
 		Window handle;
 		[System.NonSerialized]
 		bool refresh;
+		[System.NonSerialized]
+		int refreshCount;
 		[System.NonSerialized]
 		PreviewRenderUtility renderer;
 		[System.NonSerialized]

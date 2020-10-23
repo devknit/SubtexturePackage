@@ -29,8 +29,9 @@ namespace Subtexture
 		{
 			handle.Record( label);
 		}
-		public virtual void OnGUI( BaseParam[] param)
+		public virtual int OnGUI( PreviewRenderUtility context, BaseParam[] param)
 		{
+			return 0;
 		}
 		public bool IsClose()
 		{

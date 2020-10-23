@@ -19,8 +19,9 @@ namespace Subtexture
 		{
 			base.OnDisable();
 		}
-		public override void OnGUI( BaseParam[] param)
+		public override int OnGUI( PreviewRenderUtility context, BaseParam[] param)
 		{
+			
 			OnPUI( "Transform", false, () =>
 			{
 				Vector3 localPositionValue = EditorGUILayout.Vector3Field( "Position", localPosition);
@@ -42,6 +43,7 @@ namespace Subtexture
 					localScale = localScaleValue;
 				}
 			});
+			return 0;
 		}
 		public Matrix4x4 LocalMatrix
 		{

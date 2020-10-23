@@ -19,7 +19,7 @@ namespace Subtexture
 		public CameraParam() : base( false)
 		{
 		}
-		public override void OnGUI( BaseParam[] param)
+		public override int OnGUI( PreviewRenderUtility context, BaseParam[] param)
 		{
 			OnPUI( "Camera", false, () =>
 			{
@@ -172,6 +172,7 @@ namespace Subtexture
 				}
 				EditorGUILayout.EndHorizontal();
 			});
+			return 0;
 		}
 		public void Apply( Camera camera)
 		{

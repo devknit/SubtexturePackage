@@ -10,7 +10,7 @@ namespace Subtexture
 		public LightParam() : base( false)
 		{
 		}
-		public override void OnGUI( BaseParam[] param)
+		public override int OnGUI( PreviewRenderUtility context, BaseParam[] param)
 		{
 			OnPUI( "Light", false, () =>
 			{
@@ -51,6 +51,7 @@ namespace Subtexture
 					shadows = shadowsValue;
 				}
 			});
+			return 0;
 		}
 		public Color Apply( Light light)
 		{

@@ -10,7 +10,7 @@ namespace Subtexture
 		public TextureParam() : base( true)
 		{
 		}
-		public override void OnGUI( BaseParam[] param)
+		public override int OnGUI( PreviewRenderUtility context, BaseParam[] param)
 		{
 			OnPUI( "Texture", false, () =>
 			{
@@ -54,6 +54,7 @@ namespace Subtexture
 					}
 				}
 			});
+			return 0;
 		}
 		static readonly int[] kResolutions = new int[]
 		{

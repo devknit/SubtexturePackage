@@ -72,13 +72,13 @@ namespace Subtexture
 			}
 			base.OnDisable();
 		}
-		public override void OnGUI( BaseParam[] param)
+		public override int OnGUI( PreviewRenderUtility context, BaseParam[] param)
 		{
 			if( param[ (int)PreParamType.kMesh] is MeshParam meshParam)
 			{
 				if( meshParam.meshType == MeshType.kPrefab)
 				{
-					return;
+					return 0;
 				}
 			}
 			OnPUI( "Material", false, () =>
@@ -115,6 +115,7 @@ namespace Subtexture
 					}
 				}
 			});
+			return 0;
 		}
 		void ChangeDynamicMaterial( MaterialType type)
 		{
