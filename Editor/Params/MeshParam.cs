@@ -1,6 +1,8 @@
 ﻿
 using UnityEngine;
 using UnityEditor;
+using UnityEngine.SceneManagement;
+using UnityEditor.SceneManagement;
 using System.Collections.Generic;
 
 namespace Subtexture
@@ -367,11 +369,23 @@ namespace Subtexture
 			sphere = new BoundingSphere( Vector3.zero, 0.0f);
 			return false;
 		}
+		
 		public void PrefabRender( PreviewRenderUtility context, Matrix4x4 localMatrix)
 		{
 			if( prefab != null)
 			{
-				Renderer[] renderers = prefab.GetComponentsInChildren<Renderer>();
+				Scene previewScene = EditorSceneManager.NewPreviewScene();
+				var gameObject = PrefabUtility.InstantiatePrefab( prefab, previewScene) as GameObject;
+				
+				var animator = gameObject.GetComponent<Animator>();
+				if( animator != null)
+				{
+					animator.Rebind();
+					animator.StartPlayback();
+					//animator.playbackTime = animator.recorderStartTime;
+					animator.playbackTime = 0;
+				}
+				Renderer[] renderers = gameObject.GetComponentsInChildren<Renderer>();
 				
 				for( int i0 = 0; i0 < renderers.Length; ++i0)
 				{
@@ -418,6 +432,7 @@ namespace Subtexture
 						context.DrawMesh( boundsMesh, localMatrix, boundsMaterial, 0);
 					}
 				}
+				EditorSceneManager.ClosePreviewScene( previewScene);
 			}
 		}
 		public Mesh RenderMesh
