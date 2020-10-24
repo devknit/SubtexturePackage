@@ -134,74 +134,6 @@ namespace Subtexture
 					Record( "Change Far Clipping Planes");
 					viewportRect = viewportRectValue;
 				}
-				EditorGUILayout.BeginHorizontal();
-				{
-					if( GUILayout.Button( "Front") != false)
-					{
-						if( param[ (int)PreParamType.kTexture] is TextureParam textureParam)
-						if( param[ (int)PreParamType.kTransform] is TransformParam transformParam)
-						if( param[ (int)PreParamType.kMesh] is MeshParam meshParam)
-						{
-							ToPreset( CameraPreset.kFront, textureParam, transformParam, meshParam);
-						}
-					}
-					if( GUILayout.Button( "Back") != false)
-					{
-						if( param[ (int)PreParamType.kTexture] is TextureParam textureParam)
-						if( param[ (int)PreParamType.kTransform] is TransformParam transformParam)
-						if( param[ (int)PreParamType.kMesh] is MeshParam meshParam)
-						{
-							ToPreset( CameraPreset.kBack, textureParam, transformParam, meshParam);
-						}
-					}
-				}
-				EditorGUILayout.EndHorizontal();
-				
-				EditorGUILayout.BeginHorizontal();
-				{
-					if( GUILayout.Button( "Top") != false)
-					{
-						if( param[ (int)PreParamType.kTexture] is TextureParam textureParam)
-						if( param[ (int)PreParamType.kTransform] is TransformParam transformParam)
-						if( param[ (int)PreParamType.kMesh] is MeshParam meshParam)
-						{
-							ToPreset( CameraPreset.kTop, textureParam, transformParam, meshParam);
-						}
-					}
-					if( GUILayout.Button( "Bottom") != false)
-					{
-						if( param[ (int)PreParamType.kTexture] is TextureParam textureParam)
-						if( param[ (int)PreParamType.kTransform] is TransformParam transformParam)
-						if( param[ (int)PreParamType.kMesh] is MeshParam meshParam)
-						{
-							ToPreset( CameraPreset.kBottom, textureParam, transformParam, meshParam);
-						}
-					}
-				}
-				EditorGUILayout.EndHorizontal();
-				
-				EditorGUILayout.BeginHorizontal();
-				{
-					if( GUILayout.Button( "Left") != false)
-					{
-						if( param[ (int)PreParamType.kTexture] is TextureParam textureParam)
-						if( param[ (int)PreParamType.kTransform] is TransformParam transformParam)
-						if( param[ (int)PreParamType.kMesh] is MeshParam meshParam)
-						{
-							ToPreset( CameraPreset.kLeft, textureParam, transformParam, meshParam);
-						}
-					}
-					if( GUILayout.Button( "Right") != false)
-					{
-						if( param[ (int)PreParamType.kTexture] is TextureParam textureParam)
-						if( param[ (int)PreParamType.kTransform] is TransformParam transformParam)
-						if( param[ (int)PreParamType.kMesh] is MeshParam meshParam)
-						{
-							ToPreset( CameraPreset.kRight, textureParam, transformParam, meshParam);
-						}
-					}
-				}
-				EditorGUILayout.EndHorizontal();
 			});
 			return 0;
 		}
@@ -251,13 +183,19 @@ namespace Subtexture
 								length = bounds.extents.x;
 								fov = Camera.VerticalToHorizontalFieldOfView( fieldOfView, aspecct);
 							}
-							float distance = length / Mathf.Tan( fov * 0.5f * Mathf.Deg2Rad) + bounds.extents.z - bounds.center.z;
+							float distance = length / Mathf.Tan( fov * 0.5f * Mathf.Deg2Rad) + bounds.extents.z;
 							if( distance <= 0.0f)
 							{
 								return;
 							}
+							Vector3 direction = lookAtPosition - localPosition;
+							
+							if( Mathf.Approximately( direction.magnitude, 0.0f) != false)
+							{
+								return;
+							}
 							lookAtPosition = bounds.center;
-							Vector3 direction = Vector3.Normalize( lookAtPosition - localPosition);
+							direction = Vector3.Normalize( direction);
 							localPosition = lookAtPosition - direction * distance;
 							localRotation = Quaternion.LookRotation( direction).eulerAngles;
 							nearClipPlane = distance - 0.01f;
@@ -522,7 +460,7 @@ namespace Subtexture
 		[SerializeField]
 		Color backgroundColor = Color.clear;
 		[SerializeField]
-		bool orthographic = true;
+		bool orthographic = false;
 		[SerializeField]
 		float orthographicSize = 0.5f;
 		[SerializeField]

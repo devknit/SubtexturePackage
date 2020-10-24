@@ -14,7 +14,8 @@ namespace Subtexture
 		kLight,
 		kTransform,
 		kMesh,
-		kMaterial
+		kMaterial,
+		kAnimation,
 	}
 	public enum ExportFormat
 	{
@@ -46,7 +47,8 @@ namespace Subtexture
 					new LightParam(),
 					new TransformParam(),
 					new MeshParam(),
-					new MaterialParam()
+					new MaterialParam(),
+					new AnimationParam()
 				};
 			}
 			for( int i0 = 0; i0 < preParams.Length; ++i0)
@@ -182,6 +184,53 @@ namespace Subtexture
 					previewForceUpdate = GUILayout.Toggle( 
 						previewForceUpdate, "Sync", EditorStyles.toolbarButton, GUILayout.Width( 50));
 					
+					if( GUILayout.Button( "View", EditorStyles.toolbarButton, GUILayout.Width( 50)) != false)
+					{
+						if( preParams[ (int)PreParamType.kTexture] is TextureParam textureParam)
+						if( preParams[ (int)PreParamType.kCamera] is CameraParam cameraParam)
+						if( preParams[ (int)PreParamType.kTransform] is TransformParam transformParam)
+						if( preParams[ (int)PreParamType.kMesh] is MeshParam meshParam)
+						{
+							var context = new GenericMenu();
+							
+							context.AddItem( new GUIContent( "Fit"), false, () =>
+							{
+								cameraParam.ToPreset( CameraPreset.kFit, textureParam, transformParam, meshParam);
+								refresh = true;
+							});
+							context.AddItem( new GUIContent( "Front"), false, () =>
+							{
+								cameraParam.ToPreset( CameraPreset.kFront, textureParam, transformParam, meshParam);
+								refresh = true;
+							});
+							context.AddItem( new GUIContent( "Back"), false, () =>
+							{
+								cameraParam.ToPreset( CameraPreset.kBack, textureParam, transformParam, meshParam);
+								refresh = true;
+							});
+							context.AddItem( new GUIContent( "Top"), false, () =>
+							{
+								cameraParam.ToPreset( CameraPreset.kTop, textureParam, transformParam, meshParam);
+								refresh = true;
+							});
+							context.AddItem( new GUIContent( "Bottom"), false, () =>
+							{
+								cameraParam.ToPreset( CameraPreset.kBottom, textureParam, transformParam, meshParam);
+								refresh = true;
+							});
+							context.AddItem( new GUIContent( "Left"), false, () =>
+							{
+								cameraParam.ToPreset( CameraPreset.kLeft, textureParam, transformParam, meshParam);
+								refresh = true;
+							});
+							context.AddItem( new GUIContent( "Right"), false, () =>
+							{
+								cameraParam.ToPreset( CameraPreset.kRight, textureParam, transformParam, meshParam);
+								refresh = true;
+							});
+							context.ShowAsContext();
+						}
+					}
 					previewFilterMode = (FilterMode)EditorGUILayout.EnumPopup( 
 						previewFilterMode, EditorStyles.toolbarPopup, GUILayout.Width( 70));
 				}
@@ -500,8 +549,12 @@ namespace Subtexture
 			{
 				Rendering( textureParam.RenderRect, cameraParam, lightParam, (renderer) =>
 				{
-					meshParam.PrefabRender( renderer, transformParam);
+					meshParam.Update( renderer, transformParam);
 				});
+				if( preParams[ (int)PreParamType.kAnimation] is AnimationParam animationParam)
+				{
+					animationParam.Update();
+				}
 			}
 			else if( preParams[ (int)PreParamType.kMaterial] is MaterialParam materialParam)
 			{

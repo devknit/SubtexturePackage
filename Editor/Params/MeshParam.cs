@@ -155,11 +155,6 @@ namespace Subtexture
 		{
 			base.OnDisable();
 			
-			if( animator != null)
-			{
-				animator.Dispose();
-				animator = null;
-			}
 			if( gameObject != null)
 			{
 				GameObject.DestroyImmediate( gameObject);
@@ -197,10 +192,9 @@ namespace Subtexture
 				{
 					Record( "Change Mesh Type");
 					
-					if( animator != null)
+					if( param[ (int)PreParamType.kAnimation] is AnimationParam animationParam)
 					{
-						animator.Dispose();
-						animator = null;
+						animationParam.Dispose();
 					}
 					if( gameObject != null)
 					{
@@ -346,10 +340,9 @@ namespace Subtexture
 					{
 						Record( "Change Prefab");
 						
-						if( animator != null)
+						if( param[ (int)PreParamType.kAnimation] is AnimationParam animationParam)
 						{
-							animator.Dispose();
-							animator = null;
+							animationParam.Dispose();
 						}
 						if( gameObject != null)
 						{
@@ -363,35 +356,26 @@ namespace Subtexture
 						}
 						prefab = prefabValue;
 					}
+					bool showBoundsValue = EditorGUILayout.Toggle( "Show BoundingBox", showBounds);
+					if( showBounds.Equals( showBoundsValue) == false)
+					{
+						boundsObject.SetActive( showBoundsValue);
+						showBounds = showBoundsValue;
+					}
+					Rect batchButtonRect = EditorGUILayout.GetControlRect();
+					batchButtonRect.xMin += 152.0f;
+					
+					if( GUI.Button( batchButtonRect, "Batch") != false)
+					{
+						
+					}
 				}
 				if( prefab != null)
 				{
 					if( gameObject == null)
 					{
 						gameObject = context.InstantiatePrefabInScene( prefab);
-						var output = gameObject.GetComponent<Animator>();
 						
-						if( output != null && object.ReferenceEquals( output, null) == false)
-						{
-							AnimationClip[] clips = null;
-							clipIndex = 0;
-							
-							if( output.runtimeAnimatorController != null)
-							{
-								clips = output.runtimeAnimatorController.animationClips;
-							}
-							animator = new SimpleAnimator( output, clips, clipIndex);
-							animator.SetTimeUpdateMode( DirectorUpdateMode.Manual);
-							
-							if( animator.CurrentClip != null)
-							{
-								if( animationSeek > animator.CurrentClip.length)
-								{
-									animationSeek = animator.CurrentClip.length;
-								}
-							}
-							refreshCount = 3;
-						}
 						if( param[ (int)PreParamType.kCamera] is CameraParam cameraParam)
 						if( param[ (int)PreParamType.kTexture] is TextureParam textureParam)
 						if( param[ (int)PreParamType.kTransform] is TransformParam transformParam)
@@ -407,40 +391,6 @@ namespace Subtexture
 						boundsObject.GetComponent<MeshRenderer>().sharedMaterial = boundsMaterial;
 						boundsObject.transform.SetParent( gameObject.transform, false);
 						boundsObject.SetActive( showBounds);
-					}
-					if( animator != null)
-					{
-						if( (animator.Clips?.Length ?? 0) > 0)
-						{
-							int clipIndexValue = EditorGUILayout.Popup( "Animation Clips", clipIndex, animator.Clips.Select( x => x.name).ToArray());
-							if( clipIndex.Equals( clipIndexValue) == false)
-							{
-								Record( "Change Animation Clips");
-								clipIndex = clipIndexValue;
-								animator.SetClip( clipIndex);
-								
-								if( animationSeek > animator.CurrentClip.length)
-								{
-									animationSeek = animator.CurrentClip.length;
-								}
-								refreshCount = 2;
-							}
-						}
-						if( animator.CurrentClip != null)
-						{
-							float animationSeekValue = EditorGUILayout.Slider( "Animation Seconds", animationSeek, 0.0f, animator.CurrentClip.length);
-							if( animationSeek.Equals( animationSeekValue) == false)
-							{
-								Record( "Change Animation Seconds");
-								animationSeek = animationSeekValue;
-							}
-						}
-					}
-					bool showBoundsValue = EditorGUILayout.Toggle( "Show BoundingBox", showBounds);
-					if( showBounds.Equals( showBoundsValue) == false)
-					{
-						boundsObject.SetActive( showBoundsValue);
-						showBounds = showBoundsValue;
 					}
 				}
 			});
@@ -490,7 +440,7 @@ namespace Subtexture
 			sphere = new BoundingSphere( Vector3.zero, 0.0f);
 			return false;
 		}
-		public void PrefabRender( PreviewRenderUtility context, TransformParam transformParam)
+		public void Update( PreviewRenderUtility context, TransformParam transformParam)
 		{
 			Bounds bounds;
 			
@@ -499,7 +449,6 @@ namespace Subtexture
 				gameObject.transform.localPosition = transformParam.localPosition;
 				gameObject.transform.localEulerAngles = transformParam.localRotation;
 				gameObject.transform.localScale = transformParam.localScale;
-				animator?.EvaluateTime( animationSeek);
 			}
 			if( TryGetBoundingBox( out bounds) != false)
 			{
@@ -553,13 +502,7 @@ namespace Subtexture
 		[SerializeField]
 		GameObject prefab = default;
 		[SerializeField]
-		GameObject gameObject = default;
-		[System.NonSerialized]
-		SimpleAnimator animator = default;
-		[SerializeField]
-		int clipIndex = default;
-		[SerializeField]
-		float animationSeek = 0.0f;
+		public GameObject gameObject = default;
 		[SerializeField]
 		bool showBounds = false;
 	}

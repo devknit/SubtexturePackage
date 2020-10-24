@@ -11,15 +11,16 @@ namespace Subtexture
 		public BaseParam( bool opened)
 		{
 			defaultOpened = opened;
+			enabled = true;
 		}
 		public virtual void OnEnable( Window window)
 		{
 			handle = window;
 			
-			if( enabled == null)
+			if( opend == null)
 			{
-				enabled = new AnimBool( defaultOpened);
-				enabled.valueChanged.AddListener( window.Repaint);
+				opend = new AnimBool( defaultOpened);
+				opend.valueChanged.AddListener( window.Repaint);
 			}
 		}
 		public virtual void OnDisable()
@@ -33,51 +34,58 @@ namespace Subtexture
 		{
 			return 0;
 		}
-		public bool IsClose()
-		{
-			return closed;
-		}
-		protected void OnPUI( string caption, bool close, System.Action callback)
+		protected void OnPUI( string caption, bool disableGroup, System.Action callback)
 		{
 			EditorGUILayout.BeginVertical( GUI.skin.box);
 			{
 				EditorGUILayout.BeginHorizontal();
 				{
-					bool target = EditorGUILayout.Foldout( enabled.target, caption);
-					if( enabled.target.Equals( target) == false)
+					bool target = EditorGUILayout.Foldout( opend.target, caption);
+					if( opend.target.Equals( target) == false)
 					{
 						Record( "Change Foldout");
-						enabled.target = target;
+						opend.target = target;
 					}
-					if( close != false)
+					if( disableGroup != false)
 					{
 						GUILayout.FlexibleSpace();
-						
-						if( GUILayout.Button( "×"))
+						bool enabledValue = EditorGUILayout.Toggle( enabled);
+						if( enabled.Equals( enabledValue) == false)
 						{
-							closed = true;
+							Record( "Change Enabled");
+							enabled = enabledValue;
 						}
 					}
 				}
 				EditorGUILayout.EndHorizontal();
 				
-				if( EditorGUILayout.BeginFadeGroup( enabled.faded) != false)
+				if( EditorGUILayout.BeginFadeGroup( opend.faded) != false)
 				{
 					++EditorGUI.indentLevel;
-					callback?.Invoke();
+					
+					EditorGUI.BeginDisabledGroup( enabled == false);
+					{
+						callback?.Invoke();
+					}
+					EditorGUI.EndDisabledGroup();
+					
 					--EditorGUI.indentLevel;
 				}
 				EditorGUILayout.EndFadeGroup();
 			}
 			EditorGUILayout.EndVertical();
 		}
+		public bool Enabled
+		{
+			get => enabled;
+		}
 		
 		[SerializeField]
 		bool defaultOpened;
 		[SerializeField]
-		AnimBool enabled;
+		AnimBool opend;
 		[SerializeField]
-		bool closed;
+		bool enabled;
 		[System.NonSerialized]
 		Window handle;
 	}

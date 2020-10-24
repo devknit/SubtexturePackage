@@ -12,7 +12,7 @@ namespace Subtexture
 		}
 		public override int OnGUI( PreviewRenderUtility context, BaseParam[] param)
 		{
-			OnPUI( "Texture", false, () =>
+			OnPUI( "Screen Texture", false, () =>
 			{
 				bool forceSquareValue = EditorGUILayout.Toggle( "Force square", forceSquare);
 				if( forceSquare.Equals( forceSquareValue) == false)
