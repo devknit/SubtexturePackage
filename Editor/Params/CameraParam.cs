@@ -4,8 +4,9 @@ using UnityEditor;
 
 namespace Subtexture
 {
-	public enum Direction
+	public enum CameraPreset
 	{
+		kFit,
 		kFront,
 		kBack,
 		kTop,
@@ -19,10 +20,40 @@ namespace Subtexture
 		public CameraParam() : base( false)
 		{
 		}
+		public void MoveControl( Camera camera, Vector2 value)
+		{
+			var translate = 
+				(camera.transform.right * -value.x)
+				+ (camera.transform.up * value.y);
+			
+			localPosition += translate;
+			lookAtPosition += translate;
+			camera.transform.localPosition = localPosition;
+			camera.transform.LookAt( lookAtPosition);
+		}
+		public void OrbitControl( Camera camera, Vector2 value)
+		{
+			camera.transform.RotateAround( lookAtPosition, Vector3.up, value.x);
+			camera.transform.RotateAround( lookAtPosition, camera.transform.right, value.y);
+			localPosition = camera.transform.localPosition;
+			localRotation = camera.transform.localEulerAngles;
+		}
+		public void ZoomControl( Camera camera, float value)
+		{
+			Vector3 direction = lookAtPosition - localPosition;
+			float distance = Mathf.Max( 1e-4f, direction.magnitude + value * 0.5f);
+			camera.transform.localPosition = localPosition = lookAtPosition - (direction.normalized * distance);
+		}
 		public override int OnGUI( PreviewRenderUtility context, BaseParam[] param)
 		{
 			OnPUI( "Camera", false, () =>
 			{
+				Vector3 lookAtPositionValue = EditorGUILayout.Vector3Field( "LookAt", lookAtPosition);
+				if( lookAtPosition.Equals( lookAtPositionValue) == false)
+				{
+					Record( "Change LookAt");
+					lookAtPosition = lookAtPositionValue;
+				}
 				Vector3 localPositionValue = EditorGUILayout.Vector3Field( "Position", localPosition);
 				if( localPosition.Equals( localPositionValue) == false)
 				{
@@ -97,11 +128,11 @@ namespace Subtexture
 					farClipPlane = farClipPlaneValue;
 				}
 				
-				Rect rectValue = EditorGUILayout.RectField( "Viewport Rect", rect);
-				if( rect.Equals( rectValue) == false)
+				Rect viewportRectValue = EditorGUILayout.RectField( "Viewport Rect", viewportRect);
+				if( viewportRect.Equals( viewportRectValue) == false)
 				{
 					Record( "Change Far Clipping Planes");
-					rect = rectValue;
+					viewportRect = viewportRectValue;
 				}
 				EditorGUILayout.BeginHorizontal();
 				{
@@ -111,7 +142,7 @@ namespace Subtexture
 						if( param[ (int)PreParamType.kTransform] is TransformParam transformParam)
 						if( param[ (int)PreParamType.kMesh] is MeshParam meshParam)
 						{
-							ToDirection( Direction.kFront, textureParam, transformParam, meshParam);
+							ToPreset( CameraPreset.kFront, textureParam, transformParam, meshParam);
 						}
 					}
 					if( GUILayout.Button( "Back") != false)
@@ -120,7 +151,7 @@ namespace Subtexture
 						if( param[ (int)PreParamType.kTransform] is TransformParam transformParam)
 						if( param[ (int)PreParamType.kMesh] is MeshParam meshParam)
 						{
-							ToDirection( Direction.kBack, textureParam, transformParam, meshParam);
+							ToPreset( CameraPreset.kBack, textureParam, transformParam, meshParam);
 						}
 					}
 				}
@@ -134,7 +165,7 @@ namespace Subtexture
 						if( param[ (int)PreParamType.kTransform] is TransformParam transformParam)
 						if( param[ (int)PreParamType.kMesh] is MeshParam meshParam)
 						{
-							ToDirection( Direction.kTop, textureParam, transformParam, meshParam);
+							ToPreset( CameraPreset.kTop, textureParam, transformParam, meshParam);
 						}
 					}
 					if( GUILayout.Button( "Bottom") != false)
@@ -143,7 +174,7 @@ namespace Subtexture
 						if( param[ (int)PreParamType.kTransform] is TransformParam transformParam)
 						if( param[ (int)PreParamType.kMesh] is MeshParam meshParam)
 						{
-							ToDirection( Direction.kBottom, textureParam, transformParam, meshParam);
+							ToPreset( CameraPreset.kBottom, textureParam, transformParam, meshParam);
 						}
 					}
 				}
@@ -157,7 +188,7 @@ namespace Subtexture
 						if( param[ (int)PreParamType.kTransform] is TransformParam transformParam)
 						if( param[ (int)PreParamType.kMesh] is MeshParam meshParam)
 						{
-							ToDirection( Direction.kLeft, textureParam, transformParam, meshParam);
+							ToPreset( CameraPreset.kLeft, textureParam, transformParam, meshParam);
 						}
 					}
 					if( GUILayout.Button( "Right") != false)
@@ -166,7 +197,7 @@ namespace Subtexture
 						if( param[ (int)PreParamType.kTransform] is TransformParam transformParam)
 						if( param[ (int)PreParamType.kMesh] is MeshParam meshParam)
 						{
-							ToDirection( Direction.kRight, textureParam, transformParam, meshParam);
+							ToPreset( CameraPreset.kRight, textureParam, transformParam, meshParam);
 						}
 					}
 				}
@@ -192,9 +223,9 @@ namespace Subtexture
 			}
 			camera.nearClipPlane = nearClipPlane;
 			camera.farClipPlane = farClipPlane;
-			camera.rect = rect;
+			camera.rect = viewportRect;
 		}
-		public void ToDirection( Direction direction, TextureParam textureParam, TransformParam transformParam, MeshParam meshParam)
+		public void ToPreset( CameraPreset preset, TextureParam textureParam, TransformParam transformParam, MeshParam meshParam)
 		{
 			float aspecct = (float)textureParam.width / (float)textureParam.height;
 			Bounds bounds;
@@ -203,9 +234,37 @@ namespace Subtexture
 			{
 				if( orthographic == false)
 				{
-					switch( direction)
+					switch( preset)
 					{
-						case Direction.kFront:
+						case CameraPreset.kFit:
+						{
+							float length;
+							float fov;
+							
+							if( bounds.extents.x < bounds.extents.y)
+							{
+								length = bounds.extents.y;
+								fov = fieldOfView;
+							}
+							else
+							{
+								length = bounds.extents.x;
+								fov = Camera.VerticalToHorizontalFieldOfView( fieldOfView, aspecct);
+							}
+							float distance = length / Mathf.Tan( fov * 0.5f * Mathf.Deg2Rad) + bounds.extents.z - bounds.center.z;
+							if( distance <= 0.0f)
+							{
+								return;
+							}
+							lookAtPosition = bounds.center;
+							Vector3 direction = Vector3.Normalize( lookAtPosition - localPosition);
+							localPosition = lookAtPosition - direction * distance;
+							localRotation = Quaternion.LookRotation( direction).eulerAngles;
+							nearClipPlane = distance - 0.01f;
+							farClipPlane = nearClipPlane + bounds.size.z + 0.02f;
+							break;
+						}
+						case CameraPreset.kFront:
 						{
 							float length;
 							float fov;
@@ -224,11 +283,12 @@ namespace Subtexture
 							float z = -(distance + bounds.extents.z - bounds.center.z);
 							localPosition = new Vector3( bounds.center.x, bounds.center.y, z);
 							localRotation = Vector3.zero;
+							lookAtPosition = bounds.center;
 							nearClipPlane = distance - 0.01f;
 							farClipPlane = nearClipPlane + bounds.size.z + 0.02f;
 							break;
 						}
-						case Direction.kBack:
+						case CameraPreset.kBack:
 						{
 							float length;
 							float fov;
@@ -247,11 +307,12 @@ namespace Subtexture
 							float z = distance + bounds.extents.z + bounds.center.z;
 							localPosition = new Vector3( bounds.center.x, bounds.center.y, z);
 							localRotation = new Vector3( 0, 180, 0);
+							lookAtPosition = bounds.center;
 							nearClipPlane = distance - 0.01f;
 							farClipPlane = nearClipPlane + bounds.size.z + 0.02f;
 							break;
 						}
-						case Direction.kTop:
+						case CameraPreset.kTop:
 						{
 							float length;
 							float fov;
@@ -270,11 +331,12 @@ namespace Subtexture
 							float y = distance + bounds.extents.y + bounds.center.y;
 							localPosition = new Vector3( bounds.center.x, y, bounds.center.z);
 							localRotation = new Vector3( 90, 0, 0);
+							lookAtPosition = bounds.center;
 							nearClipPlane = distance - 0.01f;
 							farClipPlane = nearClipPlane + bounds.size.y + 0.02f;
 							break;
 						}
-						case Direction.kBottom:
+						case CameraPreset.kBottom:
 						{
 							float length;
 							float fov;
@@ -293,11 +355,12 @@ namespace Subtexture
 							float y = -(distance + bounds.extents.y - bounds.center.y);
 							localPosition = new Vector3( bounds.center.x, y, bounds.center.z);
 							localRotation = new Vector3( -90, 0, 0);
+							lookAtPosition = bounds.center;
 							nearClipPlane = distance - 0.01f;
 							farClipPlane = nearClipPlane + bounds.size.y + 0.02f;
 							break;
 						}
-						case Direction.kLeft:
+						case CameraPreset.kLeft:
 						{
 							float length;
 							float fov;
@@ -316,11 +379,12 @@ namespace Subtexture
 							float x = -(distance + bounds.extents.x - bounds.center.x);
 							localPosition = new Vector3( x, bounds.center.y, bounds.center.z);
 							localRotation = new Vector3( 0, 90, 0);
+							lookAtPosition = bounds.center;
 							nearClipPlane = distance - 0.01f;
 							farClipPlane = nearClipPlane + bounds.size.x + 0.02f;
 							break;
 						}
-						case Direction.kRight:
+						case CameraPreset.kRight:
 						{
 							float length;
 							float fov;
@@ -339,6 +403,7 @@ namespace Subtexture
 							float x = distance + bounds.extents.x + bounds.center.x;
 							localPosition = new Vector3( x, bounds.center.y, bounds.center.z);
 							localRotation = new Vector3( 0, -90, 0);
+							lookAtPosition = bounds.center;
 							nearClipPlane = distance - 0.01f;
 							farClipPlane = nearClipPlane + bounds.size.x + 0.02f;
 							break;
@@ -349,57 +414,63 @@ namespace Subtexture
 				{
 					const float nearLength = 1.00f;
 					
-					switch( direction)
+					switch( preset)
 					{
-						case Direction.kFront:
+						case CameraPreset.kFront:
 						{
 							localPosition = new Vector3( bounds.center.x, bounds.center.y, -(bounds.extents.z - bounds.center.z + nearLength));
 							localRotation = Vector3.zero;
+							lookAtPosition = bounds.center;
 							orthographicSize = Mathf.Max( Camera.HorizontalToVerticalFieldOfView( bounds.extents.x, aspecct), bounds.extents.y) * 1.005f;
 							nearClipPlane = nearLength;
 							farClipPlane = nearClipPlane + bounds.size.z + 0.001f;
 							break;
 						}
-						case Direction.kBack:
+						case CameraPreset.kBack:
 						{
 							localPosition = new Vector3( bounds.center.x, bounds.center.y, bounds.extents.z + bounds.center.z + nearLength);
 							localRotation = new Vector3( 0, 180, 0);
+							lookAtPosition = bounds.center;
 							orthographicSize = Mathf.Max( Camera.HorizontalToVerticalFieldOfView( bounds.extents.x, aspecct), bounds.extents.y) * 1.005f;
 							nearClipPlane = nearLength;
 							farClipPlane = nearClipPlane + bounds.size.z + 0.001f;
 							break;
 						}
-						case Direction.kTop:
+						case CameraPreset.kTop:
 						{
 							localPosition = new Vector3( bounds.center.x, bounds.extents.y + bounds.center.y + nearLength, bounds.center.z);
 							localRotation = new Vector3( 90, 0, 0);
+							lookAtPosition = bounds.center;
 							orthographicSize = Mathf.Max( Camera.HorizontalToVerticalFieldOfView( bounds.extents.x, aspecct), bounds.extents.z) * 1.005f;
 							nearClipPlane = nearLength;
 							farClipPlane = nearClipPlane + bounds.size.y + 0.001f + 100;
 							break;
 						}
-						case Direction.kBottom:
+						case CameraPreset.kBottom:
 						{
 							localPosition = new Vector3( bounds.center.x, -(bounds.extents.y - bounds.center.y + nearLength), bounds.center.z);
 							localRotation = new Vector3( -90, 0, 0);
+							lookAtPosition = bounds.center;
 							orthographicSize = Mathf.Max( Camera.HorizontalToVerticalFieldOfView( bounds.extents.x, aspecct), bounds.extents.z) * 1.005f;
 							nearClipPlane = nearLength;
 							farClipPlane = nearClipPlane + bounds.size.y + 0.001f;
 							break;
 						}
-						case Direction.kLeft:
+						case CameraPreset.kLeft:
 						{
 							localPosition = new Vector3( -(bounds.extents.x - bounds.center.x + nearLength), bounds.center.y, bounds.center.z);
 							localRotation = new Vector3( 0, 90, 0);
+							lookAtPosition = bounds.center;
 							orthographicSize = Mathf.Max( Camera.HorizontalToVerticalFieldOfView( bounds.extents.z, aspecct), bounds.extents.y) * 1.005f;
 							nearClipPlane = nearLength;
 							farClipPlane = nearClipPlane + bounds.size.y + 0.001f;
 							break;
 						}
-						case Direction.kRight:
+						case CameraPreset.kRight:
 						{
 							localPosition = new Vector3( bounds.extents.x - bounds.center.x + nearLength, bounds.center.y, bounds.center.z);
 							localRotation = new Vector3( 0, -90, 0);
+							lookAtPosition = bounds.center;
 							orthographicSize = Mathf.Max( Camera.HorizontalToVerticalFieldOfView( bounds.extents.z, aspecct), bounds.extents.y) * 1.005f;
 							nearClipPlane = nearLength;
 							farClipPlane = nearClipPlane + bounds.size.y + 0.001f;
@@ -428,6 +499,14 @@ namespace Subtexture
 				}
 			}
 		}
+		public Vector2 GetSurfaceArea( float aspect)
+		{
+			float distance = Mathf.Abs( Vector3.Distance( lookAtPosition, localPosition));
+			float xFieldOfView = Camera.VerticalToHorizontalFieldOfView( fieldOfView, aspect);
+			return new Vector2( 
+				distance * Mathf.Tan( xFieldOfView * 0.5f * Mathf.Deg2Rad) * 2.0f,
+				distance * Mathf.Tan( fieldOfView * 0.5f * Mathf.Deg2Rad) * 2.0f);
+		}
 		static readonly string[] kProjections = new string[]
 		{
 			"Perspective",
@@ -438,6 +517,8 @@ namespace Subtexture
 		Vector3 localPosition = new Vector3( 0, 0, -1);
 		[SerializeField]
 		Vector3 localRotation = Vector3.zero;
+		[SerializeField]
+		Vector3 lookAtPosition = Vector3.zero;
 		[SerializeField]
 		Color backgroundColor = Color.clear;
 		[SerializeField]
@@ -451,6 +532,6 @@ namespace Subtexture
 		[SerializeField]
 		float farClipPlane = 1000.0f;
 		[SerializeField]
-		Rect rect = new Rect( 0, 0, 1, 1);
+		Rect viewportRect = new Rect( 0, 0, 1, 1);
 	}
 }

@@ -196,6 +196,22 @@ namespace Subtexture
 				if( meshType.Equals( meshTypeValue) == false)
 				{
 					Record( "Change Mesh Type");
+					
+					if( animator != null)
+					{
+						animator.Dispose();
+						animator = null;
+					}
+					if( gameObject != null)
+					{
+						GameObject.DestroyImmediate( gameObject);
+						gameObject = null;
+					}
+					if( boundsObject != null)
+					{
+						GameObject.DestroyImmediate( boundsObject);
+						boundsObject = null;
+					}
 					meshType = meshTypeValue;
 				}
 				if( meshType == MeshType.kAssets)
@@ -380,7 +396,7 @@ namespace Subtexture
 						if( param[ (int)PreParamType.kTexture] is TextureParam textureParam)
 						if( param[ (int)PreParamType.kTransform] is TransformParam transformParam)
 						{
-							cameraParam.ToDirection( Direction.kFront, textureParam, transformParam, this);
+							cameraParam.ToPreset( CameraPreset.kFit, textureParam, transformParam, this);
 						}
 					}
 					if( boundsObject == null)

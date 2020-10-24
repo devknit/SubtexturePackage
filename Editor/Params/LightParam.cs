@@ -10,6 +10,13 @@ namespace Subtexture
 		public LightParam() : base( false)
 		{
 		}
+		public void OrbitControl( Light light, Vector2 value)
+		{
+			light.transform.RotateAround( Vector3.zero, Vector3.up, value.x);
+			light.transform.RotateAround( Vector3.zero, light.transform.right, value.y);
+			localPosition = light.transform.localPosition;
+			localRotation = light.transform.localEulerAngles;
+		}
 		public override int OnGUI( PreviewRenderUtility context, BaseParam[] param)
 		{
 			OnPUI( "Light", false, () =>

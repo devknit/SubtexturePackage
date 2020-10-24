@@ -33,6 +33,10 @@ namespace Subtexture
 		{
 			handle = window;
 			
+			if( renderer == null)
+			{
+				renderer = new PreviewRenderUtility();
+			}
 			if( preParams == null)
 			{
 				preParams = new BaseParam[]
@@ -232,19 +236,97 @@ namespace Subtexture
 						GUI.DrawTextureWithTexCoords( previewRect, textureChecker, texCoords, false);
 					}
 					GUI.DrawTexture( previewRect, previewTexture);
+					MouseControl( previewRect);
 				}
 			}
 			GUILayout.EndArea();
+		}
+		void MouseControl( Rect rect)
+		{
+			Event ev = Event.current;
+			
+			switch( ev.type)
+			{
+				case EventType.MouseDrag:
+				{
+					if( rect.Contains( ev.mousePosition) != false)
+					{
+						switch( ev.button)
+						{
+							case 0:
+							{
+								if( ev.alt != false)
+								{
+									if( preParams[ (int)PreParamType.kCamera] is CameraParam cameraParam)
+									{
+										cameraParam.OrbitControl( renderer.camera, ev.delta);
+										refresh = true;
+									}
+								}
+								break;
+							}
+							case 1:
+							{
+								if( ev.alt != false)
+								{
+									if( preParams[ (int)PreParamType.kCamera] is CameraParam cameraParam)
+									{
+										cameraParam.ZoomControl( renderer.camera, (ev.delta.x * -1.0f - ev.delta.y) * 0.5f);
+										refresh = true;
+									}
+								}
+								break;
+							}
+							case 2:
+							{
+								if( ev.alt == false)
+								{
+									if( preParams[ (int)PreParamType.kCamera] is CameraParam cameraParam)
+									{
+										Vector2 size = cameraParam.GetSurfaceArea( rect.width / rect.height);
+										Vector2 delta = ev.delta;
+										delta.x *= size.x / rect.width;
+										delta.y *= size.y / rect.height; 
+										cameraParam.MoveControl( renderer.camera, delta);
+										refresh = true;
+									}
+								}
+								else
+								{
+									if( preParams[ (int)PreParamType.kLight] is LightParam lightParam)
+									{
+										lightParam.OrbitControl( renderer.lights[ 0], ev.delta);
+										refresh = true;
+									}
+								}
+								break;
+							}
+						}
+					}
+					break;
+				}
+				case EventType.ScrollWheel:
+				{
+					if( rect.Contains( ev.mousePosition) != false)
+					{
+						if( ev.alt == false)
+						{
+							if( preParams[ (int)PreParamType.kCamera] is CameraParam cameraParam)
+							{
+								cameraParam.ZoomControl( renderer.camera, ev.delta.y * 0.1f);
+								refresh = true;
+							}
+						}
+					}
+					break;
+				}
+			}
 		}
 		public void OnInspectorGUI( Rect rect)
 		{
 			if( enabled == false)
 			{
 				return;
-			}
-			if( renderer == null)
-			{
-				renderer = new PreviewRenderUtility();
 			}
 			GUILayout.BeginArea( rect);
 			{
