@@ -75,6 +75,10 @@ namespace Subtexture
 			}
 			EditorGUILayout.EndVertical();
 		}
+		public bool Opend
+		{
+			get => opend?.target ?? false;
+		}
 		public bool Enabled
 		{
 			get => enabled;

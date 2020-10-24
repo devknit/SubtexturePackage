@@ -9,7 +9,21 @@ namespace Subtexture
 {
 	public sealed partial class Project
 	{
+		void Export( ExportFormat exportFormat, string filename)
+		{
+			Export( exportFormat, (extension) =>
+			{
+				return $"{filename}.{extension}";
+			});
+		}
 		void Export( ExportFormat exportFormat)
+		{
+			Export( exportFormat, (extension) =>
+			{
+				return EditorUtility.SaveFilePanel( "Subtexture", Application.dataPath, string.Empty, extension);
+			});
+		}
+		void Export( ExportFormat exportFormat, System.Func<string, string> callback)
 		{
 			string extension = string.Empty;
 			
@@ -32,7 +46,7 @@ namespace Subtexture
 				}
 			}
 			
-			string path = EditorUtility.SaveFilePanel( "Subtexture", Application.dataPath, "", extension);
+			string path = callback?.Invoke( extension) ?? string.Empty;
 			if( string.IsNullOrEmpty( path) == false)
 			{
 				Texture2D texture = null;

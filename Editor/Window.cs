@@ -76,10 +76,6 @@ namespace Subtexture
 		{
 			project.OnInspectorGUI( rect);
 		}
-		[EWSubWindow( "Batch", EWSubWindowIcon.Inspector)]
-		void OnBatchGUI( Rect rect)
-		{
-		}
 		public void Record( string label)
 		{
 			Undo.RecordObject( this, label);

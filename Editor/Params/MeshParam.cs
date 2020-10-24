@@ -16,7 +16,7 @@ namespace Subtexture
 	[System.Serializable]
 	public sealed class MeshParam : BaseParam
 	{
-		public MeshParam() : base( false)
+		public MeshParam() : base( true)
 		{
 		}
 		public override void OnEnable( Window window)
@@ -336,6 +336,12 @@ namespace Subtexture
 				else if( meshType == MeshType.kPrefab)
 				{
 					var prefabValue = EditorGUILayout.ObjectField( "Prefab", prefab, typeof( GameObject), false) as GameObject;
+					if( requestPrefab != null)
+					{
+						prefabValue = requestPrefab;
+						requestPrefab = null;
+						GUI.changed = true;
+					}
 					if( prefab != prefabValue)
 					{
 						Record( "Change Prefab");
@@ -361,13 +367,6 @@ namespace Subtexture
 					{
 						boundsObject.SetActive( showBoundsValue);
 						showBounds = showBoundsValue;
-					}
-					Rect batchButtonRect = EditorGUILayout.GetControlRect();
-					batchButtonRect.xMin += 152.0f;
-					
-					if( GUI.Button( batchButtonRect, "Batch") != false)
-					{
-						
 					}
 				}
 				if( prefab != null)
@@ -500,10 +499,12 @@ namespace Subtexture
 		[SerializeField]
 		GameObject boundsObject = default;
 		[SerializeField]
-		GameObject prefab = default;
+		bool showBounds = false;
+		[SerializeField]
+		public GameObject prefab = default;
 		[SerializeField]
 		public GameObject gameObject = default;
-		[SerializeField]
-		bool showBounds = false;
+		[System.NonSerialized]
+		public GameObject requestPrefab;
 	}
 }

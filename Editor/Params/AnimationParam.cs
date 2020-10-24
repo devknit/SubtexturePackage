@@ -32,11 +32,7 @@ namespace Subtexture
 					{
 						return 0;
 					}
-					if( meshParam.gameObject == null)
-					{
-						return 0;
-					}
-					if( animator == null)
+					if( meshParam.gameObject != null && animator == null)
 					{
 						var output = meshParam.gameObject.GetComponent<Animator>();
 						

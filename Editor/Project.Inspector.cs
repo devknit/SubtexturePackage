@@ -15,13 +15,14 @@ namespace Subtexture
 			{
 				return;
 			}
+			EditorGUI.BeginDisabledGroup( string.IsNullOrEmpty( batchExportPath) == false);
 			GUILayout.BeginArea( rect);
 			{
 				EditorGUILayout.BeginHorizontal();
 				{
 					EditorGUILayout.BeginVertical();
 					{
-						scrollPosition = EditorGUILayout.BeginScrollView( scrollPosition);
+						inspectorScrollPosition = EditorGUILayout.BeginScrollView( inspectorScrollPosition);
 						{
 							EditorGUI.BeginChangeCheck();
 							
@@ -31,6 +32,13 @@ namespace Subtexture
 							}
 							postProcessList.DoLayoutList();
 							
+							if( preParams[ (int)PreParamType.kMesh] is MeshParam meshParam)
+							{
+								if( meshParam.meshType == MeshType.kPrefab)
+								{
+									batchPrefabList.DoLayoutList();
+								}
+							}
 							if( EditorGUI.EndChangeCheck() != false)
 							{
 								refresh = true;
@@ -46,6 +54,7 @@ namespace Subtexture
 				}
 				EditorGUILayout.EndHorizontal();
 			}
+			EditorGUI.EndDisabledGroup();
 			GUILayout.EndArea();
 		}
 		void OnPostProcessGUI( Rect rect, int index, bool isActive, bool isFocused)
@@ -67,6 +76,22 @@ namespace Subtexture
 			var postProcessParam = postProcessParams[ list.index];
 			postProcessParam.OnDisable();
 			postProcessParams.Remove( postProcessParam);
+		}
+		void OnBatchPrefabGUI( Rect rect, int index, bool isActive, bool isFocused)
+		{
+			batchPrefabs[ index] = EditorGUI.ObjectField( rect, batchPrefabs[ index], typeof( GameObject), false) as GameObject;
+		}
+		float OnBatchPrefabHeight( int index)
+		{
+			return EditorGUIUtility.singleLineHeight;
+		}
+		void OnBatchPrefabAdd( ReorderableList list)
+		{
+			batchPrefabs.Add( null);
+		}
+		void OnBatchPrefabRemove( ReorderableList list)
+		{
+			batchPrefabs.RemoveAt( list.index);
 		}
 		void Refresh()
 		{
