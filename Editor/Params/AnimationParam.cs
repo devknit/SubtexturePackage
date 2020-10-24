@@ -115,7 +115,7 @@ namespace Subtexture
 		}
 		public void Update()
 		{
-			if( Enabled != null)
+			if( Enabled != false)
 			{
 				animator?.EvaluateTime( animationSeek);
 			}

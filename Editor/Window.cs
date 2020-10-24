@@ -4,7 +4,7 @@ using UnityEditor;
 
 namespace Subtexture
 {
-	public class Window : MDIEditorWindow
+	public sealed class Window : MDIEditorWindow
 	{
 		[MenuItem ("Tools/Subtexture/Open &T")]	
 		static void ShowWindow() 
@@ -75,6 +75,10 @@ namespace Subtexture
 		void OnInspectorGUI( Rect rect)
 		{
 			project.OnInspectorGUI( rect);
+		}
+		[EWSubWindow( "Batch", EWSubWindowIcon.Inspector)]
+		void OnBatchGUI( Rect rect)
+		{
 		}
 		public void Record( string label)
 		{
