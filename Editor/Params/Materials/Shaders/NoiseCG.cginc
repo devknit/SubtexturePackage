@@ -1,9 +1,10 @@
-// https://thebookofshaders.com/
-// Upgrade NOTE: excluded shader from DX11, OpenGL ES 2.0 because it uses unsized arrays
-#pragma exclude_renderers d3d11 gles
-
+ï»¿
 #ifndef __SUBTEXTURE_NOISE_CGINC__
 #define __SUBTEXTURE_NOISE_CGINC__
+
+// https://thebookofshaders.com/
+// Upgrade NOTE: excluded shader from DX11, OpenGL ES 2.0 because it uses unsized arrays
+//#pragma exclude_renderers d3d11 gles
 
 //https://thebookofshaders.com/10/?lan=jp
 #if 0
@@ -31,43 +32,43 @@ float2 fade( float2 t)
 }
 float2 bilinear( float f0, float f1, float f2, float f3, float2 t)
 {
-    return lerp( lerp( f0, f1, t.x), lerp( f2, f3, t.x), t.y);
+	return lerp( lerp( f0, f1, t.x), lerp( f2, f3, t.x), t.y);
 }
 
 float blockNoise( float2 v)
 {
-    return random( floor( v));
+	return random( floor( v));
 }
 
 //https://thebookofshaders.com/11/?lan=jp
 float valueNoise( float2 v)
 {
-    float2 p = floor( v);
-    float2 f = frac( v);
+	float2 p = floor( v);
+	float2 f = frac( v);
 
-    float v00 = random( p + float2( 0, 0));
-    float v10 = random( p + float2( 1, 0));
-    float v01 = random( p + float2( 0, 1));
-    float v11 = random( p + float2( 1, 1));
-    
-    //float2 t = f * f * (3.0 - 2.0 * f);
-    float2 t = fade( f);
+	float v00 = random( p + float2( 0, 0));
+	float v10 = random( p + float2( 1, 0));
+	float v01 = random( p + float2( 0, 1));
+	float v11 = random( p + float2( 1, 1));
+	
+	//float2 t = f * f * (3.0 - 2.0 * f);
+	float2 t = fade( f);
 
 	return bilinear( v00, v10, v01, v11, t);
 }
 
 float perlinNoise( float2 v)
 {
-    float2 p = floor( v);
-    float2 f = frac( v);
+	float2 p = floor( v);
+	float2 f = frac( v);
 	float2 t = fade( f);
 
 	float v00 = dot( random2( p + float2( 0, 0)), f - float2( 0, 0));
 	float v10 = dot( random2( p + float2( 1, 0)), f - float2( 1, 0));
 	float v01 = dot( random2( p + float2( 0, 1)), f - float2( 0, 1));
 	float v11 = dot( random2( p + float2( 1, 1)), f - float2( 1, 1));
-    
-    return bilinear( v00, v10, v01, v11, t);
+	
+	return bilinear( v00, v10, v01, v11, t);
 }
 /* Fractal Brownian Motion */
 //https://thebookofshaders.com/13/?lan=jp
@@ -102,17 +103,17 @@ float cellularNoise( float2 v, float t)
 	{
 		for( int x = -1; x <= 1; ++x)
 		{
-			/* ƒ}ƒX‚ÌŠî“_ */
+			/* ãƒžã‚¹ã®åŸºç‚¹ */
 			float2 neighbor = float2( x, y);
 			
-			/* ƒ}ƒX‚Ì‹N“_‚ðŠî€‚É‚µ‚½“_‚ÌÀ•W */
+			/* ãƒžã‚¹ã®èµ·ç‚¹ã‚’åŸºæº–ã«ã—ãŸç‚¹ã®åº§æ¨™ */
 			float2 pt = random2( ist + neighbor);
 			pt = 0.5 + 0.5 * sin( t + 6.2831 * pt);
 			
-			/* Šî“_‚Æ“_‚Ì‹——£ */
+			/* åŸºç‚¹ã¨ç‚¹ã®è·é›¢ */
 			float distance = length( neighbor + pt - fst);
 			
-			/* ‹ß‚¢‹——£‚ð•Û‚Â */
+			/* è¿‘ã„è·é›¢ã‚’ä¿ã¤ */
 			minDistance = min( minDistance, distance);
 		}
 	}
@@ -195,7 +196,4 @@ float3 voronoiNoise2( float2 v, float t)
 	}
 	return float3( minPoint, minDistance);
 }
-
-
-
 #endif /* __SUBTEXTURE_NOISE_CGINC__ */
