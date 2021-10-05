@@ -38,7 +38,7 @@ namespace Subtexture
 				
 				boundsMesh.SetVertices( new Vector3[]
 				{
-		            new Vector3( -0.5f, -0.5f, -0.5f),
+					new Vector3( -0.5f, -0.5f, -0.5f),
 					new Vector3(  0.5f, -0.5f, -0.5f),
 					new Vector3( -0.5f,  0.5f, -0.5f),
 					new Vector3(  0.5f,  0.5f, -0.5f),
@@ -46,9 +46,9 @@ namespace Subtexture
 					new Vector3(  0.5f, -0.5f,  0.5f),
 					new Vector3( -0.5f,  0.5f,  0.5f),
 					new Vector3(  0.5f,  0.5f,  0.5f),
-		        });
-		        boundsMesh.SetColors( new Color[]
-		        {
+				});
+				boundsMesh.SetColors( new Color[]
+				{
 					Color.green,
 					Color.green,
 					Color.green,
@@ -71,20 +71,20 @@ namespace Subtexture
 				
 				dynamicMesh.vertices = new Vector3[]
 				{
-		            new Vector3( -0.5f, -0.5f, 0),
+					new Vector3( -0.5f, -0.5f, 0),
 					new Vector3( -0.5f,  0.5f, 0),
 					new Vector3(  0.5f, -0.5f, 0),
 					new Vector3(  0.5f,  0.5f, 0)
-		        };
-		        dynamicMesh.colors = new Color[]
-		        {
+				};
+				dynamicMesh.colors = new Color[]
+				{
 					vertexColor,
 					vertexColor,
 					vertexColor,
 					vertexColor
 				};
-		        dynamicMesh.triangles = new int[]
-		        {
+				dynamicMesh.triangles = new int[]
+				{
 					0, 1, 2, 
 					1, 3, 2
 				};
@@ -224,7 +224,7 @@ namespace Subtexture
 					{
 						Record( "Change Vertex Color");
 						dynamicMesh.colors = new Color[]
-				        {
+						{
 							vertexColorValue,
 							vertexColorValue,
 							vertexColorValue,
@@ -362,6 +362,11 @@ namespace Subtexture
 						}
 						prefab = prefabValue;
 					}
+					bool autoViewFitValue = EditorGUILayout.Toggle( "Auto view fit", autoViewFit);
+					if( autoViewFit.Equals( autoViewFitValue) == false)
+					{
+						autoViewFit = autoViewFitValue;
+					}
 					bool showBoundsValue = EditorGUILayout.Toggle( "Show BoundingBox", showBounds);
 					if( showBounds.Equals( showBoundsValue) == false)
 					{
@@ -379,7 +384,10 @@ namespace Subtexture
 						if( param[ (int)PreParamType.kTexture] is TextureParam textureParam)
 						if( param[ (int)PreParamType.kTransform] is TransformParam transformParam)
 						{
-							cameraParam.ToPreset( CameraPreset.kFit, textureParam, transformParam, this);
+							if( autoViewFit != false)
+							{
+								cameraParam.ToPreset( CameraPreset.kFit, textureParam, transformParam, this);
+							}
 						}
 					}
 					if( boundsObject == null)
@@ -498,6 +506,8 @@ namespace Subtexture
 		Mesh assetMesh = default;
 		[SerializeField]
 		GameObject boundsObject = default;
+		[SerializeField]
+		bool autoViewFit = true;
 		[SerializeField]
 		bool showBounds = false;
 		[SerializeField]

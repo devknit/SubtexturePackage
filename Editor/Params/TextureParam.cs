@@ -65,11 +65,11 @@ namespace Subtexture
 			"1", "2", "4", "8", "16", "32", "64", "128", "256", "512", "1024", "2048", "4096", "8192"
 		};
 		float GetScaleFactor()
-	    {
-	        float scaleFacX = Mathf.Max( Mathf.Min( width * 2, 1024), width) / width;
-	        float scaleFacY = Mathf.Max( Mathf.Min( height * 2, 1024), height) / height;
-	        return Mathf.Min( scaleFacX, scaleFacY) * EditorGUIUtility.pixelsPerPoint;
-	    }
+		{
+			float scaleFacX = Mathf.Max( Mathf.Min( width * 2, 1024), width) / width;
+			float scaleFacY = Mathf.Max( Mathf.Min( height * 2, 1024), height) / height;
+			return Mathf.Min( scaleFacX, scaleFacY) * EditorGUIUtility.pixelsPerPoint;
+		}
 		public Rect RenderRect
 		{
 			get
