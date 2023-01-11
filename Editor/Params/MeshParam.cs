@@ -411,22 +411,7 @@ namespace Subtexture
 				{
 					if( gameObject != null)
 					{
-						bounds = new Bounds();
-						
-						Renderer[] renderers = gameObject.GetComponentsInChildren<Renderer>();
-						
-						for( int i0 = 0; i0 < renderers.Length; ++i0)
-						{
-							switch( renderers[ i0])
-							{
-								case MeshRenderer meshRenderer:
-								case SkinnedMeshRenderer skinnedMeshRenderer:
-								{
-									bounds.Encapsulate( renderers[ i0].bounds);
-									break;
-								}
-							}
-						}
+						bounds = GetBoundingBox( gameObject);
 						return true;
 					}
 					break;
@@ -434,6 +419,89 @@ namespace Subtexture
 			}
 			bounds = new Bounds( Vector3.zero, Vector3.zero);
 			return false;
+		}
+		static Bounds GetBoundingBox( GameObject gameObject)
+		{
+			var renderers = gameObject.GetComponentsInChildren<Renderer>( true);
+			var bounds = new Bounds();
+			
+			foreach( var renderer in renderers)
+			{
+				Bounds? meshBounds = null;
+				
+				switch( renderer)
+				{
+					case MeshRenderer meshRenderer:
+					{
+						var filter = renderer.GetComponent<MeshFilter>();
+						if( filter != null)
+						{
+							meshBounds = filter.mesh.bounds;
+						}
+						break;
+					}
+					case SkinnedMeshRenderer skinnedMeshRenderer:
+					{
+						var mesh = new Mesh();
+						skinnedMeshRenderer.BakeMesh( mesh, true);
+						meshBounds = mesh.bounds;
+						Mesh.DestroyImmediate( mesh);
+						break;
+					}
+				}
+				if( meshBounds.HasValue != false)
+				{
+					Bounds transformBounds = RotateBounds( meshBounds.Value, renderer.transform.rotation);
+					Vector3 boundsCenter = transformBounds.center + renderer.transform.position;
+					Vector3 boundsSize = Vector3.Scale( transformBounds.size, renderer.transform.lossyScale);
+					
+					if( bounds.size == Vector3.zero)
+					{
+						// 元バウンドのサイズがゼロの場合はバウンドを作り直す
+						bounds = new Bounds( boundsCenter, Vector3.zero);
+					}
+					bounds.Encapsulate( new Bounds( boundsCenter, boundsSize));
+				}
+			}
+			Vector3 position = gameObject.transform.position;
+			Vector3 scale = gameObject.transform.lossyScale;
+			return new Bounds( 
+				new Vector3(
+					(bounds.center.x - position.x) / scale.x,
+					(bounds.center.y - position.y) / scale.y,
+					(bounds.center.z - position.z) / scale.z), 
+				new Vector3(
+					bounds.size.x / scale.x,
+					bounds.size.y / scale.y,
+					bounds.size.z / scale.z));
+		}
+		static Bounds RotateBounds( Bounds bounds, Quaternion quaternion)
+		{
+			Vector3 min = bounds.min;
+			Vector3 max = bounds.max;
+			
+			var vertices = new Vector3[]
+			{
+				new Vector3( min.x, min.y, min.z),
+				new Vector3( min.x, min.y, max.z),
+				new Vector3( min.x, max.y, min.z),
+				new Vector3( min.x, max.y, max.z),
+				new Vector3( max.x, min.y, min.z),
+				new Vector3( max.x, min.y, max.z),
+				new Vector3( max.x, max.y, min.z),
+				new Vector3( max.x, max.y, max.z),
+			};
+			min = new Vector3( float.MaxValue, float.MaxValue, float.MaxValue);
+			max = new Vector3( float.MinValue, float.MinValue, float.MinValue);
+			
+			foreach( Vector3 vertex in vertices)
+			{
+				var v = quaternion * vertex;
+				min = Vector3.Min( min, v);
+				max = Vector3.Max( max, v);
+			}
+			Vector3 size = max - min;
+			return new Bounds( min + size * 0.5f, size);
 		}
 		public bool TryGetBoundingSphere( out BoundingSphere sphere)
 		{
