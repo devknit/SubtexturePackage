@@ -32,15 +32,15 @@ namespace Subtexture
 	{
 		public void OnEnable( Window window)
 		{
-			handle = window;
+			m_Handle = window;
 			
-			if( renderer == null)
+			if( m_Renderer == null)
 			{
-				renderer = new PreviewRenderUtility();
+				m_Renderer = new PreviewRenderUtility();
 			}
-			if( preParams == null)
+			if( m_PreParams == null)
 			{
-				preParams = new BaseParam[]
+				m_PreParams = new BaseParam[]
 				{
 					new TextureParam(),
 					new CameraParam(),
@@ -51,46 +51,46 @@ namespace Subtexture
 					new AnimationParam()
 				};
 			}
-			for( int i0 = 0; i0 < preParams.Length; ++i0)
+			for( int i0 = 0; i0 < m_PreParams.Length; ++i0)
 			{
-				preParams[ i0].OnEnable( window);
+				m_PreParams[ i0].OnEnable( window);
 			}
-			if( postProcessParams == null)
+			if( m_PostProcessParams == null)
 			{
-				postProcessParams = new List<PostProcessParam>();
+				m_PostProcessParams = new List<PostProcessParam>();
 			}
-			foreach( PostProcessParam param in postProcessParams)
+			foreach( PostProcessParam param in m_PostProcessParams)
 			{
 				param.OnEnable( window);
 			}
-			if( postProcessList == null)
+			if( m_PostProcessList == null)
 			{
-				postProcessList = new ReorderableList(
-					postProcessParams,
+				m_PostProcessList = new ReorderableList(
+					m_PostProcessParams,
 					typeof( PostProcessParam),
 					true, true, true, true);
-				postProcessList.onAddCallback += OnPostProcessAdd;
-				postProcessList.onRemoveCallback += OnPostProcessRemove;
-				postProcessList.drawElementCallback += OnPostProcessGUI;
-				postProcessList.elementHeightCallback += OnPostProcessHeight;
-				postProcessList.drawHeaderCallback = (rect) =>
+				m_PostProcessList.onAddCallback += OnPostProcessAdd;
+				m_PostProcessList.onRemoveCallback += OnPostProcessRemove;
+				m_PostProcessList.drawElementCallback += OnPostProcessGUI;
+				m_PostProcessList.elementHeightCallback += OnPostProcessHeight;
+				m_PostProcessList.drawHeaderCallback = (rect) =>
 				{
 					EditorGUI.LabelField( rect, "Post Processing");
 				};
 			}
-			if( batchPrefabs == null)
+			if( m_BatchPrefabs == null)
 			{
-				batchPrefabs = new List<GameObject>();
+				m_BatchPrefabs = new List<GameObject>();
 			}
-			if( batchPrefabList == null)
+			if( m_BatchPrefabList == null)
 			{
-				batchPrefabList = new ReorderableList(
-					batchPrefabs, typeof( GameObject), true, true, true, true);
-				batchPrefabList.onAddCallback += OnBatchPrefabAdd;
-				batchPrefabList.onRemoveCallback += OnBatchPrefabRemove;
-				batchPrefabList.drawElementCallback += OnBatchPrefabGUI;
-				batchPrefabList.elementHeightCallback += OnBatchPrefabHeight;
-				batchPrefabList.drawHeaderCallback = (rect) =>
+				m_BatchPrefabList = new ReorderableList(
+					m_BatchPrefabs, typeof( GameObject), true, true, true, true);
+				m_BatchPrefabList.onAddCallback += OnBatchPrefabAdd;
+				m_BatchPrefabList.onRemoveCallback += OnBatchPrefabRemove;
+				m_BatchPrefabList.drawElementCallback += OnBatchPrefabGUI;
+				m_BatchPrefabList.elementHeightCallback += OnBatchPrefabHeight;
+				m_BatchPrefabList.drawHeaderCallback = (rect) =>
 				{
 					int i0;
 					Rect labelRect = rect;
@@ -103,7 +103,7 @@ namespace Subtexture
 						{
 							if( objs[ i0] is GameObject gameObject)
 							{
-								batchPrefabs.Add( gameObject);
+								m_BatchPrefabs.Add( gameObject);
 							}
 						}
 					});
@@ -111,26 +111,26 @@ namespace Subtexture
 					clearRect.xMin -= 64 - clearRect.width;
 					if( GUI.Button( clearRect, "Clear", EditorStyles.toolbarButton) != false)
 					{
-						batchPrefabs.Clear();
+						m_BatchPrefabs.Clear();
 					}
-					if( preParams[ (int)PreParamType.kMesh] is MeshParam meshParam)
+					if( m_PreParams[ (int)PreParamType.kMesh] is MeshParam meshParam)
 					{
-						if( meshParam.meshType == MeshType.kPrefab)
+						if( meshParam.MeshType == MeshType.kPrefab)
 						{
-							if( string.IsNullOrEmpty( batchExportPath) != false)
+							if( string.IsNullOrEmpty( m_BatchExportPath) != false)
 							{
-								batchIndex = -1;
+								m_BatchIndex = -1;
 								
-								for( i0 = 0; i0 < batchPrefabs.Count; ++i0)
+								for( i0 = 0; i0 < m_BatchPrefabs.Count; ++i0)
 								{
-									if( batchPrefabs[ i0] != null)
+									if( m_BatchPrefabs[ i0] != null)
 									{
-										batchIndex = i0;
+										m_BatchIndex = i0;
 										break;
 									}
 								}
 							}
-							EditorGUI.BeginDisabledGroup( batchIndex < 0 || meshParam.Opend == false);
+							EditorGUI.BeginDisabledGroup( m_BatchIndex < 0 || meshParam.Opend == false);
 							{
 								Rect runRect = rect;
 								runRect.xMin -= 128 - runRect.width;
@@ -140,7 +140,7 @@ namespace Subtexture
 									string path = EditorUtility.SaveFolderPanel( "出力先", Application.dataPath, string.Empty);
 									if( string.IsNullOrEmpty( path) == false && System.IO.Directory.Exists( path) != false)
 									{
-										batchExportPath = path;
+										m_BatchExportPath = path;
 									}
 								}
 							}
@@ -149,121 +149,121 @@ namespace Subtexture
 					}
 				};
 			}
-			refresh = true;
-			enabled = true;
+			m_Refresh = true;
+			m_Enabled = true;
 		}
 		public void OnDisable()
 		{
-			if( renderer != null)
+			if( m_Renderer != null)
 			{
-				renderer.Cleanup();
-				renderer = null;
+				m_Renderer.Cleanup();
+				m_Renderer = null;
 			}
-			if( postProcessList != null)
+			if( m_PostProcessList != null)
 			{
-				postProcessList = null;
+				m_PostProcessList = null;
 			}
-			if( batchPrefabList != null)
+			if( m_BatchPrefabList != null)
 			{
-				batchPrefabList = null;
+				m_BatchPrefabList = null;
 			}
-			if( postProcessParams != null)
+			if( m_PostProcessParams != null)
 			{
-				foreach( PostProcessParam param in postProcessParams)
+				foreach( PostProcessParam param in m_PostProcessParams)
 				{
 					param.OnDisable();
 				}
 			}
-			if( preParams != null)
+			if( m_PreParams != null)
 			{
-				for( int i0 = 0; i0 < preParams.Length; ++i0)
+				for( int i0 = 0; i0 < m_PreParams.Length; ++i0)
 				{
-					preParams[ i0].OnDisable();
+					m_PreParams[ i0].OnDisable();
 				}
 			}
-			enabled = false;
+			m_Enabled = false;
 		}
 		void Batch()
 		{
-			if( string.IsNullOrEmpty( batchExportPath) != false || refreshCount > 0)
+			if( string.IsNullOrEmpty( m_BatchExportPath) != false || m_RefreshCount > 0)
 			{
 				return;
 			}
-			if( preParams[ (int)PreParamType.kMesh] is MeshParam meshParam)
+			if( m_PreParams[ (int)PreParamType.kMesh] is MeshParam meshParam)
 			{
-				if( batchIndex < batchPrefabs.Count)
+				if( m_BatchIndex < m_BatchPrefabs.Count)
 				{
-					if( meshParam.prefab == batchPrefabs[ batchIndex])
+					if( meshParam.Prefab == m_BatchPrefabs[ m_BatchIndex])
 					{
-						string assetPath = AssetDatabase.GetAssetPath( meshParam.prefab);
+						string assetPath = AssetDatabase.GetAssetPath( meshParam.Prefab);
 						string assetFileName = System.IO.Path.GetFileName( assetPath);
-						string exportPath = System.IO.Path.Combine( batchExportPath, assetFileName).Replace( "\\", "/");
+						string exportPath = System.IO.Path.Combine( m_BatchExportPath, assetFileName).Replace( "\\", "/");
 						Export( ExportFormat.kPng, exportPath);
-						++batchIndex;
+						++m_BatchIndex;
 					}
 				}
-				if( batchIndex < batchPrefabs.Count)
+				if( m_BatchIndex < m_BatchPrefabs.Count)
 				{
-					if( meshParam.requestPrefab == null)
+					if( meshParam.RequestPrefab == null)
 					{
 						if( EditorUtility.DisplayCancelableProgressBar( "Batching", 
-							$"Exporting... {batchIndex+1}/{batchPrefabs.Count}", 
-							(float)batchIndex / (float)batchPrefabs.Count) != false)
+							$"Exporting... {m_BatchIndex+1}/{m_BatchPrefabs.Count}", 
+							(float)m_BatchIndex / (float)m_BatchPrefabs.Count) != false)
 						{
 							EditorUtility.ClearProgressBar();
-							batchExportPath = string.Empty;
+							m_BatchExportPath = string.Empty;
 						}
 						else
 						{
 							do
 							{
-								if( batchPrefabs[ batchIndex] != null)
+								if( m_BatchPrefabs[ m_BatchIndex] != null)
 								{
-									meshParam.requestPrefab = batchPrefabs[ batchIndex];
-									refreshCount = Mathf.Max( 1, refreshCount);
+									meshParam.RequestPrefab = m_BatchPrefabs[ m_BatchIndex];
+									m_RefreshCount = Mathf.Max( 1, m_RefreshCount);
 									break;
 								}
 							}
-							while( ++batchIndex < batchPrefabs.Count);
+							while( ++m_BatchIndex < m_BatchPrefabs.Count);
 						}
 					}
 				}
-				if( batchIndex >= batchPrefabs.Count)
+				if( m_BatchIndex >= m_BatchPrefabs.Count)
 				{
 					EditorUtility.DisplayProgressBar( "Batching", 
-						$"Exporting... {batchIndex}/{batchPrefabs.Count}", 
-						(float)batchIndex / (float)batchPrefabs.Count);
+						$"Exporting... {m_BatchIndex}/{m_BatchPrefabs.Count}", 
+						(float)m_BatchIndex / (float)m_BatchPrefabs.Count);
 					EditorUtility.DisplayDialog( "Batch", "Complete", "OK");
 					EditorUtility.ClearProgressBar();
-					batchExportPath = string.Empty;
+					m_BatchExportPath = string.Empty;
 				}
 			}
 		}
 		public void Update()
 		{
-			if( enabled == false)
+			if( m_Enabled == false)
 			{
 				return;
 			}
 			Batch();
 			
-			if( previewForceUpdate != false || refreshCount > 0)
+			if( m_PreviewForceUpdate != false || m_RefreshCount > 0)
 			{
-				if( --refreshCount < 0)
+				if( --m_RefreshCount < 0)
 				{
-					refreshCount = 0;
+					m_RefreshCount = 0;
 				}
-				refresh = true;
-				handle.Repaint();
+				m_Refresh = true;
+				m_Handle.Repaint();
 			}
 		}
 		public void OnToolbarGUI()
 		{
-			if( enabled == false)
+			if( m_Enabled == false)
 			{
 				return;
 			}
-			EditorGUI.BeginDisabledGroup( previewTexture == null);
+			EditorGUI.BeginDisabledGroup( m_RreviewTexture == null);
 			{
 				if( GUILayout.Button( "Export", EditorStyles.toolbarButton, GUILayout.Width( 70)) != false)
 				{
@@ -335,44 +335,44 @@ namespace Subtexture
 		}
 		public void Record( string label)
 		{
-			handle.Record( label);
+			m_Handle.Record( label);
 		}
 		
 		[SerializeField]
-		bool previewForceUpdate = false;
+		bool m_PreviewForceUpdate = false;
 		[SerializeField]
-		FilterMode previewFilterMode = FilterMode.Bilinear;
+		FilterMode m_PreviewFilterMode = FilterMode.Bilinear;
 		
 		[SerializeField]
-		Vector2 inspectorScrollPosition = Vector2.zero;
+		Vector2 m_InspectorScrollPosition = Vector2.zero;
 		[SerializeField]
-		Vector2 batchScrollPosition = Vector2.zero;
+		Vector2 m_BatchScrollPosition = Vector2.zero;
 		[SerializeReference]
-		BaseParam[] preParams = default;
+		BaseParam[] m_PreParams = default;
 		[SerializeField]
-		List<PostProcessParam> postProcessParams = default;
+		List<PostProcessParam> m_PostProcessParams = default;
 		[SerializeField]
-		List<GameObject> batchPrefabs = default;
+		List<GameObject> m_BatchPrefabs = default;
 		
 		[System.NonSerialized]
-		bool enabled;
+		bool m_Enabled;
 		[System.NonSerialized]
-		Window handle;
+		Window m_Handle;
 		[System.NonSerialized]
-		bool refresh;
+		bool m_Refresh;
 		[System.NonSerialized]
-		int refreshCount;
+		int m_RefreshCount;
 		[System.NonSerialized]
-		PreviewRenderUtility renderer;
+		PreviewRenderUtility m_Renderer;
 		[System.NonSerialized]
-		RenderTexture previewTexture;
+		RenderTexture m_RreviewTexture;
 		[System.NonSerialized]
-		ReorderableList postProcessList;
+		ReorderableList m_PostProcessList;
 		[System.NonSerialized]
-		ReorderableList batchPrefabList;
+		ReorderableList m_BatchPrefabList;
 		[System.NonSerialized]
-		string batchExportPath;
+		string m_BatchExportPath;
 		[System.NonSerialized]
-		int batchIndex = -1;
+		int m_BatchIndex = -1;
 	}
 }

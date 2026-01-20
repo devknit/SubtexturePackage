@@ -10,13 +10,13 @@ namespace Subtexture
 	public enum MeshType
 	{
 		kAssets,
-		kDynamic,
-		kPrefab
+		kQuad,
+		kPrefab,
 	}
 	[System.Serializable]
 	public sealed class MeshParam : BaseParam
 	{
-		public MeshParam() : base( true)
+		public MeshParam() : base( false)
 		{
 		}
 		public override void OnEnable( Window window)
@@ -29,14 +29,14 @@ namespace Subtexture
 			{
 				if( AssetDatabase.LoadAssetAtPath<Shader>( newShaderPath) is Shader shader)
 				{
-					boundsMaterial = new Material( shader);
+					m_BoundsMaterial = new Material( shader);
 				}
 			}
-			if( boundsMesh == null)
+			if( m_BoundsMesh == null)
 			{
-				boundsMesh = new Mesh();
+				m_BoundsMesh = new Mesh();
 				
-				boundsMesh.SetVertices( new Vector3[]
+				m_BoundsMesh.SetVertices( new Vector3[]
 				{
 					new Vector3( -0.5f, -0.5f, -0.5f),
 					new Vector3(  0.5f, -0.5f, -0.5f),
@@ -47,7 +47,7 @@ namespace Subtexture
 					new Vector3( -0.5f,  0.5f,  0.5f),
 					new Vector3(  0.5f,  0.5f,  0.5f),
 				});
-				boundsMesh.SetColors( new Color[]
+				m_BoundsMesh.SetColors( new Color[]
 				{
 					Color.green,
 					Color.green,
@@ -58,32 +58,32 @@ namespace Subtexture
 					Color.green,
 					Color.green,
 				});
-				boundsMesh.SetIndices( new int[]
+				m_BoundsMesh.SetIndices( new int[]
 				{
 					0, 1, 2, 3, 4, 5, 6, 7,
 					0, 2, 1, 3, 4, 6, 5, 7,
 					0, 4, 1, 5, 2, 6, 3, 7,
 				}, MeshTopology.Lines, 0);
 			}
-			if( dynamicMesh == null)
+			if( m_DynamicMesh == null)
 			{
-				dynamicMesh = new Mesh();
+				m_DynamicMesh = new Mesh();
 				
-				dynamicMesh.vertices = new Vector3[]
+				m_DynamicMesh.vertices = new Vector3[]
 				{
-					new Vector3( -0.5f, -0.5f, 0),
-					new Vector3( -0.5f,  0.5f, 0),
-					new Vector3(  0.5f, -0.5f, 0),
-					new Vector3(  0.5f,  0.5f, 0)
+					new Vector3( m_Width * -0.5f, m_Height * -0.5f, 0),
+					new Vector3( m_Width * -0.5f, m_Height *  0.5f, 0),
+					new Vector3( m_Width *  0.5f, m_Height * -0.5f, 0),
+					new Vector3( m_Width *  0.5f, m_Height *  0.5f, 0)
 				};
-				dynamicMesh.colors = new Color[]
+				m_DynamicMesh.colors = new Color[]
 				{
-					vertexColor,
-					vertexColor,
-					vertexColor,
-					vertexColor
+					m_Color,
+					m_Color,
+					m_Color,
+					m_Color
 				};
-				dynamicMesh.triangles = new int[]
+				m_DynamicMesh.triangles = new int[]
 				{
 					0, 1, 2, 
 					1, 3, 2
@@ -91,327 +91,495 @@ namespace Subtexture
 				
 				List<Vector4> texcoord;
 				texcoord = new List<Vector4>();
-				texcoord.Add( new Vector4( 0, 0, texcoords0.z, texcoords0.w));
-				texcoord.Add( new Vector4( 0, 1, texcoords0.z, texcoords0.w));
-				texcoord.Add( new Vector4( 1, 0, texcoords0.z, texcoords0.w));
-				texcoord.Add( new Vector4( 1, 1, texcoords0.z, texcoords0.w));
-				dynamicMesh.SetUVs( 0, texcoord);
+				texcoord.Add( new Vector4( 0, 0, m_Texcoords0.z, m_Texcoords0.w));
+				texcoord.Add( new Vector4( 0, 1, m_Texcoords0.z, m_Texcoords0.w));
+				texcoord.Add( new Vector4( 1, 0, m_Texcoords0.z, m_Texcoords0.w));
+				texcoord.Add( new Vector4( 1, 1, m_Texcoords0.z, m_Texcoords0.w));
+				m_DynamicMesh.SetUVs( 0, texcoord);
 				
 				texcoord = new List<Vector4>();
-				texcoord.Add( texcoords1);
-				texcoord.Add( texcoords1);
-				texcoord.Add( texcoords1);
-				texcoord.Add( texcoords1);
-				dynamicMesh.SetUVs( 1, texcoord);
+				texcoord.Add( m_Texcoords1);
+				texcoord.Add( m_Texcoords1);
+				texcoord.Add( m_Texcoords1);
+				texcoord.Add( m_Texcoords1);
+				m_DynamicMesh.SetUVs( 1, texcoord);
 				
 				texcoord = new List<Vector4>();
-				texcoord.Add( texcoords2);
-				texcoord.Add( texcoords2);
-				texcoord.Add( texcoords2);
-				texcoord.Add( texcoords2);
-				dynamicMesh.SetUVs( 2, texcoord);
+				texcoord.Add( m_Texcoords2);
+				texcoord.Add( m_Texcoords2);
+				texcoord.Add( m_Texcoords2);
+				texcoord.Add( m_Texcoords2);
+				m_DynamicMesh.SetUVs( 2, texcoord);
 				
 				texcoord = new List<Vector4>();
-				texcoord.Add( texcoords3);
-				texcoord.Add( texcoords3);
-				texcoord.Add( texcoords3);
-				texcoord.Add( texcoords3);
-				dynamicMesh.SetUVs( 3, texcoord);
+				texcoord.Add( m_Texcoords3);
+				texcoord.Add( m_Texcoords3);
+				texcoord.Add( m_Texcoords3);
+				texcoord.Add( m_Texcoords3);
+				m_DynamicMesh.SetUVs( 3, texcoord);
 				
 				texcoord = new List<Vector4>();
-				texcoord.Add( texcoords4);
-				texcoord.Add( texcoords4);
-				texcoord.Add( texcoords4);
-				texcoord.Add( texcoords4);
-				dynamicMesh.SetUVs( 4, texcoord);
+				texcoord.Add( m_Texcoords4);
+				texcoord.Add( m_Texcoords4);
+				texcoord.Add( m_Texcoords4);
+				texcoord.Add( m_Texcoords4);
+				m_DynamicMesh.SetUVs( 4, texcoord);
 				
 				texcoord = new List<Vector4>();
-				texcoord.Add( texcoords5);
-				texcoord.Add( texcoords5);
-				texcoord.Add( texcoords5);
-				texcoord.Add( texcoords5);
-				dynamicMesh.SetUVs( 5, texcoord);
+				texcoord.Add( m_Texcoords5);
+				texcoord.Add( m_Texcoords5);
+				texcoord.Add( m_Texcoords5);
+				texcoord.Add( m_Texcoords5);
+				m_DynamicMesh.SetUVs( 5, texcoord);
 				
 				texcoord = new List<Vector4>();
-				texcoord.Add( texcoords6);
-				texcoord.Add( texcoords6);
-				texcoord.Add( texcoords6);
-				texcoord.Add( texcoords6);
-				dynamicMesh.SetUVs( 6, texcoord);
+				texcoord.Add( m_Texcoords6);
+				texcoord.Add( m_Texcoords6);
+				texcoord.Add( m_Texcoords6);
+				texcoord.Add( m_Texcoords6);
+				m_DynamicMesh.SetUVs( 6, texcoord);
 				
 				texcoord = new List<Vector4>();
-				texcoord.Add( texcoords7);
-				texcoord.Add( texcoords7);
-				texcoord.Add( texcoords7);
-				texcoord.Add( texcoords7);
-				dynamicMesh.SetUVs( 7, texcoord);
+				texcoord.Add( m_Texcoords7);
+				texcoord.Add( m_Texcoords7);
+				texcoord.Add( m_Texcoords7);
+				texcoord.Add( m_Texcoords7);
+				m_DynamicMesh.SetUVs( 7, texcoord);
 				
-				dynamicMesh.RecalculateNormals();
-				dynamicMesh.RecalculateBounds();
-				dynamicMesh.MarkDynamic();
+				m_DynamicMesh.RecalculateNormals();
+				m_DynamicMesh.RecalculateBounds();
+				m_DynamicMesh.MarkDynamic();
 			}
 		}
 		public override void OnDisable()
 		{
 			base.OnDisable();
 			
-			if( gameObject != null)
+			if( m_GameObject != null)
 			{
-				GameObject.DestroyImmediate( gameObject);
-				gameObject = null;
+				GameObject.DestroyImmediate( m_GameObject);
+				m_GameObject = null;
 			}
-			if( boundsObject != null)
+			if( m_BoundsObject != null)
 			{
-				GameObject.DestroyImmediate( boundsObject);
-				boundsObject = null;
+				GameObject.DestroyImmediate( m_BoundsObject);
+				m_BoundsObject = null;
 			}
-			if( boundsMaterial != null)
+			if( m_BoundsMaterial != null)
 			{
-				Material.DestroyImmediate( boundsMaterial);
-				boundsMaterial = null;
+				Material.DestroyImmediate( m_BoundsMaterial);
+				m_BoundsMaterial = null;
 			}
-			if( boundsMesh != null)
+			if( m_BoundsMesh != null)
 			{
-				Mesh.DestroyImmediate( boundsMesh);
-				boundsMesh = null;
+				Mesh.DestroyImmediate( m_BoundsMesh);
+				m_BoundsMesh = null;
 			}
-			if( dynamicMesh != null)
+			if( m_DynamicMesh != null)
 			{
-				Mesh.DestroyImmediate( dynamicMesh);
-				dynamicMesh = null;
+				Mesh.DestroyImmediate( m_DynamicMesh);
+				m_DynamicMesh = null;
 			}
 		}
 		public override int OnGUI( PreviewRenderUtility context, BaseParam[] param)
 		{
 			int refreshCount = 0;
 			
-			OnPUI( "Mesh", false, () =>
-			{
-				var meshTypeValue = (MeshType)EditorGUILayout.EnumPopup( "Type", meshType);
-				if( meshType.Equals( meshTypeValue) == false)
+			OnPUI( "Mesh", false, 
+				() =>
 				{
-					Record( "Change Mesh Type");
+					if( m_GameObject != null)
+					{
+						GameObject.DestroyImmediate( m_GameObject);
+						m_GameObject = null;
+					}
+					if( m_BoundsObject != null)
+					{
+						GameObject.DestroyImmediate( m_BoundsObject);
+						m_BoundsObject = null;
+					}
+					m_MeshType = MeshType.kQuad;
+					m_Width = 1;
+					m_Height = 1;
+					m_Size = 1;
+					m_Color = Color.white;
+					m_Texcoords0 = Vector4.zero;
+					m_Texcoords1 = Vector4.zero;
+					m_Texcoords2 = Vector4.zero;
+					m_Texcoords3 = Vector4.zero;
+					m_Texcoords4 = Vector4.zero;
+					m_Texcoords5 = Vector4.zero;
+					m_Texcoords6 = Vector4.zero;
+					m_Texcoords7 = Vector4.zero;
 					
-					if( param[ (int)PreParamType.kAnimation] is AnimationParam animationParam)
+					m_DynamicMesh.vertices = new Vector3[]
 					{
-						animationParam.Dispose();
-					}
-					if( gameObject != null)
+						new Vector3( m_Width * -0.5f, m_Height * -0.5f, 0),
+						new Vector3( m_Width * -0.5f, m_Height *  0.5f, 0),
+						new Vector3( m_Width *  0.5f, m_Height * -0.5f, 0),
+						new Vector3( m_Width *  0.5f, m_Height *  0.5f, 0)
+					};
+					m_DynamicMesh.colors = new Color[]
 					{
-						GameObject.DestroyImmediate( gameObject);
-						gameObject = null;
-					}
-					if( boundsObject != null)
-					{
-						GameObject.DestroyImmediate( boundsObject);
-						boundsObject = null;
-					}
-					meshType = meshTypeValue;
-				}
-				if( meshType == MeshType.kAssets)
-				{
-					var assetMeshValue = EditorGUILayout.ObjectField( "Mesh", assetMesh, typeof( Mesh), false) as Mesh;
-					if( assetMesh != assetMeshValue)
-					{
-						Record( "Change Mesh Assets");
-						assetMesh = assetMeshValue;
-					}
-				}
-				else if( meshType == MeshType.kDynamic)
-				{
-					Color vertexColorValue = EditorGUILayout.ColorField( "Vertex Color", vertexColor);
-					if( vertexColor.Equals( vertexColorValue) == false)
-					{
-						Record( "Change Vertex Color");
-						dynamicMesh.colors = new Color[]
-						{
-							vertexColorValue,
-							vertexColorValue,
-							vertexColorValue,
-							vertexColorValue
-						};
-						vertexColor = vertexColorValue;
-					}
+						m_Color,
+						m_Color,
+						m_Color,
+						m_Color
+					};
 					List<Vector4> texcoord;
-					Vector4 uv;
 					
-					Vector2 texcoordZW = new Vector2( texcoords0.z, texcoords0.w);
-					Vector2 uvZW = EditorGUILayout.Vector2Field( "TexCoord0.zw", texcoordZW);
-					if( texcoordZW.Equals( uvZW) == false)
-					{
-						Record( "Change TexCoord0");
-						texcoord = new List<Vector4>();
-						texcoord.Add( new Vector4( 0, 0, uvZW.x, uvZW.y));
-						texcoord.Add( new Vector4( 0, 1, uvZW.x, uvZW.y));
-						texcoord.Add( new Vector4( 1, 0, uvZW.x, uvZW.y));
-						texcoord.Add( new Vector4( 1, 1, uvZW.x, uvZW.y));
-						dynamicMesh.SetUVs( 0, texcoord);
-						texcoords0 = new Vector4( 0, 0, uvZW.x, uvZW.y);
-					}
-					uv = EditorGUILayout.Vector4Field( "TexCoord1", texcoords1);
-					if( texcoords1.Equals( uv) == false)
-					{
-						Record( "Change TexCoord1");
-						texcoord = new List<Vector4>();
-						texcoord.Add( uv);
-						texcoord.Add( uv);
-						texcoord.Add( uv);
-						texcoord.Add( uv);
-						dynamicMesh.SetUVs( 1, texcoord);
-						texcoords1 = uv;
-					}
-					uv = EditorGUILayout.Vector4Field( "TexCoord2", texcoords2);
-					if( texcoords2.Equals( uv) == false)
-					{
-						Record( "Change TexCoord2");
-						texcoord = new List<Vector4>();
-						texcoord.Add( uv);
-						texcoord.Add( uv);
-						texcoord.Add( uv);
-						texcoord.Add( uv);
-						dynamicMesh.SetUVs( 2, texcoord);
-						texcoords2 = uv;
-					}
-					uv = EditorGUILayout.Vector4Field( "TexCoord3", texcoords3);
-					if( texcoords3.Equals( uv) == false)
-					{
-						Record( "Change TexCoord3");
-						texcoord = new List<Vector4>();
-						texcoord.Add( uv);
-						texcoord.Add( uv);
-						texcoord.Add( uv);
-						texcoord.Add( uv);
-						dynamicMesh.SetUVs( 3, texcoord);
-						texcoords3 = uv;
-					}
-					uv = EditorGUILayout.Vector4Field( "TexCoord4", texcoords4);
-					if( texcoords4.Equals( uv) == false)
-					{
-						Record( "Change TexCoord4");
-						texcoord = new List<Vector4>();
-						texcoord.Add( uv);
-						texcoord.Add( uv);
-						texcoord.Add( uv);
-						texcoord.Add( uv);
-						dynamicMesh.SetUVs( 4, texcoord);
-						texcoords4 = uv;
-					}
-					uv = EditorGUILayout.Vector4Field( "TexCoord5", texcoords5);
-					if( texcoords5.Equals( uv) == false)
-					{
-						Record( "Change TexCoord5");
-						texcoord = new List<Vector4>();
-						texcoord.Add( uv);
-						texcoord.Add( uv);
-						texcoord.Add( uv);
-						texcoord.Add( uv);
-						dynamicMesh.SetUVs( 5, texcoord);
-						texcoords5 = uv;
-					}
-					uv = EditorGUILayout.Vector4Field( "TexCoord6", texcoords6);
-					if( texcoords6.Equals( uv) == false)
-					{
-						Record( "Change TexCoord6");
-						texcoord = new List<Vector4>();
-						texcoord.Add( uv);
-						texcoord.Add( uv);
-						texcoord.Add( uv);
-						texcoord.Add( uv);
-						dynamicMesh.SetUVs( 6, texcoord);
-						texcoords6 = uv;
-					}
-					uv = EditorGUILayout.Vector4Field( "TexCoord7", texcoords7);
-					if( texcoords7.Equals( uv) == false)
-					{
-						Record( "Change TexCoord7");
-						texcoord = new List<Vector4>();
-						texcoord.Add( uv);
-						texcoord.Add( uv);
-						texcoord.Add( uv);
-						texcoord.Add( uv);
-						dynamicMesh.SetUVs( 7, texcoord);
-						texcoords7 = uv;
-					}
-				}
-				else if( meshType == MeshType.kPrefab)
+					texcoord = new List<Vector4>();
+					texcoord.Add( new Vector4( 0, 0, m_Texcoords0.z, m_Texcoords0.w));
+					texcoord.Add( new Vector4( 0, 1, m_Texcoords0.z, m_Texcoords0.w));
+					texcoord.Add( new Vector4( 1, 0, m_Texcoords0.z, m_Texcoords0.w));
+					texcoord.Add( new Vector4( 1, 1, m_Texcoords0.z, m_Texcoords0.w));
+					m_DynamicMesh.SetUVs( 0, texcoord);
+					
+					texcoord = new List<Vector4>();
+					texcoord.Add( m_Texcoords1);
+					texcoord.Add( m_Texcoords1);
+					texcoord.Add( m_Texcoords1);
+					texcoord.Add( m_Texcoords1);
+					m_DynamicMesh.SetUVs( 1, texcoord);
+					
+					texcoord = new List<Vector4>();
+					texcoord.Add( m_Texcoords2);
+					texcoord.Add( m_Texcoords2);
+					texcoord.Add( m_Texcoords2);
+					texcoord.Add( m_Texcoords2);
+					m_DynamicMesh.SetUVs( 2, texcoord);
+					
+					texcoord = new List<Vector4>();
+					texcoord.Add( m_Texcoords3);
+					texcoord.Add( m_Texcoords3);
+					texcoord.Add( m_Texcoords3);
+					texcoord.Add( m_Texcoords3);
+					m_DynamicMesh.SetUVs( 3, texcoord);
+					
+					texcoord = new List<Vector4>();
+					texcoord.Add( m_Texcoords4);
+					texcoord.Add( m_Texcoords4);
+					texcoord.Add( m_Texcoords4);
+					texcoord.Add( m_Texcoords4);
+					m_DynamicMesh.SetUVs( 4, texcoord);
+					
+					texcoord = new List<Vector4>();
+					texcoord.Add( m_Texcoords5);
+					texcoord.Add( m_Texcoords5);
+					texcoord.Add( m_Texcoords5);
+					texcoord.Add( m_Texcoords5);
+					m_DynamicMesh.SetUVs( 5, texcoord);
+					
+					texcoord = new List<Vector4>();
+					texcoord.Add( m_Texcoords6);
+					texcoord.Add( m_Texcoords6);
+					texcoord.Add( m_Texcoords6);
+					texcoord.Add( m_Texcoords6);
+					m_DynamicMesh.SetUVs( 6, texcoord);
+					
+					texcoord = new List<Vector4>();
+					texcoord.Add( m_Texcoords7);
+					texcoord.Add( m_Texcoords7);
+					texcoord.Add( m_Texcoords7);
+					texcoord.Add( m_Texcoords7);
+					m_DynamicMesh.SetUVs( 7, texcoord);
+				}, 
+				() =>
 				{
-					var prefabValue = EditorGUILayout.ObjectField( "Prefab", prefab, typeof( GameObject), false) as GameObject;
-					if( requestPrefab != null)
+					var meshTypeValue = (MeshType)EditorGUILayout.EnumPopup( "Type", m_MeshType);
+					if( m_MeshType.Equals( meshTypeValue) == false)
 					{
-						prefabValue = requestPrefab;
-						requestPrefab = null;
-						GUI.changed = true;
-					}
-					if( prefab != prefabValue)
-					{
-						Record( "Change Prefab");
+						Record( "Change Mesh Type");
 						
 						if( param[ (int)PreParamType.kAnimation] is AnimationParam animationParam)
 						{
 							animationParam.Dispose();
 						}
-						if( gameObject != null)
+						if( m_GameObject != null)
 						{
-							GameObject.DestroyImmediate( gameObject);
-							gameObject = null;
+							GameObject.DestroyImmediate( m_GameObject);
+							m_GameObject = null;
 						}
-						if( boundsObject != null)
+						if( m_BoundsObject != null)
 						{
-							GameObject.DestroyImmediate( boundsObject);
-							boundsObject = null;
+							GameObject.DestroyImmediate( m_BoundsObject);
+							m_BoundsObject = null;
 						}
-						prefab = prefabValue;
+						m_MeshType = meshTypeValue;
 					}
-					bool autoViewFitValue = EditorGUILayout.Toggle( "Auto view fit", autoViewFit);
-					if( autoViewFit.Equals( autoViewFitValue) == false)
+					if( m_MeshType == MeshType.kAssets)
 					{
-						autoViewFit = autoViewFitValue;
-					}
-					bool showBoundsValue = EditorGUILayout.Toggle( "Show BoundingBox", showBounds);
-					if( showBounds.Equals( showBoundsValue) == false)
-					{
-						boundsObject.SetActive( showBoundsValue);
-						showBounds = showBoundsValue;
-					}
-				}
-				if( prefab != null)
-				{
-					if( gameObject == null)
-					{
-						gameObject = context.InstantiatePrefabInScene( prefab);
-						
-						if( param[ (int)PreParamType.kCamera] is CameraParam cameraParam)
-						if( param[ (int)PreParamType.kTexture] is TextureParam textureParam)
-						if( param[ (int)PreParamType.kTransform] is TransformParam transformParam)
+						var assetMeshValue = EditorGUILayout.ObjectField( "Mesh", m_AssetMesh, typeof( Mesh), false) as Mesh;
+						if( m_AssetMesh != assetMeshValue)
 						{
-							if( autoViewFit != false)
+							Record( "Change Mesh Assets");
+							m_AssetMesh = assetMeshValue;
+						}
+					}
+					else if( m_MeshType == MeshType.kQuad)
+					{
+						bool forceSquareValue = EditorGUILayout.Toggle( "Force square", m_ForceSquare);
+						if( m_ForceSquare.Equals( forceSquareValue) == false)
+						{
+							Record( "Change Force square");
+							if( forceSquareValue != false)
 							{
-								cameraParam.ToPreset( CameraPreset.kFit, textureParam, transformParam, this);
+								m_Width = m_Size;
+								m_Height = m_Size;
+							}
+							m_ForceSquare = forceSquareValue;
+						}
+						if( m_ForceSquare == false)
+						{
+							EditorGUI.BeginChangeCheck();
+							int widthValue = EditorGUILayout.IntSlider( "Width", m_Width, 1, 8196);
+							if( EditorGUI.EndChangeCheck() != false && m_Width.Equals( widthValue) == false)
+							{
+								Record( "Change Width");
+								m_Width = widthValue;
+								m_Size = widthValue;
+								
+								m_DynamicMesh.vertices = new Vector3[]
+								{
+									new Vector3( m_Width * -0.5f, m_Height * -0.5f, 0),
+									new Vector3( m_Width * -0.5f, m_Height *  0.5f, 0),
+									new Vector3( m_Width *  0.5f, m_Height * -0.5f, 0),
+									new Vector3( m_Width *  0.5f, m_Height *  0.5f, 0)
+								};
+							}
+							EditorGUI.BeginChangeCheck();
+							int heightValue = EditorGUILayout.IntSlider( "Height", m_Height, 1, 8196);
+							if( EditorGUI.EndChangeCheck() != false && m_Height.Equals( heightValue) == false)
+							{
+								Record( "Change Height");
+								m_Height = heightValue;
+								m_Size = heightValue;
+								
+								m_DynamicMesh.vertices = new Vector3[]
+								{
+									new Vector3( m_Width * -0.5f, m_Height * -0.5f, 0),
+									new Vector3( m_Width * -0.5f, m_Height *  0.5f, 0),
+									new Vector3( m_Width *  0.5f, m_Height * -0.5f, 0),
+									new Vector3( m_Width *  0.5f, m_Height *  0.5f, 0)
+								};
 							}
 						}
+						else
+						{
+							EditorGUI.BeginChangeCheck();
+							int sizeValue = EditorGUILayout.IntSlider( "Size", m_Size, 1, 8196);
+							if( EditorGUI.EndChangeCheck() != false && m_Size.Equals( sizeValue) == false)
+							{
+								Record( "Change Size");
+								m_Size = sizeValue;
+								m_Width = m_Size;
+								m_Height = m_Size;
+								
+								m_DynamicMesh.vertices = new Vector3[]
+								{
+									new Vector3( m_Width * -0.5f, m_Height * -0.5f, 0),
+									new Vector3( m_Width * -0.5f, m_Height *  0.5f, 0),
+									new Vector3( m_Width *  0.5f, m_Height * -0.5f, 0),
+									new Vector3( m_Width *  0.5f, m_Height *  0.5f, 0)
+								};
+							}
+						}
+						Color colorValue = EditorGUILayout.ColorField( "Color", m_Color);
+						if( m_Color.Equals( colorValue) == false)
+						{
+							Record( "Change Vertex Color");
+							m_DynamicMesh.colors = new Color[]
+							{
+								colorValue,
+								colorValue,
+								colorValue,
+								colorValue
+							};
+							m_Color = colorValue;
+						}
+						List<Vector4> texcoord;
+						Vector4 uv;
+						
+						Vector2 texcoordZW = new Vector2( m_Texcoords0.z, m_Texcoords0.w);
+						Vector2 uvZW = EditorGUILayout.Vector2Field( "TexCoord0.zw", texcoordZW);
+						if( texcoordZW.Equals( uvZW) == false)
+						{
+							Record( "Change TexCoord0");
+							texcoord = new List<Vector4>();
+							texcoord.Add( new Vector4( 0, 0, uvZW.x, uvZW.y));
+							texcoord.Add( new Vector4( 0, 1, uvZW.x, uvZW.y));
+							texcoord.Add( new Vector4( 1, 0, uvZW.x, uvZW.y));
+							texcoord.Add( new Vector4( 1, 1, uvZW.x, uvZW.y));
+							m_DynamicMesh.SetUVs( 0, texcoord);
+							m_Texcoords0 = new Vector4( 0, 0, uvZW.x, uvZW.y);
+						}
+						uv = EditorGUILayout.Vector4Field( "TexCoord1", m_Texcoords1);
+						if( m_Texcoords1.Equals( uv) == false)
+						{
+							Record( "Change TexCoord1");
+							texcoord = new List<Vector4>();
+							texcoord.Add( uv);
+							texcoord.Add( uv);
+							texcoord.Add( uv);
+							texcoord.Add( uv);
+							m_DynamicMesh.SetUVs( 1, texcoord);
+							m_Texcoords1 = uv;
+						}
+						uv = EditorGUILayout.Vector4Field( "TexCoord2", m_Texcoords2);
+						if( m_Texcoords2.Equals( uv) == false)
+						{
+							Record( "Change TexCoord2");
+							texcoord = new List<Vector4>();
+							texcoord.Add( uv);
+							texcoord.Add( uv);
+							texcoord.Add( uv);
+							texcoord.Add( uv);
+							m_DynamicMesh.SetUVs( 2, texcoord);
+							m_Texcoords2 = uv;
+						}
+						uv = EditorGUILayout.Vector4Field( "TexCoord3", m_Texcoords3);
+						if( m_Texcoords3.Equals( uv) == false)
+						{
+							Record( "Change TexCoord3");
+							texcoord = new List<Vector4>();
+							texcoord.Add( uv);
+							texcoord.Add( uv);
+							texcoord.Add( uv);
+							texcoord.Add( uv);
+							m_DynamicMesh.SetUVs( 3, texcoord);
+							m_Texcoords3 = uv;
+						}
+						uv = EditorGUILayout.Vector4Field( "TexCoord4", m_Texcoords4);
+						if( m_Texcoords4.Equals( uv) == false)
+						{
+							Record( "Change TexCoord4");
+							texcoord = new List<Vector4>();
+							texcoord.Add( uv);
+							texcoord.Add( uv);
+							texcoord.Add( uv);
+							texcoord.Add( uv);
+							m_DynamicMesh.SetUVs( 4, texcoord);
+							m_Texcoords4 = uv;
+						}
+						uv = EditorGUILayout.Vector4Field( "TexCoord5", m_Texcoords5);
+						if( m_Texcoords5.Equals( uv) == false)
+						{
+							Record( "Change TexCoord5");
+							texcoord = new List<Vector4>();
+							texcoord.Add( uv);
+							texcoord.Add( uv);
+							texcoord.Add( uv);
+							texcoord.Add( uv);
+							m_DynamicMesh.SetUVs( 5, texcoord);
+							m_Texcoords5 = uv;
+						}
+						uv = EditorGUILayout.Vector4Field( "TexCoord6", m_Texcoords6);
+						if( m_Texcoords6.Equals( uv) == false)
+						{
+							Record( "Change TexCoord6");
+							texcoord = new List<Vector4>();
+							texcoord.Add( uv);
+							texcoord.Add( uv);
+							texcoord.Add( uv);
+							texcoord.Add( uv);
+							m_DynamicMesh.SetUVs( 6, texcoord);
+							m_Texcoords6 = uv;
+						}
+						uv = EditorGUILayout.Vector4Field( "TexCoord7", m_Texcoords7);
+						if( m_Texcoords7.Equals( uv) == false)
+						{
+							Record( "Change TexCoord7");
+							texcoord = new List<Vector4>();
+							texcoord.Add( uv);
+							texcoord.Add( uv);
+							texcoord.Add( uv);
+							texcoord.Add( uv);
+							m_DynamicMesh.SetUVs( 7, texcoord);
+							m_Texcoords7 = uv;
+						}
 					}
-					if( boundsObject == null)
+					else if( m_MeshType == MeshType.kPrefab)
 					{
-						boundsObject = new GameObject( "Bounds", typeof( MeshFilter), typeof( MeshRenderer));
-						context.AddSingleGO( boundsObject);
-						boundsObject.GetComponent<MeshFilter>().sharedMesh = boundsMesh;
-						boundsObject.GetComponent<MeshRenderer>().sharedMaterial = boundsMaterial;
-						boundsObject.transform.SetParent( gameObject.transform, false);
-						boundsObject.SetActive( showBounds);
+						var prefabValue = EditorGUILayout.ObjectField( "Prefab", m_Prefab, typeof( GameObject), false) as GameObject;
+						if( m_RequestPrefab != null)
+						{
+							prefabValue = m_RequestPrefab;
+							m_RequestPrefab = null;
+							GUI.changed = true;
+						}
+						if( m_Prefab != prefabValue)
+						{
+							Record( "Change Prefab");
+							
+							if( param[ (int)PreParamType.kAnimation] is AnimationParam animationParam)
+							{
+								animationParam.Dispose();
+							}
+							if( m_GameObject != null)
+							{
+								GameObject.DestroyImmediate( m_GameObject);
+								m_GameObject = null;
+							}
+							if( m_BoundsObject != null)
+							{
+								GameObject.DestroyImmediate( m_BoundsObject);
+								m_BoundsObject = null;
+							}
+							m_Prefab = prefabValue;
+						}
+						bool m_AutoViewFitValue = EditorGUILayout.Toggle( "Auto view fit", m_AutoViewFit);
+						if( m_AutoViewFit.Equals( m_AutoViewFitValue) == false)
+						{
+							m_AutoViewFit = m_AutoViewFitValue;
+						}
+						bool showBoundsValue = EditorGUILayout.Toggle( "Show BoundingBox", m_ShowBounds);
+						if( m_ShowBounds.Equals( showBoundsValue) == false)
+						{
+							if( m_BoundsObject != null)
+							{
+								m_BoundsObject.SetActive( showBoundsValue);
+							}
+							m_ShowBounds = showBoundsValue;
+						}
 					}
-				}
-			});
+					if( m_Prefab != null)
+					{
+						if( m_GameObject == null)
+						{
+							m_GameObject = context.InstantiatePrefabInScene( m_Prefab);
+							
+							if( param[ (int)PreParamType.kCamera] is CameraParam cameraParam)
+							if( param[ (int)PreParamType.kTexture] is TextureParam textureParam)
+							if( param[ (int)PreParamType.kTransform] is TransformParam transformParam)
+							{
+								if( m_AutoViewFit != false)
+								{
+									cameraParam.ToPreset( CameraPreset.kFit, textureParam, transformParam, this);
+								}
+							}
+						}
+						if( m_BoundsObject == null)
+						{
+							m_BoundsObject = new GameObject( "Bounds", typeof( MeshFilter), typeof( MeshRenderer));
+							context.AddSingleGO( m_BoundsObject);
+							m_BoundsObject.GetComponent<MeshFilter>().sharedMesh = m_BoundsMesh;
+							m_BoundsObject.GetComponent<MeshRenderer>().sharedMaterial = m_BoundsMaterial;
+							m_BoundsObject.transform.SetParent( m_GameObject.transform, false);
+							m_BoundsObject.SetActive( m_ShowBounds);
+						}
+					}
+				});
 			return refreshCount;
 		}
 		public bool TryGetBoundingBox( out Bounds bounds)
 		{
-			switch( meshType)
+			switch( m_MeshType)
 			{
 				case MeshType.kPrefab:
 				{
-					if( gameObject != null)
+					if( m_GameObject != null)
 					{
-						bounds = GetBoundingBox( gameObject);
+						bounds = GetBoundingBox( m_GameObject);
 						return true;
 					}
 					break;
@@ -420,9 +588,9 @@ namespace Subtexture
 			bounds = new Bounds( Vector3.zero, Vector3.zero);
 			return false;
 		}
-		static Bounds GetBoundingBox( GameObject gameObject)
+		static Bounds GetBoundingBox( GameObject m_GameObject)
 		{
-			var renderers = gameObject.GetComponentsInChildren<Renderer>( true);
+			var renderers = m_GameObject.GetComponentsInChildren<Renderer>( true);
 			var bounds = new Bounds();
 			
 			foreach( var renderer in renderers)
@@ -463,8 +631,8 @@ namespace Subtexture
 					bounds.Encapsulate( new Bounds( boundsCenter, boundsSize));
 				}
 			}
-			Vector3 position = gameObject.transform.position;
-			Vector3 scale = gameObject.transform.lossyScale;
+			Vector3 position = m_GameObject.transform.position;
+			Vector3 scale = m_GameObject.transform.lossyScale;
 			return new Bounds( 
 				new Vector3(
 					(bounds.center.x - position.x) / scale.x,
@@ -519,70 +687,94 @@ namespace Subtexture
 		{
 			Bounds bounds;
 			
-			if( gameObject != null)
+			if( m_GameObject != null)
 			{
-				gameObject.transform.localPosition = transformParam.localPosition;
-				gameObject.transform.localEulerAngles = transformParam.localRotation;
-				gameObject.transform.localScale = transformParam.localScale;
+				m_GameObject.transform.localPosition = transformParam.LocalPosition;
+				m_GameObject.transform.localEulerAngles = transformParam.LocalRotation;
+				m_GameObject.transform.localScale = transformParam.LocalScale;
 			}
 			if( TryGetBoundingBox( out bounds) != false)
 			{
-				boundsObject.transform.localPosition = bounds.center;
-				boundsObject.transform.localScale = bounds.size;
+				m_BoundsObject.transform.localPosition = bounds.center;
+				m_BoundsObject.transform.localScale = bounds.size;
 			}
 		}
 		public Mesh RenderMesh
 		{
 			get
 			{
-				switch( meshType)
+				switch( m_MeshType)
 				{
-					case MeshType.kAssets: return assetMesh;
-					case MeshType.kDynamic: return dynamicMesh;
+					case MeshType.kAssets: return m_AssetMesh;
+					case MeshType.kQuad: return m_DynamicMesh;
 				}
 				return null;
 			}
 		}
-		
+		public MeshType MeshType
+		{
+			get{ return m_MeshType; }
+		}
+		public GameObject Prefab
+		{
+			get{ return m_Prefab; }
+		}
+		public GameObject GameObject
+		{
+			get{ return m_GameObject; }
+		}
+		public GameObject RequestPrefab
+		{
+			get{ return m_RequestPrefab; }
+			internal set{ m_RequestPrefab = value; }
+		}
 		[SerializeField]
-		public MeshType meshType = MeshType.kPrefab;
+		MeshType m_MeshType = MeshType.kQuad;
 		[SerializeField]
-		Color vertexColor = Color.white;
+		bool m_ForceSquare = true;
 		[SerializeField]
-		Vector4 texcoords0 = Vector4.zero;
+		int m_Width = 1;
 		[SerializeField]
-		Vector4 texcoords1 = Vector4.zero;
+		int m_Height = 1;
 		[SerializeField]
-		Vector4 texcoords2 = Vector4.zero;
+		int m_Size = 1;
 		[SerializeField]
-		Vector4 texcoords3 = Vector4.zero;
+		Color m_Color = Color.white;
 		[SerializeField]
-		Vector4 texcoords4 = Vector4.zero;
+		Vector4 m_Texcoords0 = Vector4.zero;
 		[SerializeField]
-		Vector4 texcoords5 = Vector4.zero;
+		Vector4 m_Texcoords1 = Vector4.zero;
 		[SerializeField]
-		Vector4 texcoords6 = Vector4.zero;
+		Vector4 m_Texcoords2 = Vector4.zero;
 		[SerializeField]
-		Vector4 texcoords7 = Vector4.zero;
+		Vector4 m_Texcoords3 = Vector4.zero;
 		[SerializeField]
-		Material boundsMaterial = default;
+		Vector4 m_Texcoords4 = Vector4.zero;
 		[SerializeField]
-		Mesh boundsMesh = default;
+		Vector4 m_Texcoords5 = Vector4.zero;
 		[SerializeField]
-		Mesh dynamicMesh = default;
+		Vector4 m_Texcoords6 = Vector4.zero;
 		[SerializeField]
-		Mesh assetMesh = default;
+		Vector4 m_Texcoords7 = Vector4.zero;
 		[SerializeField]
-		GameObject boundsObject = default;
+		Material m_BoundsMaterial = default;
 		[SerializeField]
-		bool autoViewFit = true;
+		Mesh m_BoundsMesh = default;
 		[SerializeField]
-		bool showBounds = false;
+		Mesh m_DynamicMesh = default;
 		[SerializeField]
-		public GameObject prefab = default;
+		Mesh m_AssetMesh = default;
 		[SerializeField]
-		public GameObject gameObject = default;
+		GameObject m_BoundsObject = default;
+		[SerializeField]
+		bool m_AutoViewFit = true;
+		[SerializeField]
+		bool m_ShowBounds = false;
+		[SerializeField]
+		GameObject m_Prefab = default;
+		[SerializeField]
+		GameObject m_GameObject = default;
 		[System.NonSerialized]
-		public GameObject requestPrefab;
+		GameObject m_RequestPrefab;
 	}
 }

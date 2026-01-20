@@ -64,11 +64,11 @@ namespace Subtexture
 			
 			Rect textureRect = new Rect( rect.x, rect.y, rect.width, 64);
 			
-			var newTexture = EditorGUI.ObjectField( textureRect, "Texture", texture, typeof( Texture2D), false) as Texture2D;
-			if( texture != newTexture)
+			var newTexture = EditorGUI.ObjectField( textureRect, "Texture", m_Texture, typeof( Texture2D), false) as Texture2D;
+			if( m_Texture != newTexture)
 			{
 				Record( "Change Blend Map");
-				texture = newTexture;
+				m_Texture = newTexture;
 				ret = true;
 			}
 			
@@ -87,11 +87,11 @@ namespace Subtexture
 			
 			Rect offsetRect = new Rect( 
 				x + labelWidth, y, w, EditorGUIUtility.singleLineHeight);
-			Vector2 newOffset = EditorGUI.Vector2Field( offsetRect, string.Empty, offset);
-			if( offset.Equals( newOffset) == false)
+			Vector2 newOffset = EditorGUI.Vector2Field( offsetRect, string.Empty, m_Offset);
+			if( m_Offset.Equals( newOffset) == false)
 			{
 				Record( "Change Offset");
-				offset = newOffset;
+				m_Offset = newOffset;
 				ret = true;
 			}
 			
@@ -103,11 +103,11 @@ namespace Subtexture
 			
 			Rect tilingRect = new Rect( 
 				x + labelWidth, y, w, EditorGUIUtility.singleLineHeight);
-			Vector2 newTiling = EditorGUI.Vector2Field( tilingRect, string.Empty, tiling);
-			if( tiling.Equals( newTiling) == false)
+			Vector2 newTiling = EditorGUI.Vector2Field( tilingRect, string.Empty, m_Tiling);
+			if( m_Tiling.Equals( newTiling) == false)
 			{
 				Record( "Change Tiling");
-				tiling = newTiling;
+				m_Tiling = newTiling;
 				ret = true;
 			}
 			return ret;
@@ -123,47 +123,47 @@ namespace Subtexture
 			}
 			Rect elementRect = new Rect( rect.x, rect.y + 66, rect.width, EditorGUIUtility.singleLineHeight);
 			
-			var newColorBlendOp = (ColorBlendOp)EditorGUI.EnumPopup( elementRect, " Color Blend Op", colorBlendOp);
-			if( colorBlendOp != newColorBlendOp)
+			var newColorBlendOp = (ColorBlendOp)EditorGUI.EnumPopup( elementRect, " Color Blend Op", m_ColorBlendOp);
+			if( m_ColorBlendOp != newColorBlendOp)
 			{
 				Record( "Change Color Blend Op");
-				colorBlendOp = newColorBlendOp;
+				m_ColorBlendOp = newColorBlendOp;
 				ret = true;
 			}
 			elementRect.y += elementRect.height + 2;
 			
-			var newColorBlendRatioSource = (ColorBlendRatioSource)EditorGUI.EnumPopup( elementRect, " Color Blend Ratio Source", colorBlendRatioSource);
-			if( colorBlendRatioSource != newColorBlendRatioSource)
+			var newColorBlendRatioSource = (ColorBlendRatioSource)EditorGUI.EnumPopup( elementRect, " Color Blend Ratio Source", m_ColorBlendRatioSource);
+			if( m_ColorBlendRatioSource != newColorBlendRatioSource)
 			{
 				Record( "Change Color Blend Ratio Source");
-				colorBlendRatioSource = newColorBlendRatioSource;
+				m_ColorBlendRatioSource = newColorBlendRatioSource;
 				ret = true;
 			}
 			elementRect.y += elementRect.height + 2;
 			
-			var newColorBlendRatioValue = EditorGUI.FloatField( elementRect, " Color Blend Ratio Value", colorBlendRatioValue);
-			if( colorBlendRatioValue != newColorBlendRatioValue)
+			var newColorBlendRatioValue = EditorGUI.FloatField( elementRect, " Color Blend Ratio Value", m_ColorBlendRatioValue);
+			if( m_ColorBlendRatioValue != newColorBlendRatioValue)
 			{
 				Record( "Change Color Blend Ratio Value");
-				colorBlendRatioValue = newColorBlendRatioValue;
+				m_ColorBlendRatioValue = newColorBlendRatioValue;
 				ret = true;
 			}
 			elementRect.y += elementRect.height + 2;
 			
-			var newAlphaBlendOp = (AlphaBlendOp)EditorGUI.EnumPopup( elementRect, " Alpha Blend Op", alphaBlendOp);
-			if( alphaBlendOp != newAlphaBlendOp)
+			var newAlphaBlendOp = (AlphaBlendOp)EditorGUI.EnumPopup( elementRect, " Alpha Blend Op", m_AlphaBlendOp);
+			if( m_AlphaBlendOp != newAlphaBlendOp)
 			{
 				Record( "Change Alpha Blend Op");
-				alphaBlendOp = newAlphaBlendOp;
+				m_AlphaBlendOp = newAlphaBlendOp;
 				ret = true;
 			}
 			elementRect.y += elementRect.height + 2;
 			
-			var newAlphaBlendRatioValue = EditorGUI.FloatField( elementRect, " Alpha Blend Ratio Value", alphaBlendRatioValue);
-			if( alphaBlendRatioValue != newAlphaBlendRatioValue)
+			var newAlphaBlendRatioValue = EditorGUI.FloatField( elementRect, " Alpha Blend Ratio Value", m_AlphaBlendRatioValue);
+			if( m_AlphaBlendRatioValue != newAlphaBlendRatioValue)
 			{
 				Record( "Change Alpha Blend Ratio Value");
-				alphaBlendRatioValue = newAlphaBlendRatioValue;
+				m_AlphaBlendRatioValue = newAlphaBlendRatioValue;
 				ret = true;
 			}
 			return ret;
@@ -178,22 +178,24 @@ namespace Subtexture
 		}
 		public override Material OnUpdateMaterial()
 		{
-			materialCache.SetVector( "_UVScale", new Vector4( tiling.x, tiling.y, 0.0f, 0.0f));
-			materialCache.SetVector( "_UVOffset", new Vector4( offset.x, offset.y, 0.0f, 0.0f));
-			materialCache.SetTexture( "_BlendTex", texture);
-			materialCache.SetFloat( "_ColorBlendRatio1", colorBlendRatioValue);
-			materialCache.SetFloat( "_AlphaBlendRatio1", alphaBlendRatioValue);
-			
-			string[] keywords = materialCache.shaderKeywords;
-			
-			for( int i0 = 0; i0 < keywords.Length; ++i0)
+			if( Material != null)
 			{
-				materialCache.DisableKeyword( keywords[ i0]);
+				Material.SetVector( "_UVScale", new Vector4( m_Tiling.x, m_Tiling.y, 0.0f, 0.0f));
+				Material.SetVector( "_UVOffset", new Vector4( m_Offset.x, m_Offset.y, 0.0f, 0.0f));
+				Material.SetTexture( "_BlendTex", m_Texture);
+				Material.SetFloat( "_ColorBlendRatio1", m_ColorBlendRatioValue);
+				Material.SetFloat( "_AlphaBlendRatio1", m_AlphaBlendRatioValue);
+				
+				string[] keywords = Material.shaderKeywords;
+				
+				for( int i0 = 0; i0 < keywords.Length; ++i0)
+				{
+					Material.DisableKeyword( keywords[ i0]);
+				}
+				Material.EnableKeyword( string.Format( $"_COLORBLENDOP1_{m_ColorBlendOp.ToString().ToUpper()}"));
+				Material.EnableKeyword( string.Format( $"_COLORBLENDSRC1_{m_ColorBlendRatioSource.ToString().ToUpper()}"));
+				Material.EnableKeyword( string.Format( $"_ALPHABLENDOP1_{m_AlphaBlendOp.ToString().ToUpper()}"));
 			}
-			materialCache.EnableKeyword( string.Format( $"_COLORBLENDOP1_{colorBlendOp.ToString().ToUpper()}"));
-			materialCache.EnableKeyword( string.Format( $"_COLORBLENDSRC1_{colorBlendRatioSource.ToString().ToUpper()}"));
-			materialCache.EnableKeyword( string.Format( $"_ALPHABLENDOP1_{alphaBlendOp.ToString().ToUpper()}"));
-			
 			return base.OnUpdateMaterial();
 		}
 		protected override string GetShaderGuid()
@@ -202,20 +204,20 @@ namespace Subtexture
 		}
 		
 		[SerializeField]
-		Texture2D texture;
+		Texture2D m_Texture;
 		[SerializeField]
-		Vector2 tiling = Vector2.one;
+		Vector2 m_Tiling = Vector2.one;
 		[SerializeField]
-		Vector2 offset = Vector2.zero;
+		Vector2 m_Offset = Vector2.zero;
 		[SerializeField]
-		ColorBlendOp colorBlendOp;
+		ColorBlendOp m_ColorBlendOp;
 		[SerializeField]
-		ColorBlendRatioSource colorBlendRatioSource;
+		ColorBlendRatioSource m_ColorBlendRatioSource;
 		[SerializeField]
-		float colorBlendRatioValue = 1.0f;
+		float m_ColorBlendRatioValue = 1.0f;
 		[SerializeField]
-		AlphaBlendOp alphaBlendOp;
+		AlphaBlendOp m_AlphaBlendOp;
 		[SerializeField]
-		float alphaBlendRatioValue = 1.0f;
+		float m_AlphaBlendRatioValue = 1.0f;
 	}
 }

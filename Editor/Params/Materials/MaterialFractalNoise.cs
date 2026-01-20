@@ -7,29 +7,47 @@ namespace Subtexture
 	[System.Serializable]
 	public class MaterialFractalNoise : MaterialBaseUvProperties
 	{
+		public override void Reset()
+		{
+			base.Reset();
+			SetUvScale( 8.0f);
+			m_Brightness = 0.5f;
+			m_Octave = 4;
+			m_NoiseParams = new NoiseParam[]
+			{
+				new NoiseParam( 0.5f, 1.0f, 0.0f, Vector2.zero),
+				new NoiseParam( 0.25f, 2.0f, 0.0f, Vector2.zero),
+				new NoiseParam( 0.125f, 2.0f, 0.0f, Vector2.zero),
+				new NoiseParam( 0.0625f, 2.0f, 0.0f, Vector2.zero),
+				new NoiseParam( 0.03125f, 2.0f, 0.0f, Vector2.zero),
+				new NoiseParam( 0.015625f, 2.0f, 0.0f, Vector2.zero),
+				new NoiseParam( 0.0078125f, 2.0f, 0.0f, Vector2.zero),
+				new NoiseParam( 0.00390625f, 2.0f, 0.0f, Vector2.zero)
+			};
+		}
 		public override bool OnGUI()
 		{
 			bool ret = base.OnGUI();
 			
-			float brightnessValue = EditorGUILayout.Slider( "Brightness", brightness, 0.0f, 1.0f);
-			if( brightness.Equals( brightnessValue) == false)
+			float brightnessValue = EditorGUILayout.Slider( "Brightness", m_Brightness, 0.0f, 1.0f);
+			if( m_Brightness.Equals( brightnessValue) == false)
 			{
 				Record( "Change Brightness");
-				brightness = brightnessValue;
+				m_Brightness = brightnessValue;
 				ret = true;
 			}
-			int octaveValue = EditorGUILayout.IntSlider( "Octave", octave, 1, 8);
-			if( octave.Equals( octaveValue) == false)
+			int octaveValue = EditorGUILayout.IntSlider( "Octave", m_Octave, 1, 8);
+			if( m_Octave.Equals( octaveValue) == false)
 			{
 				Record( "Change Octave");
-				octave = octaveValue;
+				m_Octave = octaveValue;
 				ret = true;
 			}
 			EditorGUILayout.BeginVertical( GUI.skin.box);
 			{
-				for( int i0 = 0; i0 < octave; ++i0)
+				for( int i0 = 0; i0 < m_Octave; ++i0)
 				{
-					if( noiseParams[ i0].OnGUI( "Element" + i0, Record) != false)
+					if( m_NoiseParams[ i0].OnGUI( "Element" + i0, Record) != false)
 					{
 						ret = true;
 					}
@@ -42,85 +60,87 @@ namespace Subtexture
 		public override void OnUpdateMaterial()
 		{
 			base.OnUpdateMaterial();
-			materialCache.SetFloat( "_Brightness", brightness);
-			materialCache.SetInt( "_Octave", octave);
 			
-			materialCache.SetVector( 
-				"_Amplitude0123", new Vector4(
-					noiseParams[ 0].amplitude,
-					noiseParams[ 1].amplitude,
-					noiseParams[ 2].amplitude,
-					noiseParams[ 3].amplitude));
-			materialCache.SetVector( 
-				"_Amplitude4567", new Vector4(
-					noiseParams[ 4].amplitude,
-					noiseParams[ 5].amplitude,
-					noiseParams[ 6].amplitude,
-					noiseParams[ 7].amplitude));
-					
-			materialCache.SetVector( 
-				"_Lacunarity0123", new Vector4(
-					noiseParams[ 0].lacunarity,
-					noiseParams[ 1].lacunarity,
-					noiseParams[ 2].lacunarity,
-					noiseParams[ 3].lacunarity));
-			materialCache.SetVector( 
-				"_Lacunarity4567", new Vector4(
-					noiseParams[ 4].lacunarity,
-					noiseParams[ 5].lacunarity,
-					noiseParams[ 6].lacunarity,
-					noiseParams[ 7].lacunarity));
-					
-			materialCache.SetVector( 
-				"_Rotation0123", new Vector4(
-					noiseParams[ 0].rotation,
-					noiseParams[ 1].rotation,
-					noiseParams[ 2].rotation,
-					noiseParams[ 3].rotation));
-			materialCache.SetVector( 
-				"_Rotation4567", new Vector4(
-					noiseParams[ 4].rotation,
-					noiseParams[ 5].rotation,
-					noiseParams[ 6].rotation,
-					noiseParams[ 7].rotation));
-					
-			materialCache.SetVector( 
-				"_Shift01", new Vector4(
-					noiseParams[ 0].shift.x,
-					noiseParams[ 0].shift.y,
-					noiseParams[ 1].shift.x,
-					noiseParams[ 1].shift.y));
-			materialCache.SetVector( 
-				"_Shift23", new Vector4(
-					noiseParams[ 2].shift.x,
-					noiseParams[ 2].shift.y,
-					noiseParams[ 3].shift.x,
-					noiseParams[ 3].shift.y));
-			materialCache.SetVector( 
-				"_Shift45", new Vector4(
-					noiseParams[ 4].shift.x,
-					noiseParams[ 4].shift.y,
-					noiseParams[ 5].shift.x,
-					noiseParams[ 5].shift.y));
-			materialCache.SetVector( 
-				"_Shift67", new Vector4(
-					noiseParams[ 6].shift.x,
-					noiseParams[ 6].shift.y,
-					noiseParams[ 7].shift.x,
-					noiseParams[ 7].shift.y));
+			if( Material != null)
+			{
+				Material.SetFloat( "_Brightness", m_Brightness);
+				Material.SetInt( "_Octave", m_Octave);
 				
+				Material.SetVector( 
+					"_Amplitude0123", new Vector4(
+						m_NoiseParams[ 0].Amplitude,
+						m_NoiseParams[ 1].Amplitude,
+						m_NoiseParams[ 2].Amplitude,
+						m_NoiseParams[ 3].Amplitude));
+				Material.SetVector( 
+					"_Amplitude4567", new Vector4(
+						m_NoiseParams[ 4].Amplitude,
+						m_NoiseParams[ 5].Amplitude,
+						m_NoiseParams[ 6].Amplitude,
+						m_NoiseParams[ 7].Amplitude));
+						
+				Material.SetVector( 
+					"_Lacunarity0123", new Vector4(
+						m_NoiseParams[ 0].Lacunarity,
+						m_NoiseParams[ 1].Lacunarity,
+						m_NoiseParams[ 2].Lacunarity,
+						m_NoiseParams[ 3].Lacunarity));
+				Material.SetVector( 
+					"_Lacunarity4567", new Vector4(
+						m_NoiseParams[ 4].Lacunarity,
+						m_NoiseParams[ 5].Lacunarity,
+						m_NoiseParams[ 6].Lacunarity,
+						m_NoiseParams[ 7].Lacunarity));
+						
+				Material.SetVector( 
+					"_Rotation0123", new Vector4(
+						m_NoiseParams[ 0].Rotation,
+						m_NoiseParams[ 1].Rotation,
+						m_NoiseParams[ 2].Rotation,
+						m_NoiseParams[ 3].Rotation));
+				Material.SetVector( 
+					"_Rotation4567", new Vector4(
+						m_NoiseParams[ 4].Rotation,
+						m_NoiseParams[ 5].Rotation,
+						m_NoiseParams[ 6].Rotation,
+						m_NoiseParams[ 7].Rotation));
+						
+				Material.SetVector( 
+					"_Shift01", new Vector4(
+						m_NoiseParams[ 0].Shift.x,
+						m_NoiseParams[ 0].Shift.y,
+						m_NoiseParams[ 1].Shift.x,
+						m_NoiseParams[ 1].Shift.y));
+				Material.SetVector( 
+					"_Shift23", new Vector4(
+						m_NoiseParams[ 2].Shift.x,
+						m_NoiseParams[ 2].Shift.y,
+						m_NoiseParams[ 3].Shift.x,
+						m_NoiseParams[ 3].Shift.y));
+				Material.SetVector( 
+					"_Shift45", new Vector4(
+						m_NoiseParams[ 4].Shift.x,
+						m_NoiseParams[ 4].Shift.y,
+						m_NoiseParams[ 5].Shift.x,
+						m_NoiseParams[ 5].Shift.y));
+				Material.SetVector( 
+					"_Shift67", new Vector4(
+						m_NoiseParams[ 6].Shift.x,
+						m_NoiseParams[ 6].Shift.y,
+						m_NoiseParams[ 7].Shift.x,
+						m_NoiseParams[ 7].Shift.y));
+			}
 		}
 		protected override string GetShaderGuid()
 		{
 			return "b649d9c025e729849bf5138c0dad8d6b";
 		}
-		
 		[SerializeField]
-		float brightness = 0.5f;
+		float m_Brightness = 0.5f;
 		[SerializeField]
-		int octave = 4;
+		int m_Octave = 4;
 		[SerializeField]
-		NoiseParam[] noiseParams = new NoiseParam[]
+		NoiseParam[] m_NoiseParams = new NoiseParam[]
 		{
 			new NoiseParam( 0.5f, 1.0f, 0.0f, Vector2.zero),
 			new NoiseParam( 0.25f, 2.0f, 0.0f, Vector2.zero),
@@ -136,62 +156,78 @@ namespace Subtexture
 		{
 			public NoiseParam( float amplitude, float lacunarity, float rotation, Vector2 shift)
 			{
-				this.amplitude = amplitude;
-				this.lacunarity = lacunarity;
-				this.rotation = rotation;
-				this.shift = shift;
+				m_Amplitude = amplitude;
+				m_Lacunarity = lacunarity;
+				m_Rotation = rotation;
+				m_Shift = shift;
 			}
 			public bool OnGUI( string caption, System.Action<string> record)
 			{
 				bool ret = false;
 				
-				enabled = EditorGUILayout.Foldout( enabled, caption);
-				if( enabled != false)
+				m_Enabled = EditorGUILayout.Foldout( m_Enabled, caption);
+				if( m_Enabled != false)
 				{
 					++EditorGUI.indentLevel;
 					
-					float amplitudeValue = EditorGUILayout.FloatField( "Amplitude", amplitude);
-					if( amplitude.Equals( amplitudeValue) == false)
+					float amplitudeValue = EditorGUILayout.FloatField( "Amplitude", m_Amplitude);
+					if( m_Amplitude.Equals( amplitudeValue) == false)
 					{
 						record?.Invoke( "Change Amplitude");
-						amplitude = amplitudeValue;
+						m_Amplitude = amplitudeValue;
 						ret = true;
 					}
-					float lacunarityValue = EditorGUILayout.FloatField( "Lacunarity", lacunarity);
-					if( lacunarity.Equals( lacunarityValue) == false)
+					float lacunarityValue = EditorGUILayout.FloatField( "Lacunarity", m_Lacunarity);
+					if( m_Lacunarity.Equals( lacunarityValue) == false)
 					{
 						record?.Invoke( "Change Lacunarity");
-						lacunarity = lacunarityValue;
+						m_Lacunarity = lacunarityValue;
 						ret = true;
 					}
-					float rotationValue = EditorGUILayout.FloatField( "Rotation", rotation);
-					if( rotation.Equals( rotationValue) == false)
+					float rotationValue = EditorGUILayout.FloatField( "Rotation", m_Rotation);
+					if( m_Rotation.Equals( rotationValue) == false)
 					{
 						record?.Invoke( "Change Rotation");
-						rotation = rotationValue;
+						m_Rotation = rotationValue;
 						ret = true;
 					}
-					Vector2 shiftValue = EditorGUILayout.Vector2Field( "Shift", shift);
-					if( shift.Equals( shiftValue) == false)
+					Vector2 shiftValue = EditorGUILayout.Vector2Field( "Shift", m_Shift);
+					if( m_Shift.Equals( shiftValue) == false)
 					{
 						record?.Invoke( "Change Shift");
-						shift = shiftValue;
+						m_Shift = shiftValue;
 						ret = true;
 					}
 					--EditorGUI.indentLevel;
 				}
 				return ret;
 			}
+			public float Amplitude
+			{
+				get{ return m_Amplitude; }
+			}
+			public float Lacunarity
+			{
+				get{ return m_Lacunarity; }
+			}
+			public float Rotation
+			{
+				get{ return m_Rotation; }
+			}
+			public Vector2 Shift
+			{
+				get{ return m_Shift; }
+			}
 			[SerializeField]
-			bool enabled = true;
+			bool m_Enabled = true;
 			[SerializeField]
-			internal float amplitude;
+			float m_Amplitude;
 			[SerializeField]
-			internal float lacunarity;
+			float m_Lacunarity;
 			[SerializeField]
-			internal float rotation;
+			float m_Rotation;
 			[SerializeField]
-			internal Vector2 shift;
+			Vector2 m_Shift;
 		}
 	}
 	

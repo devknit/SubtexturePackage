@@ -2,8 +2,6 @@
 using UnityEngine;
 using UnityEditor;
 using UnityEditorInternal;
-using UnityEngine.Experimental.Rendering;
-using System.Collections.Generic;
 
 namespace Subtexture
 {
@@ -11,39 +9,39 @@ namespace Subtexture
 	{
 		public void OnInspectorGUI( Rect rect)
 		{
-			if( enabled == false)
+			if( m_Enabled == false)
 			{
 				return;
 			}
-			EditorGUI.BeginDisabledGroup( string.IsNullOrEmpty( batchExportPath) == false);
+			EditorGUI.BeginDisabledGroup( string.IsNullOrEmpty( m_BatchExportPath) == false);
 			GUILayout.BeginArea( rect);
 			{
 				EditorGUILayout.BeginHorizontal();
 				{
 					EditorGUILayout.BeginVertical();
 					{
-						inspectorScrollPosition = EditorGUILayout.BeginScrollView( inspectorScrollPosition);
+						m_InspectorScrollPosition = EditorGUILayout.BeginScrollView( m_InspectorScrollPosition);
 						{
 							EditorGUI.BeginChangeCheck();
 							
-							for( int i0 = 0; i0 < preParams.Length; ++i0)
+							for( int i0 = 0; i0 < m_PreParams.Length; ++i0)
 							{
-								refreshCount = Mathf.Max( refreshCount, preParams[ i0].OnGUI( renderer, preParams));
+								m_RefreshCount = Mathf.Max( m_RefreshCount, m_PreParams[ i0].OnGUI( m_Renderer, m_PreParams));
 							}
-							postProcessList.DoLayoutList();
+							m_PostProcessList.DoLayoutList();
 							
-							if( preParams[ (int)PreParamType.kMesh] is MeshParam meshParam)
+							if( m_PreParams[ (int)PreParamType.kMesh] is MeshParam meshParam)
 							{
-								if( meshParam.meshType == MeshType.kPrefab)
+								if( meshParam.MeshType == MeshType.kPrefab)
 								{
-									batchPrefabList.DoLayoutList();
+									m_BatchPrefabList.DoLayoutList();
 								}
 							}
 							if( EditorGUI.EndChangeCheck() != false)
 							{
-								refresh = true;
+								m_Refresh = true;
 							}
-							if( refresh != false)
+							if( m_Refresh != false)
 							{
 								Refresh();
 							}
@@ -59,27 +57,27 @@ namespace Subtexture
 		}
 		void OnPostProcessGUI( Rect rect, int index, bool isActive, bool isFocused)
 		{
-			postProcessParams[ index].OnElementGUI( rect);
+			m_PostProcessParams[ index].OnElementGUI( rect);
 		}
 		float OnPostProcessHeight( int index)
 		{
-			return postProcessParams[ index].GetElementHeight();
+			return m_PostProcessParams[ index].GetElementHeight();
 		}
 		void OnPostProcessAdd( ReorderableList list)
 		{
 			var postProcessParam = new PostProcessParam();
-			postProcessParam.OnEnable( handle);
-			postProcessParams.Add( postProcessParam);
+			postProcessParam.OnEnable( m_Handle);
+			m_PostProcessParams.Add( postProcessParam);
 		}
 		void OnPostProcessRemove( ReorderableList list)
 		{
-			var postProcessParam = postProcessParams[ list.index];
+			var postProcessParam = m_PostProcessParams[ list.index];
 			postProcessParam.OnDisable();
-			postProcessParams.Remove( postProcessParam);
+			m_PostProcessParams.Remove( postProcessParam);
 		}
 		void OnBatchPrefabGUI( Rect rect, int index, bool isActive, bool isFocused)
 		{
-			batchPrefabs[ index] = EditorGUI.ObjectField( rect, batchPrefabs[ index], typeof( GameObject), false) as GameObject;
+			m_BatchPrefabs[ index] = EditorGUI.ObjectField( rect, m_BatchPrefabs[ index], typeof( GameObject), false) as GameObject;
 		}
 		float OnBatchPrefabHeight( int index)
 		{
@@ -87,31 +85,31 @@ namespace Subtexture
 		}
 		void OnBatchPrefabAdd( ReorderableList list)
 		{
-			batchPrefabs.Add( null);
+			m_BatchPrefabs.Add( null);
 		}
 		void OnBatchPrefabRemove( ReorderableList list)
 		{
-			batchPrefabs.RemoveAt( list.index);
+			m_BatchPrefabs.RemoveAt( list.index);
 		}
 		void Refresh()
 		{
-			if( preParams[ (int)PreParamType.kTexture] is TextureParam textureParam)
-			if( preParams[ (int)PreParamType.kCamera] is CameraParam cameraParam)
-			if( preParams[ (int)PreParamType.kLight] is LightParam lightParam)
-			if( preParams[ (int)PreParamType.kTransform] is TransformParam transformParam)
-			if( preParams[ (int)PreParamType.kMesh] is MeshParam meshParam)
-			if( meshParam.meshType == MeshType.kPrefab)
+			if( m_PreParams[ (int)PreParamType.kTexture] is TextureParam textureParam)
+			if( m_PreParams[ (int)PreParamType.kCamera] is CameraParam cameraParam)
+			if( m_PreParams[ (int)PreParamType.kLight] is LightParam lightParam)
+			if( m_PreParams[ (int)PreParamType.kTransform] is TransformParam transformParam)
+			if( m_PreParams[ (int)PreParamType.kMesh] is MeshParam meshParam)
+			if( meshParam.MeshType == MeshType.kPrefab)
 			{
 				Rendering( textureParam.RenderRect, cameraParam, lightParam, (renderer) =>
 				{
 					meshParam.Update( renderer, transformParam);
 				});
-				if( preParams[ (int)PreParamType.kAnimation] is AnimationParam animationParam)
+				if( m_PreParams[ (int)PreParamType.kAnimation] is AnimationParam animationParam)
 				{
 					animationParam.Update();
 				}
 			}
-			else if( preParams[ (int)PreParamType.kMaterial] is MaterialParam materialParam)
+			else if( m_PreParams[ (int)PreParamType.kMaterial] is MaterialParam materialParam)
 			{
 				Material renderMaterial = materialParam.RenderMaterial;
 				Mesh renderMesh = meshParam.RenderMesh;
@@ -124,24 +122,24 @@ namespace Subtexture
 					});
 				}
 			}
-			refresh = false;
+			m_Refresh = false;
 		}
 		void Rendering( Rect renderRect, CameraParam cameraParam, LightParam lightParam, System.Action<PreviewRenderUtility> callback)
 		{
-			renderer.BeginPreview( renderRect, GUIStyle.none);
-			cameraParam.Apply( renderer.camera);
-			renderer.ambientColor = lightParam.Apply( renderer.lights[ 0]);
-			callback?.Invoke( renderer);
-			renderer.camera.Render();
-			if( renderer.EndPreview() is RenderTexture renderTexture)
+			m_Renderer.BeginPreview( renderRect, GUIStyle.none);
+			cameraParam.Apply( m_Renderer.camera);
+			m_Renderer.ambientColor = lightParam.Apply( m_Renderer.lights[ 0]);
+			callback?.Invoke( m_Renderer);
+			m_Renderer.camera.Render();
+			if( m_Renderer.EndPreview() is RenderTexture renderTexture)
 			{
 				RenderTexture currentTexture = RenderTexture.active;
 				
-				previewTexture = renderTexture;
+				m_RreviewTexture = renderTexture;
 				
-				foreach( PostProcessParam param in postProcessParams)
+				foreach( PostProcessParam param in m_PostProcessParams)
 				{
-					previewTexture = param.Blit( previewTexture);
+					m_RreviewTexture = param.Blit( m_RreviewTexture);
 				}
 				RenderTexture.active = currentTexture;
 			}

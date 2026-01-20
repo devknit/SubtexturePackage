@@ -14,74 +14,83 @@ namespace Subtexture
 		{
 			light.transform.RotateAround( Vector3.zero, Vector3.up, value.x);
 			light.transform.RotateAround( Vector3.zero, light.transform.right, value.y);
-			localPosition = light.transform.localPosition;
-			localRotation = light.transform.localEulerAngles;
+			m_LocalPosition = light.transform.localPosition;
+			m_LocalRotation = light.transform.localEulerAngles;
 		}
 		public override int OnGUI( PreviewRenderUtility context, BaseParam[] param)
 		{
-			OnPUI( "Light", false, () =>
-			{
-				Vector3 localPositionValue = EditorGUILayout.Vector3Field( "Position", localPosition);
-				if( localPosition.Equals( localPositionValue) == false)
+			OnPUI( "Light", false, 
+				() =>
 				{
-					Record( "Change Position");
-					localPosition = localPositionValue;
-				}
-				Vector3 localRotationValue = EditorGUILayout.Vector3Field( "Rotation", localRotation);
-				if( localRotation.Equals( localRotationValue) == false)
+					m_LocalPosition = Vector3.zero;
+					m_LocalRotation = new Vector3( 50, -30, 0);
+					m_AmbientColor = new Color32( 54, 58, 66, 255);
+					m_LightColor = new Color32( 255, 244, 214, 255);
+					m_Intensity = 1.0f;
+					m_Shadows  = LightShadows.None;
+				}, 
+				() =>
 				{
-					Record( "Change Rotation");
-					localRotation = localRotationValue;
-				}
-				Color lightColorValue = EditorGUILayout.ColorField( "Light Color", lightColor);
-				if( lightColor.Equals( lightColorValue) == false)
-				{
-					Record( "Change LightColor");
-					lightColor = lightColorValue;
-				}
-				Color ambientColorValue = EditorGUILayout.ColorField( "Ambient Color", ambientColor);
-				if( ambientColor.Equals( ambientColorValue) == false)
-				{
-					Record( "Change AmbientColor");
-					ambientColor = ambientColorValue;
-				}
-				float intensityValue = EditorGUILayout.FloatField( "Intensity", intensity);
-				if( intensity.Equals( intensityValue) == false)
-				{
-					Record( "Change Intensity");
-					intensity = intensityValue;
-				}
-				LightShadows shadowsValue = (LightShadows)EditorGUILayout.EnumPopup( "Shadows", shadows);
-				if( shadows.Equals( shadowsValue) == false)
-				{
-					Record( "Change Shadows");
-					shadows = shadowsValue;
-				}
-			});
+					Vector3 localPositionValue = EditorGUILayout.Vector3Field( "Position", m_LocalPosition);
+					if( m_LocalPosition.Equals( localPositionValue) == false)
+					{
+						Record( "Change Position");
+						m_LocalPosition = localPositionValue;
+					}
+					Vector3 localRotationValue = EditorGUILayout.Vector3Field( "Rotation", m_LocalRotation);
+					if( m_LocalRotation.Equals( localRotationValue) == false)
+					{
+						Record( "Change Rotation");
+						m_LocalRotation = localRotationValue;
+					}
+					Color lightColorValue = EditorGUILayout.ColorField( "Light Color", m_LightColor);
+					if( m_LightColor.Equals( lightColorValue) == false)
+					{
+						Record( "Change LightColor");
+						m_LightColor = lightColorValue;
+					}
+					Color ambientColorValue = EditorGUILayout.ColorField( "Ambient Color", m_AmbientColor);
+					if( m_AmbientColor.Equals( ambientColorValue) == false)
+					{
+						Record( "Change AmbientColor");
+						m_AmbientColor = ambientColorValue;
+					}
+					float intensityValue = EditorGUILayout.FloatField( "Intensity", m_Intensity);
+					if( m_Intensity.Equals( intensityValue) == false)
+					{
+						Record( "Change Intensity");
+						m_Intensity = intensityValue;
+					}
+					LightShadows shadowsValue = (LightShadows)EditorGUILayout.EnumPopup( "Shadows", m_Shadows);
+					if( m_Shadows.Equals( shadowsValue) == false)
+					{
+						Record( "Change Shadows");
+						m_Shadows = shadowsValue;
+					}
+				});
 			return 0;
 		}
 		public Color Apply( Light light)
 		{
-			light.transform.position = localPosition;
-			light.transform.rotation = Quaternion.Euler( localRotation);
-			light.color = lightColor;
-			light.intensity = intensity;
-			light.shadows = shadows ;
+			light.transform.position = m_LocalPosition;
+			light.transform.rotation = Quaternion.Euler( m_LocalRotation);
+			light.color = m_LightColor;
+			light.intensity = m_Intensity;
+			light.shadows = m_Shadows ;
 			
-			return ambientColor;
+			return m_AmbientColor;
 		}
-		
 		[SerializeField]
-		Vector3 localPosition = Vector3.zero;
+		Vector3 m_LocalPosition = Vector3.zero;
 		[SerializeField]
-		Vector3 localRotation = new Vector3( 50, -30, 0);
+		Vector3 m_LocalRotation = new Vector3( 50, -30, 0);
 		[SerializeField]
-		Color ambientColor = new Color32( 54, 58, 66, 255);
+		Color m_AmbientColor = new Color32( 54, 58, 66, 255);
 		[SerializeField]
-		Color lightColor = new Color32( 255, 244, 214, 255);
+		Color m_LightColor = new Color32( 255, 244, 214, 255);
 		[SerializeField]
-		float intensity = 1.0f;
+		float m_Intensity = 1.0f;
 		[SerializeField]
-		LightShadows shadows  = LightShadows.None;
+		LightShadows m_Shadows  = LightShadows.None;
 	}
 }

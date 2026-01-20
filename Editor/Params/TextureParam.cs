@@ -12,69 +12,63 @@ namespace Subtexture
 		}
 		public override int OnGUI( PreviewRenderUtility context, BaseParam[] param)
 		{
-			OnPUI( "Screen Texture", false, () =>
+			OnPUI( "Screen Texture", false, null, () =>
 			{
-				bool forceSquareValue = EditorGUILayout.Toggle( "Force square", forceSquare);
-				if( forceSquare.Equals( forceSquareValue) == false)
+				bool forceSquareValue = EditorGUILayout.Toggle( "Force square", m_ForceSquare);
+				if( m_ForceSquare.Equals( forceSquareValue) == false)
 				{
 					Record( "Change Force square");
 					if( forceSquareValue != false)
 					{
-						width = size;
-						height = size;
+						m_Width = m_Size;
+						m_Height = m_Size;
 					}
-					forceSquare = forceSquareValue;
+					m_ForceSquare = forceSquareValue;
 				}
-				if( forceSquare == false)
+				if( m_ForceSquare == false)
 				{
-					int widthValue = EditorGUILayout.IntPopup( "Width", width, kResolutionLabels, kResolutions);
-					if( width.Equals( widthValue) == false)
+					EditorGUI.BeginChangeCheck();
+					int widthValue = EditorGUILayout.IntSlider( "Width", m_Width, 4, 8196);
+					if( EditorGUI.EndChangeCheck() != false && m_Width.Equals( widthValue) == false)
 					{
 						Record( "Change Width");
-						width = widthValue;
-						size = widthValue;
+						m_Width = widthValue;
 					}
-					int heightValue = EditorGUILayout.IntPopup( "Height", height, kResolutionLabels, kResolutions);
-					if( height.Equals( heightValue) == false)
+					EditorGUI.BeginChangeCheck();
+					int heightValue = EditorGUILayout.IntSlider( "Height", m_Height, 4, 8196);
+					if( EditorGUI.EndChangeCheck() != false && m_Height.Equals( heightValue) == false)
 					{
 						Record( "Change Height");
-						height = heightValue;
-						size = heightValue;
+						m_Height = heightValue;
+						m_Size = heightValue;
 					}
 				}
 				else
 				{
-					int sizeValue = EditorGUILayout.IntPopup( "Size", size, kResolutionLabels, kResolutions);
-					if( size.Equals( sizeValue) == false)
+					EditorGUI.BeginChangeCheck();
+					int sizeValue = EditorGUILayout.IntSlider( "Size", m_Size, 4, 8196);
+					if( EditorGUI.EndChangeCheck() != false && m_Size.Equals( sizeValue) == false)
 					{
 						Record( "Change Size");
-						size = sizeValue;
-						width = size;
-						height = size;
+						m_Size = sizeValue;
+						m_Width = m_Size;
+						m_Height = m_Size;
 					}
 				}
 			});
 			return 0;
 		}
-		static readonly int[] kResolutions = new int[]
-		{
-			1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192
-		};
-		static readonly string[] kResolutionLabels = new string[]
-		{
-			"1", "2", "4", "8", "16", "32", "64", "128", "256", "512", "1024", "2048", "4096", "8192"
-		};
 		float GetScaleFactor()
 		{
-			float scaleFacX = Mathf.Max( Mathf.Min( width * 2, 1024), width) / width;
-			float scaleFacY = Mathf.Max( Mathf.Min( height * 2, 1024), height) / height;
+			float scaleFacX = Mathf.Max( Mathf.Min( m_Width, 1024), m_Width) / m_Width;
+			float scaleFacY = Mathf.Max( Mathf.Min( m_Height, 1024), m_Height) / m_Height;
 			return Mathf.Min( scaleFacX, scaleFacY) * EditorGUIUtility.pixelsPerPoint;
 		}
 		public Rect RenderRect
 		{
 			get
 			{
-				var rect = new Rect( 0, 0, width, height);
+				var rect = new Rect( 0, 0, m_Width, m_Height);
 				float scaleFac = GetScaleFactor();
 				
 				if( scaleFac != 1.0f)
@@ -86,14 +80,35 @@ namespace Subtexture
 				return rect;
 			}
 		}
-		
+		public int Width
+		{
+			get{ return m_Width; }
+		}
+		public int Height
+		{
+			get{ return m_Height; }
+		}
+		public int Size
+		{
+			get{ return m_Size; }
+			set
+			{
+				m_Size = Mathf.Max( 4, value);
+				m_Height = m_Size;
+				
+				if( m_ForceSquare != false)
+				{
+					m_Width = m_Size;
+				}
+			}
+		}
 		[SerializeField]
-		bool forceSquare = true;
+		bool m_ForceSquare = true;
 		[SerializeField]
-		public int width = 512;
+		int m_Width = 512;
 		[SerializeField]
-		public int height = 512;
+		int m_Height = 512;
 		[SerializeField]
-		public int size = 512;
+		int m_Size = 512;
 	}
 }

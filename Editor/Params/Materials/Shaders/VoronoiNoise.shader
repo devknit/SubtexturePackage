@@ -17,6 +17,8 @@
 		}
 		Pass
 		{
+			Cull Off
+			
 			CGPROGRAM
 			#pragma target 3.0
 			#pragma vertex vert

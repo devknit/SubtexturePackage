@@ -1,7 +1,4 @@
 ﻿
-using UnityEngine;
-using UnityEditor;
-
 namespace Subtexture
 {
 	[System.Serializable]

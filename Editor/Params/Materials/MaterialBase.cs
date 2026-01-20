@@ -9,14 +9,14 @@ namespace Subtexture
 	{
 		public void OnEnable( Window window)
 		{
-			handle = window;
+			m_Handle = window;
 		}
 		public void OnDisable()
 		{
 		}
 		public void Record( string label)
 		{
-			handle.Record( label);
+			m_Handle.Record( label);
 		}
 		public Material Create()
 		{
@@ -30,8 +30,8 @@ namespace Subtexture
 				{
 					if( AssetDatabase.LoadAssetAtPath<Shader>( newShaderPath) is Shader shader)
 					{
-						materialCache = new Material( shader);
-						return materialCache;
+						m_Material = new Material( shader);
+						return m_Material;
 					}
 				}
 			}
@@ -39,11 +39,14 @@ namespace Subtexture
 		}
 		public void Dispose()
 		{
-			if( materialCache != null)
+			if( m_Material != null)
 			{
-				Material.DestroyImmediate( materialCache);
-				materialCache = null;
+				Material.DestroyImmediate( m_Material);
+				m_Material = null;
 			}
+		}
+		public virtual void Reset()
+		{
 		}
 		public virtual bool OnGUI()
 		{
@@ -60,7 +63,7 @@ namespace Subtexture
 		{
 			bool ret = false;
 			
-			bool axisSyncValue = EditorGUILayout.ToggleLeft( "UV Scale", axisSync);
+			bool axisSyncValue = EditorGUILayout.ToggleLeft( caption, axisSync);
 			if( axisSync.Equals( axisSyncValue) == false)
 			{
 				Record( string.Format( $"Change {caption} Axis Sync"));
@@ -89,10 +92,13 @@ namespace Subtexture
 			}
 			return ret;
 		}
-		
+		protected Material Material
+		{
+			get{ return m_Material;}
+		}
 		[System.NonSerialized]
-		Window handle;
+		Window m_Handle;
 		[System.NonSerialized]
-		protected Material materialCache;
+		Material m_Material;
 	}
 }

@@ -57,27 +57,27 @@ namespace Subtexture
 					case ExportFormat.kExr16ZIP:
 					case ExportFormat.kExr16RLE:
 					{
-						texture = new Texture2D( previewTexture.width, previewTexture.height, TextureFormat.RGBAHalf, false, false);
+						texture = new Texture2D( m_RreviewTexture.width, m_RreviewTexture.height, TextureFormat.RGBAHalf, false, false);
 						break;
 					}
 					case ExportFormat.kExr32:
 					case ExportFormat.kExr32ZIP:
 					case ExportFormat.kExr32RLE:
 					{
-						texture = new Texture2D( previewTexture.width, previewTexture.height, TextureFormat.RGBAFloat, false, false);
+						texture = new Texture2D( m_RreviewTexture.width, m_RreviewTexture.height, TextureFormat.RGBAFloat, false, false);
 						break;
 					}
 					default: /* case ExportFormat.kPng: */
 					{
-						texture = new Texture2D( previewTexture.width, previewTexture.height, TextureFormat.RGBA32, false, false);
+						texture = new Texture2D( m_RreviewTexture.width, m_RreviewTexture.height, TextureFormat.RGBA32, false, false);
 						break;
 					}
 				}
 				if( texture != null)
 				{
 					var current = RenderTexture.active;
-					RenderTexture.active = previewTexture;
-					texture.ReadPixels( new Rect( 0, 0, previewTexture.width, previewTexture.height), 0, 0);
+					RenderTexture.active = m_RreviewTexture;
+					texture.ReadPixels( new Rect( 0, 0, m_RreviewTexture.width, m_RreviewTexture.height), 0, 0);
 					texture.Apply();
 					RenderTexture.active = current;
 					byte[] bytes = null;

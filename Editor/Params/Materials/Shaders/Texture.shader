@@ -14,6 +14,8 @@
 		}
 		Pass
 		{
+			Cull Off
+			
 			CGPROGRAM
 			#pragma target 3.0
 			#pragma vertex vert
@@ -44,7 +46,7 @@
 			}
 			fixed4 frag( VertexOutput i) : COLOR
 			{
-				return tex2D( _MainTex, i.uv0 * _UVScale + _UVOffset);
+				return tex2D( _MainTex, i.uv0 * _UVScale + _UVOffset) * i.vertexColor;
 			}
 			ENDCG
 		}

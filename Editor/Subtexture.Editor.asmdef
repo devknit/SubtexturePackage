@@ -1,7 +1,8 @@
 {
     "name": "Subtexture.Editor",
+    "rootNamespace": "",
     "references": [
-        "GUID:4b1bfff92d08bba47b9655aca56351c9"
+        "GUID:686d1c27f281e7f41a186c7dad64de4b"
     ],
     "includePlatforms": [
         "Editor"

@@ -16,99 +16,99 @@ namespace Subtexture
 		}
 		public SimpleAnimator( Animator animator, AnimationClip[] clips, int index)
 		{
-			graph = PlayableGraph.Create();
-			output = AnimationPlayableOutput.Create( graph, "Simple", animator);
+			m_Graph = PlayableGraph.Create();
+			m_Output = AnimationPlayableOutput.Create( m_Graph, "Simple", animator);
 			SetClips( clips, index);
 		}
 		public void Dispose()
 		{
-			if( playable.IsValid() != false)
+			if( m_Playable.IsValid() != false)
 			{
-				playable.Destroy();
+				m_Playable.Destroy();
 			}
-			if( graph.IsValid() != false)
+			if( m_Graph.IsValid() != false)
 			{
-				graph.Destroy();
+				m_Graph.Destroy();
 			}
 		}
 		public void SetTimeUpdateMode( DirectorUpdateMode value)
 		{
-			graph.SetTimeUpdateMode( value);
+			m_Graph.SetTimeUpdateMode( value);
 		}
 		public void SetOutput( Animator animator)
 		{
-			output.SetTarget( animator);
+			m_Output.SetTarget( animator);
 		}
 		public void SetClips( AnimationClip[] clips, int index)
 		{
-			animationClips = clips;
+			m_AnimationClips = clips;
 			SetClip( index);
 		}
 		public void SetClip( int index)
 		{
-			if( animationClips != null)
+			if( m_AnimationClips != null)
 			{
-				if( index >= 0 && index < animationClips.Length)
+				if( index >= 0 && index < m_AnimationClips.Length)
 				{
-					SetClip( animationClips[ index]);
+					SetClip( m_AnimationClips[ index]);
 				}
 			}
 		}
 		public void SetClip( AnimationClip clip)
 		{
-			if( playable.IsValid() != false)
+			if( m_Playable.IsValid() != false)
 			{
-				playable.Destroy();
+				m_Playable.Destroy();
 			}
-			playable = AnimationClipPlayable.Create( graph, clip);
-			output.SetSourcePlayable( playable);
-			currentAnimationClip = clip;
+			m_Playable = AnimationClipPlayable.Create( m_Graph, clip);
+			m_Output.SetSourcePlayable( m_Playable);
+			m_CurrentAnimationClip = clip;
 		}
 		public void Play()
 		{
-			if( graph.IsValid() != false)
+			if( m_Graph.IsValid() != false)
 			{
-				graph.Play();
+				m_Graph.Play();
 			}
 		}
 		public void Stop()
 		{
-			if( graph.IsValid() != false)
+			if( m_Graph.IsValid() != false)
 			{
-				graph.Stop();
+				m_Graph.Stop();
 			}
 		}
 		public void EvaluateTime( float time)
 		{
-			if( playable.IsValid() != false)
+			if( m_Playable.IsValid() != false)
 			{
-				playable.SetTime( time);
+				m_Playable.SetTime( time);
 			}
-			if( graph.IsValid() != false)
+			if( m_Graph.IsValid() != false)
 			{
-				graph.Evaluate();
+				m_Graph.Evaluate();
 			}
 		}
 		public AnimationClip CurrentClip
 		{
-			get => currentAnimationClip;
+			get => m_CurrentAnimationClip;
 		}
 		public AnimationClip[] Clips
 		{
-			get => animationClips;
+			get => m_AnimationClips;
 		}
 		
 		const string kName = "SimpleAnimator";
 		
 		[SerializeField]
-		PlayableGraph graph;
+		PlayableGraph m_Graph;
 		[SerializeField]
-		AnimationClipPlayable playable;
+		AnimationClipPlayable m_Playable;
 		[SerializeField]
-		AnimationPlayableOutput output;
+		AnimationPlayableOutput m_Output;
 		[SerializeField]
-		AnimationClip[] animationClips;
+		AnimationClip[] m_AnimationClips;
 		[SerializeField]
-		AnimationClip currentAnimationClip;
+		AnimationClip m_CurrentAnimationClip;
 	}
 }

@@ -28,23 +28,23 @@ namespace Subtexture
 					elementRect.y += elementRect.height + kIntervalHeight;
 				}
 				var component = (ColorComponent)EditorGUI.EnumPopup( 
-					elementRect, kComponentNames[ i0], components[ i0]);
-				if( components[ i0].Equals( component) == false)
+					elementRect, kComponentNames[ i0], m_Components[ i0]);
+				if( m_Components[ i0].Equals( component) == false)
 				{
 					Record( string.Format( $"Change Swizzle {kComponentNames[ i0]}"));
-					components[ i0] = component;
+					m_Components[ i0] = component;
 					ret = true;
 				}
-				if( components[ i0] == ColorComponent.kValue)
+				if( m_Components[ i0] == ColorComponent.kValue)
 				{
 					elementRect.y += elementRect.height + kIntervalHeight;
 					float value = EditorGUI.Slider( elementRect, 
 						string.Format( $"{kComponentNames[ i0]} Value"), 
-						componentValues[ i0], 0.0f, 1.0f);
-					if( componentValues[ i0].Equals( value) == false)
+						m_ComponentValues[ i0], 0.0f, 1.0f);
+					if( m_ComponentValues[ i0].Equals( value) == false)
 					{
 						Record( string.Format( $"Change Swizzle {kComponentNames[ i0]} Value"));
-						componentValues[ i0] = value;
+						m_ComponentValues[ i0] = value;
 						ret = true;
 					}
 				}
@@ -57,7 +57,7 @@ namespace Subtexture
 			
 			for( int i0 = 0; i0 < 4; ++i0)
 			{
-				if( components[ i0] == ColorComponent.kValue)
+				if( m_Components[ i0] == ColorComponent.kValue)
 				{
 					height += EditorGUIUtility.singleLineHeight + kIntervalHeight;
 				}
@@ -66,18 +66,21 @@ namespace Subtexture
 		}
 		public override Material OnUpdateMaterial()
 		{
-			materialCache.SetVector( 
-				"_SwizzleType", new Vector4( 
-					(int)components[ 0],
-					(int)components[ 1],
-					(int)components[ 2],
-					(int)components[ 3]));
-			materialCache.SetVector( 
-				"_SwizzleValue", new Vector4( 
-					componentValues[ 0],
-					componentValues[ 1],
-					componentValues[ 2],
-					componentValues[ 3]));
+			if( Material != null)
+			{
+				Material.SetVector( 
+					"_SwizzleType", new Vector4( 
+						(int)m_Components[ 0],
+						(int)m_Components[ 1],
+						(int)m_Components[ 2],
+						(int)m_Components[ 3]));
+				Material.SetVector( 
+					"_SwizzleValue", new Vector4( 
+						m_ComponentValues[ 0],
+						m_ComponentValues[ 1],
+						m_ComponentValues[ 2],
+						m_ComponentValues[ 3]));
+			}
 			return base.OnUpdateMaterial();
 		}
 		protected override string GetShaderGuid()
@@ -91,7 +94,7 @@ namespace Subtexture
 		};
 		
 		[SerializeField]
-		ColorComponent[] components = new ColorComponent[]
+		ColorComponent[] m_Components = new ColorComponent[]
 		{
 			ColorComponent.kRed,
 			ColorComponent.kGreen,
@@ -99,7 +102,7 @@ namespace Subtexture
 			ColorComponent.kAlpha
 		};
 		[SerializeField]
-		float[] componentValues = new float[]
+		float[] m_ComponentValues = new float[]
 		{
 			0.0f, 0.0f, 0.0f, 0.0f
 		};

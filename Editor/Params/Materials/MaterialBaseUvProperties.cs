@@ -7,15 +7,22 @@ namespace Subtexture
 	[System.Serializable]
 	public class MaterialBaseUvProperties : MaterialBase
 	{
+		public override void Reset()
+		{
+			SetUvScale( 1.0f);
+			m_UvScaleAxisSync = true;
+			m_UvOffsetAxisSync = true;
+			m_UvOffset = Vector2.zero;
+		}
 		public override bool OnGUI()
 		{
 			bool ret = false;
 			
-			if( AxisSyncVector2Field( "UV Scale", ref uvScale, ref uvScaleAxisSync) != false)
+			if( AxisSyncVector2Field( "UV Scale", ref m_UvScale, ref m_UvScaleAxisSync) != false)
 			{
 				ret = true;
 			}
-			if( AxisSyncVector2Field( "UV Offset", ref uvOffset, ref uvOffsetAxisSync) != false)
+			if( AxisSyncVector2Field( "UV Offset", ref m_UvOffset, ref m_UvOffsetAxisSync) != false)
 			{
 				ret = true;
 			}
@@ -23,17 +30,23 @@ namespace Subtexture
 		}
 		public override void OnUpdateMaterial()
 		{
-			materialCache.SetVector( "_UVScale", new Vector4( uvScale.x, uvScale.y, 1, 1));
-			materialCache.SetVector( "_UVOffset", new Vector4( uvOffset.x, uvOffset.y, 0, 0));
+			if( Material != null)
+			{
+				Material.SetVector( "_UVScale", new Vector4( m_UvScale.x, m_UvScale.y, 1, 1));
+				Material.SetVector( "_UVOffset", new Vector4( m_UvOffset.x, m_UvOffset.y, 0, 0));
+			}
 		}
-		
+		protected void SetUvScale( float scale)
+		{
+			m_UvScale = new Vector2( scale, scale);
+		}
 		[SerializeField]
-		protected bool uvScaleAxisSync = true;
+		bool m_UvScaleAxisSync = true;
 		[SerializeField]
-		protected Vector2 uvScale = new Vector2( 8, 8);
+		Vector2 m_UvScale = Vector2.one;
 		[SerializeField]
-		protected bool uvOffsetAxisSync = false;
+		bool m_UvOffsetAxisSync = false;
 		[SerializeField]
-		protected Vector2 uvOffset = Vector2.zero;
+		Vector2 m_UvOffset = Vector2.zero;
 	}
 }

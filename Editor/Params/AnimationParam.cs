@@ -14,10 +14,10 @@ namespace Subtexture
 		}
 		public void Dispose()
 		{
-			if( animator != null)
+			if( m_Animator != null)
 			{
-				animator.Dispose();
-				animator = null;
+				m_Animator.Dispose();
+				m_Animator = null;
 			}
 		}
 		public override int OnGUI( PreviewRenderUtility context, BaseParam[] param)
@@ -28,81 +28,81 @@ namespace Subtexture
 			{
 				if( param[ (int)PreParamType.kMesh] is MeshParam meshParam)
 				{
-					if( meshParam.meshType != MeshType.kPrefab)
+					if( meshParam.MeshType != MeshType.kPrefab)
 					{
 						return 0;
 					}
-					if( meshParam.gameObject != null && animator == null)
+					if( meshParam.GameObject != null && m_Animator == null)
 					{
-						var output = meshParam.gameObject.GetComponent<Animator>();
+						var output = meshParam.GameObject.GetComponent<Animator>();
 						
 						if( output == null)
 						{
-							output = meshParam.gameObject.AddComponent<Animator>();
+							output = meshParam.GameObject.AddComponent<Animator>();
 						}
 						if( output != null && object.ReferenceEquals( output, null) == false)
 						{
 							AnimationClip[] clips = null;
-							clipIndex = 0;
+							m_ClipIndex = 0;
 						
 							if( output.runtimeAnimatorController != null)
 							{
 								clips = output.runtimeAnimatorController.animationClips;
 							}
-							animator = new SimpleAnimator( output, clips, clipIndex);
-							animator.SetTimeUpdateMode( DirectorUpdateMode.Manual);
+							m_Animator = new SimpleAnimator( output, clips, m_ClipIndex);
+							m_Animator.SetTimeUpdateMode( DirectorUpdateMode.Manual);
 							
-							if( clip != null)
+							if( m_Clip != null)
 							{
-								animator.SetClip( clip);
+								m_Animator.SetClip( m_Clip);
 							}
-							if( animator.CurrentClip != null)
+							if( m_Animator.CurrentClip != null)
 							{
-								if( animationSeek > animator.CurrentClip.length)
+								if( m_AnimationSeek > m_Animator.CurrentClip.length)
 								{
-									animationSeek = animator.CurrentClip.length;
+									m_AnimationSeek = m_Animator.CurrentClip.length;
 								}
-								animator.EvaluateTime( animationSeek);
+								m_Animator.EvaluateTime( m_AnimationSeek);
 								refreshCount = 2;
 							}
 						}
 					}
 				}
 			}
-			OnPUI( "Animation", true, () =>
+			OnPUI( "Animation", true, null, () =>
 			{
-				var clipValue = EditorGUILayout.ObjectField( "Clip", clip, typeof( AnimationClip), false) as AnimationClip;
-				if( object.ReferenceEquals( clip, clipValue) == false)
+				var clipValue = EditorGUILayout.ObjectField( "Clip", m_Clip, typeof( AnimationClip), false) as AnimationClip;
+				if( object.ReferenceEquals( m_Clip, clipValue) == false)
 				{
 					Record( "Change Clip");
-					animator?.SetClip( clipValue);
-					clip = clipValue;
+					m_Animator?.SetClip( clipValue);
+					m_Clip = clipValue;
 				}
-				if( animator != null)
+				if( m_Animator != null)
 				{
-					if( (animator.Clips?.Length ?? 0) > 0 && clip == null)
+					if( (m_Animator.Clips?.Length ?? 0) > 0 && m_Clip == null)
 					{
-						int clipIndexValue = EditorGUILayout.Popup( "Clips", clipIndex, animator.Clips.Select( x => x.name).ToArray());
-						if( clipIndex.Equals( clipIndexValue) == false)
+						int clipIndexValue = EditorGUILayout.Popup( "Clips", m_ClipIndex, m_Animator.Clips.Select( x => x.name).ToArray());
+						if( m_ClipIndex.Equals( clipIndexValue) == false)
 						{
 							Record( "Change Clips");
-							clipIndex = clipIndexValue;
-							animator.SetClip( clipIndex);
+							m_ClipIndex = clipIndexValue;
+							m_Animator.SetClip( m_ClipIndex);
 							
-							if( animationSeek > animator.CurrentClip.length)
+							if( m_AnimationSeek > m_Animator.CurrentClip.length)
 							{
-								animationSeek = animator.CurrentClip.length;
+								m_AnimationSeek = m_Animator.CurrentClip.length;
 							}
 							refreshCount = 2;
 						}
 					}
-					if( animator.CurrentClip != null)
+					if( m_Animator.CurrentClip != null)
 					{
-						float animationSeekValue = EditorGUILayout.Slider( "Seconds", animationSeek, 0.0f, animator.CurrentClip.length);
-						if( animationSeek.Equals( animationSeekValue) == false)
+						float animationSeekValue = EditorGUILayout.Slider( "Seconds", m_AnimationSeek, 0.0f, m_Animator.CurrentClip.length);
+						if( m_AnimationSeek.Equals( animationSeekValue) == false)
 						{
 							Record( "Change Seconds");
-							animationSeek = animationSeekValue;
+							m_AnimationSeek = animationSeekValue;
 						}
 					}
 				}
@@ -113,17 +113,16 @@ namespace Subtexture
 		{
 			if( Enabled != false)
 			{
-				animator?.EvaluateTime( animationSeek);
+				m_Animator?.EvaluateTime( m_AnimationSeek);
 			}
 		}
-		
 		[SerializeField]
-		AnimationClip clip = default;
+		AnimationClip m_Clip = default;
 		[SerializeField]
-		int clipIndex = default;
+		int m_ClipIndex = default;
 		[SerializeField]
-		float animationSeek = 0.0f;
+		float m_AnimationSeek = 0.0f;
 		[System.NonSerialized]
-		SimpleAnimator animator;
+		SimpleAnimator m_Animator;
 	}
 }

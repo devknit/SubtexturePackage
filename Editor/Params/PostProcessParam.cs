@@ -21,9 +21,9 @@ namespace Subtexture
 		{
 			base.OnEnable( window);
 			
-			if( processes == null)
+			if( m_Processes == null)
 			{
-				processes = new PostProcessBase[]
+				m_Processes = new PostProcessBase[]
 				{
 					new NoneProcess(),
 					new OneMinusProcess(),
@@ -31,23 +31,23 @@ namespace Subtexture
 					new BlendMapProcess()
 				};
 			}
-			for( int i0 = 0; i0 < processes.Length; ++i0)
+			for( int i0 = 0; i0 < m_Processes.Length; ++i0)
 			{
-				processes[ i0]?.OnEnable( window);
+				m_Processes[ i0]?.OnEnable( window);
 			}
-			ChangeBlitMaterial( postProcessType);
+			ChangeBlitMaterial( m_PostProcessType);
 		}
 		public override void OnDisable()
 		{
-			if( renderTexture != null)
+			if( m_RenderTexture != null)
 			{
-				RenderTexture.DestroyImmediate( renderTexture);
-				renderTexture = null;
+				RenderTexture.DestroyImmediate( m_RenderTexture);
+				m_RenderTexture = null;
 			}
-			if( processProperties != null)
+			if( m_ProcessProperties != null)
 			{
-				processProperties.Dispose();
-				processProperties = null;
+				m_ProcessProperties.Dispose();
+				m_ProcessProperties = null;
 			}
 			base.OnDisable();
 		}
@@ -55,81 +55,81 @@ namespace Subtexture
 		{
 			rect.yMin += 2.0f;
 			Rect typeRect = new Rect( rect.x, rect.y, rect.width, EditorGUIUtility.singleLineHeight);
-			var postProcessTypeValue = (PostProcessType)EditorGUI.EnumPopup( typeRect, postProcessType);
-			if( postProcessType.Equals( postProcessTypeValue) == false)
+			var postProcessTypeValue = (PostProcessType)EditorGUI.EnumPopup( typeRect, m_PostProcessType);
+			if( m_PostProcessType.Equals( postProcessTypeValue) == false)
 			{
 				Record( "Change PostProcess Type");
 				ChangeBlitMaterial( postProcessTypeValue);
-				postProcessType = postProcessTypeValue;
+				m_PostProcessType = postProcessTypeValue;
 			}
-			if( processProperties != null)
+			if( m_ProcessProperties != null)
 			{
-				if( processProperties.OnGUI( new Rect( 
+				if( m_ProcessProperties.OnGUI( new Rect( 
 					rect.x, rect.y + typeRect.height + 2.0f, 
 					rect.width, rect.height - typeRect.height)) != false)
 				{
-					blitMaterial = processProperties.OnUpdateMaterial();
+					m_BlitMaterial = m_ProcessProperties.OnUpdateMaterial();
 				}
 			}
 		}
 		public float GetElementHeight()
 		{
-			return EditorGUIUtility.singleLineHeight + (processProperties?.GetHeight() ?? 0) + 6.0f;
+			return EditorGUIUtility.singleLineHeight + (m_ProcessProperties?.GetHeight() ?? 0) + 6.0f;
 		}
 		public RenderTexture Blit( RenderTexture source)
 		{
-			if( blitMaterial != null)
+			if( m_BlitMaterial != null)
 			{
-				if( renderTexture != null)
+				if( m_RenderTexture != null)
 				{
-					if( renderTexture.width != source.width || renderTexture.height != source.height)
+					if( m_RenderTexture.width != source.width || m_RenderTexture.height != source.height)
 					{
-						RenderTexture.DestroyImmediate( renderTexture);
-						renderTexture = null;
+						RenderTexture.DestroyImmediate( m_RenderTexture);
+						m_RenderTexture = null;
 					}
 				}
-				if( renderTexture == null)
+				if( m_RenderTexture == null)
 				{
-					renderTexture = new RenderTexture( source.width, source.height, 32, RenderTextureFormat.ARGBFloat);
-					renderTexture.hideFlags = HideFlags.HideAndDontSave;
+					m_RenderTexture = new RenderTexture( source.width, source.height, 32, RenderTextureFormat.ARGBFloat);
+					m_RenderTexture.hideFlags = HideFlags.HideAndDontSave;
 				}
-				Graphics.Blit( source, renderTexture, blitMaterial);
+				Graphics.Blit( source, m_RenderTexture, m_BlitMaterial);
 				
-				return renderTexture;
+				return m_RenderTexture;
 			}
 			return source;
 		}
 		void ChangeBlitMaterial( PostProcessType type)
 		{
-			if( blitMaterial != null)
+			if( m_BlitMaterial != null)
 			{
-				blitMaterial = null;
+				m_BlitMaterial = null;
 			}
-			if( processProperties != null)
+			if( m_ProcessProperties != null)
 			{
-				processProperties.Dispose();
-				processProperties = null;
+				m_ProcessProperties.Dispose();
+				m_ProcessProperties = null;
 			}
-			processProperties = processes[ (int)type];
+			m_ProcessProperties = m_Processes[ (int)type];
 			
-			if( processProperties != null)
+			if( m_ProcessProperties != null)
 			{
-				processProperties.Create();
-				blitMaterial = processProperties.OnUpdateMaterial();
+				m_ProcessProperties.Create();
+				m_BlitMaterial = m_ProcessProperties.OnUpdateMaterial();
 			}
 		}
 		
 		[SerializeField]
-		PostProcessType postProcessType = PostProcessType.kNone;
+		PostProcessType m_PostProcessType = PostProcessType.kNone;
 		[SerializeReference]
-		PostProcessBase[] processes;
+		PostProcessBase[] m_Processes;
 		
 		[System.NonSerialized]
-		RenderTexture renderTexture;
+		RenderTexture m_RenderTexture;
 		[System.NonSerialized]
-		PostProcessBase processProperties;
+		PostProcessBase m_ProcessProperties;
 		[System.NonSerialized]
-		Material blitMaterial;
+		Material m_BlitMaterial;
 		
 	}
 }

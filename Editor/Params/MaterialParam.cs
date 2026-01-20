@@ -1,7 +1,6 @@
 ﻿
 using UnityEngine;
 using UnityEditor;
-using System.Collections.Generic;
 
 namespace Subtexture
 {
@@ -17,7 +16,6 @@ namespace Subtexture
 		kCellularNoise,
 		kVoronoiNoise,
 		kCirclePattern,
-		kPolygonPattern,
 	}
 	[System.Serializable]
 	public sealed class MaterialParam : BaseParam
@@ -29,9 +27,9 @@ namespace Subtexture
 		{
 			base.OnEnable( window);
 			
-			if( materials == null)
+			if( m_Materials == null)
 			{
-				materials = new MaterialBase[]
+				m_Materials = new MaterialBase[]
 				{
 					null,
 					new MaterialTexture(),
@@ -43,31 +41,30 @@ namespace Subtexture
 					new MaterialCellularNoise(),
 					new MaterialVoronoiNoise(),
 					new MaterialCirclePattern(),
-					new MaterialPolygonPattern()
 				};
 			}
-			for( int i0 = 0; i0 < materials.Length; ++i0)
+			for( int i0 = 0; i0 < m_Materials.Length; ++i0)
 			{
-				materials[ i0]?.OnEnable( window);
+				m_Materials[ i0]?.OnEnable( window);
 			}
-			ChangeDynamicMaterial( materialType);
+			ChangeDynamicMaterial( m_MaterialType);
 		}
 		public override void OnDisable()
 		{
-			if( dynamicMaterial != null)
+			if( m_DynamicMaterial != null)
 			{
-				dynamicMaterial = null;
+				m_DynamicMaterial = null;
 			}
-			if( materialProperties != null)
+			if( m_MaterialProperties != null)
 			{
-				materialProperties.Dispose();
-				materialProperties = null;
+				m_MaterialProperties.Dispose();
+				m_MaterialProperties = null;
 			}
-			if( materials != null)
+			if( m_Materials != null)
 			{
-				for( int i0 = 0; i0 < materials.Length; ++i0)
+				for( int i0 = 0; i0 < m_Materials.Length; ++i0)
 				{
-					materials[ i0]?.OnDisable();
+					m_Materials[ i0]?.OnDisable();
 				}
 			}
 			base.OnDisable();
@@ -76,79 +73,97 @@ namespace Subtexture
 		{
 			if( param[ (int)PreParamType.kMesh] is MeshParam meshParam)
 			{
-				if( meshParam.meshType == MeshType.kPrefab)
+				if( meshParam.MeshType == MeshType.kPrefab)
 				{
 					return 0;
 				}
 			}
-			OnPUI( "Material", false, () =>
-			{
-				var type = (MaterialType)EditorGUILayout.EnumPopup( "Type", materialType);
-				if( materialType.Equals( type) == false)
+			OnPUI( "Material", false, 
+				() =>
 				{
-					Record( "Change Material Type");
-					ChangeDynamicMaterial( type);
-					materialType = type;
-				}
-				switch( materialType)
-				{
-					case MaterialType.kMaterialAssets:
+					if( m_MaterialType != MaterialType.kTextureAsset)
 					{
-						var assetMaterialValue = EditorGUILayout.ObjectField( "Material", assetMaterial, typeof( Material), false) as Material;
-						if( assetMaterial != assetMaterialValue)
-						{
-							Record( "Change Asset Material");
-							assetMaterial = assetMaterialValue;
-						}
-						break;
+						m_MaterialType = MaterialType.kTextureAsset;
+						ChangeDynamicMaterial( m_MaterialType);
 					}
-					default:
+					if( m_Materials != null)
 					{
-						if( materialProperties != null)
+						for( int i0 = 0; i0 < m_Materials.Length; ++i0)
 						{
-							if( materialProperties.OnGUI() != false)
+							m_Materials[ i0]?.Reset();
+							m_Materials[ i0]?.OnUpdateMaterial();
+						}
+					};
+					m_AssetMaterial = null;
+				}, 
+				() =>
+				{
+					var type = (MaterialType)EditorGUILayout.EnumPopup( "Type", m_MaterialType);
+					if( m_MaterialType.Equals( type) == false)
+					{
+						Record( "Change Material Type");
+						ChangeDynamicMaterial( type);
+						m_MaterialType = type;
+					}
+					switch( m_MaterialType)
+					{
+						case MaterialType.kMaterialAssets:
+						{
+							var assetMaterialValue = EditorGUILayout.ObjectField( "Material", m_AssetMaterial, typeof( Material), false) as Material;
+							if( m_AssetMaterial != assetMaterialValue)
 							{
-								materialProperties.OnUpdateMaterial();
+								Record( "Change Asset Material");
+								m_AssetMaterial = assetMaterialValue;
 							}
+							break;
 						}
-						break;
+						default:
+						{
+							if( m_MaterialProperties != null)
+							{
+								if( m_MaterialProperties.OnGUI() != false)
+								{
+									m_MaterialProperties.OnUpdateMaterial();
+								}
+							}
+							break;
+						}
 					}
-				}
-			});
+				});
 			return 0;
 		}
 		void ChangeDynamicMaterial( MaterialType type)
 		{
-			if( dynamicMaterial != null)
+			if( m_DynamicMaterial != null)
 			{
-				dynamicMaterial = null;
+				m_DynamicMaterial = null;
 			}
-			if( materialProperties != null)
+			if( m_MaterialProperties != null)
 			{
-				materialProperties.Dispose();
-				materialProperties = null;
+				m_MaterialProperties.Dispose();
+				m_MaterialProperties = null;
 			}
-			materialProperties = materials[ (int)type];
+			m_MaterialProperties = m_Materials[ (int)type];
 			
-			if( materialProperties != null)
+			if( m_MaterialProperties != null)
 			{
-				dynamicMaterial = materialProperties.Create();
-				materialProperties.OnUpdateMaterial();
+				m_DynamicMaterial = m_MaterialProperties.Create();
+				m_MaterialProperties.OnUpdateMaterial();
 			}
 		}
 		public Material RenderMaterial
 		{
-			get{ return (materialType == MaterialType.kMaterialAssets)? assetMaterial : dynamicMaterial; }
+			get{ return (m_MaterialType == MaterialType.kMaterialAssets)? m_AssetMaterial : m_DynamicMaterial; }
 		}
 		
 		[SerializeField]
-		MaterialType materialType = MaterialType.kMaterialAssets;
+		MaterialType m_MaterialType = MaterialType.kTextureAsset;
 		[SerializeReference]
-		MaterialBase[] materials;
+		MaterialBase[] m_Materials;
 		[SerializeField]
-		Material assetMaterial;
+		Material m_AssetMaterial;
 		
-		MaterialBase materialProperties;
-		Material dynamicMaterial;
+		MaterialBase m_MaterialProperties;
+		Material m_DynamicMaterial;
 	}
 }

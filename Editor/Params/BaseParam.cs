@@ -10,17 +10,17 @@ namespace Subtexture
 	{
 		public BaseParam( bool opened)
 		{
-			defaultOpened = opened;
-			enabled = true;
+			m_DefaultOpened = opened;
+			m_Enabled = true;
 		}
 		public virtual void OnEnable( Window window)
 		{
-			handle = window;
+			m_Handle = window;
 			
-			if( opend == null)
+			if( m_Opend == null)
 			{
-				opend = new AnimBool( defaultOpened);
-				opend.valueChanged.AddListener( window.Repaint);
+				m_Opend = new AnimBool( m_DefaultOpened);
+				m_Opend.valueChanged.AddListener( window.Repaint);
 			}
 		}
 		public virtual void OnDisable()
@@ -28,44 +28,54 @@ namespace Subtexture
 		}
 		public void Record( string label)
 		{
-			handle.Record( label);
+			m_Handle.Record( label);
 		}
 		public virtual int OnGUI( PreviewRenderUtility context, BaseParam[] param)
 		{
 			return 0;
 		}
-		protected void OnPUI( string caption, bool disableGroup, System.Action callback)
+		protected void OnPUI( string caption, bool disableGroup, System.Action onReset, System.Action onGUI)
 		{
 			EditorGUILayout.BeginVertical( GUI.skin.box);
 			{
 				EditorGUILayout.BeginHorizontal();
 				{
-					bool target = EditorGUILayout.Foldout( opend.target, caption);
-					if( opend.target.Equals( target) == false)
+					bool target = EditorGUILayout.Foldout( m_Opend.target, caption);
+					if( m_Opend.target.Equals( target) == false)
 					{
 						Record( "Change Foldout");
-						opend.target = target;
+						m_Opend.target = target;
 					}
 					if( disableGroup != false)
 					{
 						GUILayout.FlexibleSpace();
-						bool enabledValue = EditorGUILayout.Toggle( enabled);
-						if( enabled.Equals( enabledValue) == false)
+						bool enabledValue = EditorGUILayout.Toggle( m_Enabled);
+						if( m_Enabled.Equals( enabledValue) == false)
 						{
 							Record( "Change Enabled");
-							enabled = enabledValue;
+							m_Enabled = enabledValue;
+						}
+					}
+					if( onReset != null)
+					{
+						GUILayout.FlexibleSpace();
+						
+						if( GUILayout.Button( "Reset") != false)
+						{
+							onReset.Invoke();
 						}
 					}
 				}
 				EditorGUILayout.EndHorizontal();
 				
-				if( EditorGUILayout.BeginFadeGroup( opend.faded) != false)
+				if( EditorGUILayout.BeginFadeGroup( m_Opend.faded) != false)
 				{
 					++EditorGUI.indentLevel;
 					
-					EditorGUI.BeginDisabledGroup( enabled == false);
+					EditorGUI.BeginDisabledGroup( m_Enabled == false);
 					{
-						callback?.Invoke();
+						EditorGUILayout.Space( 2);
+						onGUI?.Invoke();
 					}
 					EditorGUI.EndDisabledGroup();
 					
@@ -77,20 +87,19 @@ namespace Subtexture
 		}
 		public bool Opend
 		{
-			get => opend?.target ?? false;
+			get => m_Opend?.target ?? false;
 		}
 		public bool Enabled
 		{
-			get => enabled;
+			get => m_Enabled;
 		}
-		
 		[SerializeField]
-		bool defaultOpened;
+		bool m_DefaultOpened;
 		[SerializeField]
-		AnimBool opend;
+		AnimBool m_Opend;
 		[SerializeField]
-		bool enabled;
+		bool m_Enabled;
 		[System.NonSerialized]
-		Window handle;
+		Window m_Handle;
 	}
 }

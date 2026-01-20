@@ -7,19 +7,20 @@ namespace Subtexture
 	[System.Serializable]
 	public class MaterialTexture : MaterialBaseUvProperties
 	{
-		public MaterialTexture()
+		public override void Reset()
 		{
-			uvScale = Vector2.one;
+			base.Reset();
+			m_Texture = null;
 		}
 		public override bool OnGUI()
 		{
 			bool ret = false;
 			
-			var textureValue = EditorGUILayout.ObjectField( "Texture", texture, typeof( Texture2D), false) as Texture2D;
-			if( texture != textureValue)
+			var textureValue = EditorGUILayout.ObjectField( "Texture", m_Texture, typeof( Texture2D), false) as Texture2D;
+			if( m_Texture != textureValue)
 			{
 				Record( "Change Texture");
-				texture = textureValue;
+				m_Texture = textureValue;
 				ret = true;
 			}
 			if( base.OnGUI() != false)
@@ -31,7 +32,7 @@ namespace Subtexture
 		public override void OnUpdateMaterial()
 		{
 			base.OnUpdateMaterial();
-			materialCache.SetTexture( "_MainTex", texture);
+			Material?.SetTexture( "_MainTex", m_Texture);
 		}
 		protected override string GetShaderGuid()
 		{
@@ -39,6 +40,6 @@ namespace Subtexture
 		}
 		
 		[SerializeField]
-		Texture2D texture;
+		Texture2D m_Texture;
 	}
 }

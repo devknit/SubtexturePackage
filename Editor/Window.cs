@@ -1,6 +1,7 @@
 ﻿
 using UnityEngine;
 using UnityEditor;
+using Knit.EditorWindow;
 
 namespace Subtexture
 {
@@ -9,17 +10,17 @@ namespace Subtexture
 		[MenuItem ("Tools/Subtexture/Open &T")]	
 		static void ShowWindow() 
 		{
-			CreateWindow<Window>().Show();	
+			CreateWindow<Window>( null, "Subtexture").Show();	
 		}
 		protected override void OnEnable()
 		{
 			base.OnEnable();
 			
-			if( project == null)
+			if( m_Project == null)
 			{
-				project = new Project();
+				m_Project = new Project();
 			}
-			project.OnEnable( this);
+			m_Project.OnEnable( this);
 			
 			EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
 			Undo.undoRedoPerformed += OnUndoRedo;
@@ -29,9 +30,9 @@ namespace Subtexture
 			EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
 			Undo.undoRedoPerformed -= OnUndoRedo;
 			
-			if( project != null)
+			if( m_Project != null)
 			{
-				project.OnDisable();
+				m_Project.OnDisable();
 			}
 			base.OnDisable();
 		}
@@ -42,13 +43,13 @@ namespace Subtexture
 				case PlayModeStateChange.EnteredEditMode:
 				case PlayModeStateChange.EnteredPlayMode:
 				{
-					project.OnEnable( this);
+					m_Project.OnEnable( this);
 					break;
 				}
 				case PlayModeStateChange.ExitingEditMode:
 				case PlayModeStateChange.ExitingPlayMode:
 				{
-					project.OnDisable();
+					m_Project.OnDisable();
 					break;
 				}
 			}
@@ -60,28 +61,27 @@ namespace Subtexture
 		}
 		void Update()
 		{
-			project.Update();
+			m_Project.Update();
 		}
 		protected override void OnDrawToolBar()
 		{
-			project.OnToolbarGUI();
+			m_Project.OnToolbarGUI();
 		}
-		[EWSubWindow( "Preview", EWSubWindowIcon.Scene, true, SubWindowStyle.Preview)]
+		[SubWindow( "Preview", SubWindowIcon.Scene, true, SubWindowStyle.Preview)]
 		void OnPreviewGUI( Rect rect)
 		{
-			project.OnPreviewGUI( rect);
+			m_Project.OnPreviewGUI( rect);
 		}
-		[EWSubWindow( "Inspector", EWSubWindowIcon.Inspector)]
+		[SubWindow( "Inspector", SubWindowIcon.Inspector)]
 		void OnInspectorGUI( Rect rect)
 		{
-			project.OnInspectorGUI( rect);
+			m_Project.OnInspectorGUI( rect);
 		}
 		public void Record( string label)
 		{
 			Undo.RecordObject( this, label);
 		}
-		
 		[SerializeField]
-		Project project;
+		Project m_Project;
 	}
 }

@@ -11,7 +11,7 @@ namespace Subtexture
 	{
 		public void OnPreviewGUI( Rect rect)
 		{
-			if( enabled == false)
+			if( m_Enabled == false)
 			{
 				return;
 			}
@@ -21,68 +21,68 @@ namespace Subtexture
 				{
 					GUILayout.FlexibleSpace();
 					
-					previewForceUpdate = GUILayout.Toggle( 
-						previewForceUpdate, "Sync", EditorStyles.toolbarButton, GUILayout.Width( 50));
+					m_PreviewForceUpdate = GUILayout.Toggle( 
+						m_PreviewForceUpdate, "Sync", EditorStyles.toolbarButton, GUILayout.Width( 50));
 					
 					if( GUILayout.Button( "View", EditorStyles.toolbarButton, GUILayout.Width( 50)) != false)
 					{
-						if( preParams[ (int)PreParamType.kTexture] is TextureParam textureParam)
-						if( preParams[ (int)PreParamType.kCamera] is CameraParam cameraParam)
-						if( preParams[ (int)PreParamType.kTransform] is TransformParam transformParam)
-						if( preParams[ (int)PreParamType.kMesh] is MeshParam meshParam)
+						if( m_PreParams[ (int)PreParamType.kTexture] is TextureParam textureParam)
+						if( m_PreParams[ (int)PreParamType.kCamera] is CameraParam cameraParam)
+						if( m_PreParams[ (int)PreParamType.kTransform] is TransformParam transformParam)
+						if( m_PreParams[ (int)PreParamType.kMesh] is MeshParam meshParam)
 						{
 							var context = new GenericMenu();
 							
 							context.AddItem( new GUIContent( "Fit"), false, () =>
 							{
 								cameraParam.ToPreset( CameraPreset.kFit, textureParam, transformParam, meshParam);
-								refresh = true;
+								m_Refresh = true;
 							});
 							context.AddItem( new GUIContent( "Front"), false, () =>
 							{
 								cameraParam.ToPreset( CameraPreset.kFront, textureParam, transformParam, meshParam);
-								refresh = true;
+								m_Refresh = true;
 							});
 							context.AddItem( new GUIContent( "Back"), false, () =>
 							{
 								cameraParam.ToPreset( CameraPreset.kBack, textureParam, transformParam, meshParam);
-								refresh = true;
+								m_Refresh = true;
 							});
 							context.AddItem( new GUIContent( "Top"), false, () =>
 							{
 								cameraParam.ToPreset( CameraPreset.kTop, textureParam, transformParam, meshParam);
-								refresh = true;
+								m_Refresh = true;
 							});
 							context.AddItem( new GUIContent( "Bottom"), false, () =>
 							{
 								cameraParam.ToPreset( CameraPreset.kBottom, textureParam, transformParam, meshParam);
-								refresh = true;
+								m_Refresh = true;
 							});
 							context.AddItem( new GUIContent( "Left"), false, () =>
 							{
 								cameraParam.ToPreset( CameraPreset.kLeft, textureParam, transformParam, meshParam);
-								refresh = true;
+								m_Refresh = true;
 							});
 							context.AddItem( new GUIContent( "Right"), false, () =>
 							{
 								cameraParam.ToPreset( CameraPreset.kRight, textureParam, transformParam, meshParam);
-								refresh = true;
+								m_Refresh = true;
 							});
 							context.ShowAsContext();
 						}
 					}
-					previewFilterMode = (FilterMode)EditorGUILayout.EnumPopup( 
-						previewFilterMode, EditorStyles.toolbarPopup, GUILayout.Width( 70));
+					m_PreviewFilterMode = (FilterMode)EditorGUILayout.EnumPopup( 
+						m_PreviewFilterMode, EditorStyles.toolbarPopup, GUILayout.Width( 70));
 				}
 				EditorGUILayout.EndHorizontal();
 				
-				if( previewTexture != null && previewTexture.IsCreated() != false)
+				if( m_RreviewTexture != null && m_RreviewTexture.IsCreated() != false)
 				{
 					Rect previewRect = new Rect( 
 						0, EditorStyles.toolbar.fixedHeight, rect.width, 
 						rect.height - EditorStyles.toolbar.fixedHeight);
 					float previewAspect = previewRect.width / previewRect.height;
-					float textureAspect = (float)previewTexture.width / (float)previewTexture.height;
+					float textureAspect = (float)m_RreviewTexture.width / (float)m_RreviewTexture.height;
 					float offset, scale;
 					
 					if( previewAspect < 1.0f)
@@ -97,25 +97,25 @@ namespace Subtexture
 						previewRect.xMin += offset;
 						previewRect.xMax -= offset;
 					}
-					if( previewTexture.width < previewTexture.height)
+					if( m_RreviewTexture.width < m_RreviewTexture.height)
 					{
 						scale = Mathf.Min( 
-							Mathf.Abs( previewRect.width / previewTexture.width),
-							Mathf.Abs( previewRect.height / previewTexture.height));
-						offset = ((float)previewTexture.height - (float)previewTexture.width) * scale * 0.5f;
+							Mathf.Abs( previewRect.width / m_RreviewTexture.width),
+							Mathf.Abs( previewRect.height / m_RreviewTexture.height));
+						offset = ((float)m_RreviewTexture.height - (float)m_RreviewTexture.width) * scale * 0.5f;
 						previewRect.xMin += offset;
 						previewRect.xMax -= offset;
 					}
 					else if( textureAspect > 1.0f)
 					{
 						scale = Mathf.Min( 
-							Mathf.Abs( previewRect.width / previewTexture.width),
-							Mathf.Abs( previewRect.height / previewTexture.height));
-						offset = ((float)previewTexture.width - (float)previewTexture.height) * scale * 0.5f;
+							Mathf.Abs( previewRect.width / m_RreviewTexture.width),
+							Mathf.Abs( previewRect.height / m_RreviewTexture.height));
+						offset = ((float)m_RreviewTexture.width - (float)m_RreviewTexture.height) * scale * 0.5f;
 						previewRect.yMin += offset;
 						previewRect.yMax -= offset;
 					}
-					previewTexture.filterMode = previewFilterMode;
+					m_RreviewTexture.filterMode = m_PreviewFilterMode;
 					
 					var checker = EditorGUIUtility.Load( 
 						EditorGUIUtility.isProSkin ? "textureCheckerDark" : "textureChecker");
@@ -124,7 +124,7 @@ namespace Subtexture
 						var texCoords = new Rect( 0, 0, previewRect.width * 0.02f, previewRect.height * 0.02f);
 						GUI.DrawTextureWithTexCoords( previewRect, textureChecker, texCoords, false);
 					}
-					GUI.DrawTexture( previewRect, previewTexture);
+					GUI.DrawTexture( previewRect, m_RreviewTexture);
 					MouseControl( previewRect);
 				}
 			}
@@ -146,10 +146,10 @@ namespace Subtexture
 							{
 								if( ev.alt != false)
 								{
-									if( preParams[ (int)PreParamType.kCamera] is CameraParam cameraParam)
+									if( m_PreParams[ (int)PreParamType.kCamera] is CameraParam cameraParam)
 									{
-										cameraParam.OrbitControl( renderer.camera, ev.delta);
-										refresh = true;
+										cameraParam.OrbitControl( m_Renderer.camera, ev.delta);
+										m_Refresh = true;
 									}
 								}
 								break;
@@ -158,10 +158,10 @@ namespace Subtexture
 							{
 								if( ev.alt != false)
 								{
-									if( preParams[ (int)PreParamType.kCamera] is CameraParam cameraParam)
+									if( m_PreParams[ (int)PreParamType.kCamera] is CameraParam cameraParam)
 									{
-										cameraParam.ZoomControl( renderer.camera, (ev.delta.x * -1.0f - ev.delta.y) * 0.5f);
-										refresh = true;
+										cameraParam.ZoomControl( m_Renderer.camera, (ev.delta.x * -1.0f - ev.delta.y) * 0.5f, m_PreParams);
+										m_Refresh = true;
 									}
 								}
 								break;
@@ -170,22 +170,22 @@ namespace Subtexture
 							{
 								if( ev.alt == false)
 								{
-									if( preParams[ (int)PreParamType.kCamera] is CameraParam cameraParam)
+									if( m_PreParams[ (int)PreParamType.kCamera] is CameraParam cameraParam)
 									{
 										Vector2 size = cameraParam.GetSurfaceArea( rect.width / rect.height);
 										Vector2 delta = ev.delta;
 										delta.x *= size.x / rect.width;
 										delta.y *= size.y / rect.height; 
-										cameraParam.MoveControl( renderer.camera, delta);
-										refresh = true;
+										cameraParam.MoveControl( m_Renderer.camera, delta);
+										m_Refresh = true;
 									}
 								}
 								else
 								{
-									if( preParams[ (int)PreParamType.kLight] is LightParam lightParam)
+									if( m_PreParams[ (int)PreParamType.kLight] is LightParam lightParam)
 									{
-										lightParam.OrbitControl( renderer.lights[ 0], ev.delta);
-										refresh = true;
+										lightParam.OrbitControl( m_Renderer.lights[ 0], ev.delta);
+										m_Refresh = true;
 									}
 								}
 								break;
@@ -200,10 +200,10 @@ namespace Subtexture
 					{
 						if( ev.alt == false)
 						{
-							if( preParams[ (int)PreParamType.kCamera] is CameraParam cameraParam)
+							if( m_PreParams[ (int)PreParamType.kCamera] is CameraParam cameraParam)
 							{
-								cameraParam.ZoomControl( renderer.camera, ev.delta.y * 0.1f);
-								refresh = true;
+								cameraParam.ZoomControl( m_Renderer.camera, ev.delta.y * 0.1f, m_PreParams);
+								m_Refresh = true;
 							}
 						}
 					}
